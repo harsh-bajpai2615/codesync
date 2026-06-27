@@ -72,9 +72,27 @@ def _prompt(sub: "Submission") -> str:
         ## Key Insight
         - (1-3 bullets: the trick/observation that makes the solution work)
 
+        ## Optimization
+        - (Honestly assess MY solution: is it optimal in time & space for this problem?)
+        - (If it is optimal, say so in one bullet.)
+        - (If it can be improved, give the better approach + its complexity in 1-3 bullets.)
+
         ## Tags
         - {", ".join(sub.tags) if sub.tags else "(none)"}
+
+        After the Tags section, on the VERY LAST line, output exactly one HTML comment verdict:
+        `<!-- gitkosh:optimal=yes -->` if my solution is already optimal, otherwise
+        `<!-- gitkosh:optimal=no -->`. Output nothing after that comment.
         """)
+
+
+def parse_optimal(readme: str):
+    """Extract the AI coach's verdict from a generated README. True/False/None."""
+    import re
+    m = re.search(r"gitkosh:optimal\s*=\s*(yes|no)", readme or "", re.I)
+    if not m:
+        return None
+    return m.group(1).lower() == "yes"
 
 
 # ---------- providers ----------

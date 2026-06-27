@@ -204,15 +204,18 @@ class App:
         # segmented tabs (Setup & Sync  /  Showcase)
         nav = tk.Frame(b, bg=BG); nav.pack(fill="x", padx=16, pady=(2, 8))
         self.tab_btns = {}
-        for key, label in [("main", "⚙  Setup & Sync"), ("show", "✨  Showcase")]:
+        for key, label in [("main", "⚙  Setup & Sync"), ("show", "✨  Showcase"), ("ins", "📊  Insights")]:
             btn = tk.Label(nav, text=label, bg=LOCK_BG, fg=MUTED, font=(FONT, 12, "bold"),
-                           padx=18, pady=8, cursor="hand2")
+                           padx=16, pady=8, cursor="hand2")
             btn.pack(side="left", padx=(0, 8))
             btn.bind("<Button-1>", lambda e, k=key: self._show_tab(k))
             self.tab_btns[key] = btn
 
-        self.page_main = tk.Frame(b, bg=BG); self.page_main.pack(fill="x")
+        self.page_main = tk.Frame(b, bg=BG)
         self.page_show = tk.Frame(b, bg=BG)
+        self.page_ins = tk.Frame(b, bg=BG)
+        self._pages = {"main": self.page_main, "show": self.page_show, "ins": self.page_ins}
+        self.page_main.pack(fill="x")
         b = self.page_main
 
         # steps strip
@@ -331,9 +334,11 @@ class App:
                                              fg="#374151", relief="flat", borderwidth=0)
         self.log.pack(fill="both", expand=True, padx=10, pady=(4, 10))
 
-        # showcase page
+        # showcase + insights pages
         self._build_showcase(self.page_show)
-        self._show_tab("show" if os.environ.get("GITKOSH_TAB") == "show" else "main")
+        self._build_insights(self.page_ins)
+        _start = os.environ.get("GITKOSH_TAB")
+        self._show_tab(_start if _start in self._pages else "main")
 
     # ---------------- showcase tab ----------------
     def _build_showcase(self, parent):
@@ -385,14 +390,16 @@ class App:
                              "from your recent solves (uses your AI provider when available).")
 
     def _show_tab(self, key):
-        self.page_main.pack_forget()
-        self.page_show.pack_forget()
-        (self.page_main if key == "main" else self.page_show).pack(fill="x")
+        for p in self._pages.values():
+            p.pack_forget()
+        self._pages[key].pack(fill="x")
         for k, btn in self.tab_btns.items():
             on = k == key
             btn.config(bg=ACCENT if on else LOCK_BG, fg="#FFFFFF" if on else MUTED)
         if key == "show" and self._card_img is None:
             self._refresh_card()
+        if key == "ins":
+            self._refresh_insights()
         self.root.after(50, lambda: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
     def _store_items(self):
@@ -503,6 +510,127 @@ class App:
             self.post_box.delete("1.0", "end")
             self.post_box.insert("1.0", res.get("post", ""))
         self.root.after(0, show)
+
+    # ---------------- insights tab ----------------
+    def _build_insights(self, parent):
+        intro = self._card(parent)
+        tk.Label(intro, text="📊  Your analytics", bg=CARD, fg=INK,
+                 font=(FONT, 15, "bold")).pack(anchor="w", padx=14, pady=(12, 2))
+        tk.Label(intro, text="Strengths, pace, solution quality, and résumé-ready bullets — "
+                 "all from your own solves.", bg=CARD, fg=MUTED, font=(FONT, 11),
+                 wraplength=620, justify="left").pack(anchor="w", padx=14, pady=(0, 12))
+
+        ttk.Label(parent, text="AT A GLANCE", style="Section.TLabel").pack(anchor="w", padx=18, pady=(4, 4))
+        m = self._card(parent)
+        self.ins_metrics = tk.Frame(m, bg=CARD); self.ins_metrics.pack(fill="x", padx=12, pady=12)
+
+        ttk.Label(parent, text="STRENGTHS & DIFFICULTY", style="Section.TLabel").pack(anchor="w", padx=18, pady=(4, 4))
+        sd = self._card(parent)
+        self.ins_strengths = tk.Label(sd, text="", bg=CARD, fg=INK, font=(FONT, 11),
+                                      justify="left", wraplength=620, anchor="w")
+        self.ins_strengths.pack(anchor="w", fill="x", padx=14, pady=(12, 6))
+        self.ins_diff = tk.Label(sd, text="", bg=CARD, fg=INK, font=(MONO, 11), justify="left", anchor="w")
+        self.ins_diff.pack(anchor="w", padx=14, pady=(0, 12))
+
+        ttk.Label(parent, text="SOLUTION QUALITY (AI COACH)", style="Section.TLabel").pack(anchor="w", padx=18, pady=(4, 4))
+        q = self._card(parent)
+        self.ins_quality = tk.Label(q, text="", bg=CARD, fg=INK, font=(FONT, 11),
+                                    justify="left", wraplength=620, anchor="w")
+        self.ins_quality.pack(anchor="w", fill="x", padx=14, pady=12)
+
+        ttk.Label(parent, text="RÉSUMÉ BULLETS", style="Section.TLabel").pack(anchor="w", padx=18, pady=(4, 4))
+        rc = self._card(parent)
+        rr = tk.Frame(rc, bg=CARD); rr.pack(fill="x", padx=14, pady=(12, 6))
+        ttk.Button(rr, text="Polish with AI", style="Ghost.TButton", command=self._polish_resume).pack(side="left")
+        ttk.Button(rr, text="Copy", style="Ghost.TButton",
+                   command=lambda: self._copy_text(self.resume_box.get("1.0", "end"))).pack(side="left", padx=8)
+        self.resume_box = scrolledtext.ScrolledText(rc, height=5, font=(FONT, 11), bg="#FBFBFE",
+                                                    fg="#374151", relief="flat", borderwidth=0, wrap="word")
+        self.resume_box.pack(fill="both", expand=True, padx=12, pady=(4, 12))
+
+        ttk.Label(parent, text="QUIZ ME  (spaced repetition)", style="Section.TLabel").pack(anchor="w", padx=18, pady=(4, 4))
+        qz = self._card(parent)
+        qr = tk.Frame(qz, bg=CARD); qr.pack(fill="x", padx=14, pady=(12, 6))
+        ttk.Button(qr, text="Show me a problem", style="Accent.TButton", command=self._quiz_next).pack(side="left")
+        self.quiz_reveal_btn = ttk.Button(qr, text="Reveal approach", style="Ghost.TButton",
+                                          command=self._quiz_reveal, state="disabled")
+        self.quiz_reveal_btn.pack(side="left", padx=8)
+        self.quiz_q = tk.Label(qz, text="Recall an old solve from memory — click “Show me a problem”.",
+                               bg=CARD, fg=INK, font=(FONT, 12, "bold"), wraplength=620, justify="left", anchor="w")
+        self.quiz_q.pack(anchor="w", fill="x", padx=14, pady=(4, 2))
+        self.quiz_a = tk.Label(qz, text="", bg=CARD, fg=MUTED, font=(FONT, 11),
+                               wraplength=620, justify="left", anchor="w")
+        self.quiz_a.pack(anchor="w", fill="x", padx=14, pady=(0, 12))
+        self._quiz_cur = None
+
+    def _refresh_insights(self):
+        from . import insights as ins
+        items = self._store_items()
+        a = ins.analytics(items)
+        for w in self.ins_metrics.winfo_children():
+            w.destroy()
+        opt = f"{round(100 * a['optimal'] / a['coached'])}%" if a["coached"] else "—"
+        tiles = [("This week", a["week"]), ("This month", a["month"]),
+                 ("Streak", f"{a['current_streak']}d"), ("Longest", f"{a['longest_streak']}d"),
+                 ("Optimal", opt), ("Total", a["total"])]
+        for i, (l, v) in enumerate(tiles):
+            cell = tk.Frame(self.ins_metrics, bg=CARD); cell.grid(row=0, column=i, padx=(0, 16), sticky="w")
+            tk.Label(cell, text=str(v), bg=CARD, fg=INK, font=(FONT, 20, "bold")).pack(anchor="w")
+            tk.Label(cell, text=l, bg=CARD, fg=MUTED, font=(FONT, 10)).pack(anchor="w")
+        self.ins_strengths.config(text="Strongest topics:   " + ("   ·   ".join(a["strengths"]) or "—"))
+        tot = sum(a["difficulty"].values()) or 1
+        lines = []
+        for lvl in ("Easy", "Medium", "Hard"):
+            n = a["difficulty"].get(lvl, 0)
+            f = round(18 * n / tot)
+            lines.append(f"{lvl:<7} {'█' * f}{'░' * (18 - f)} {n}")
+        self.ins_diff.config(text="\n".join(lines))
+        if a["coached"]:
+            txt = f"{round(100 * a['optimal'] / a['coached'])}% of coached solutions look optimal " \
+                  f"({a['optimal']}/{a['coached']})."
+            if a["revisit"]:
+                txt += "   Worth revisiting:\n• " + "\n• ".join(i.get("title", "—") for i in a["revisit"][:8])
+            self.ins_quality.config(text=txt)
+        else:
+            self.ins_quality.config(text="Turn on an AI provider and sync — each solution then gets "
+                                    "an optimality check, and this fills in.")
+        self.resume_box.delete("1.0", "end")
+        self.resume_box.insert("1.0", "\n".join(ins.resume_bullets(items)))
+        self._quiz_pool = list(a["revisit"] or items)
+
+    def _polish_resume(self):
+        if self.worker and self.worker.is_alive():
+            return
+        self.resume_box.delete("1.0", "end")
+        self.resume_box.insert("1.0", "Polishing with AI…")
+        self.worker = threading.Thread(target=self._run_resume, daemon=True)
+        self.worker.start()
+
+    def _run_resume(self):
+        from . import insights as ins
+        try:
+            lines = ins.resume_bullets(self._store_items(), rg=ReadmeGenerator(self.cfg["readme"]))
+        except Exception as e:  # noqa: BLE001
+            lines = [f"(couldn't generate: {e})"]
+        self.root.after(0, lambda: (self.resume_box.delete("1.0", "end"),
+                                    self.resume_box.insert("1.0", "\n".join(lines))))
+
+    def _quiz_next(self):
+        import random
+        pool = getattr(self, "_quiz_pool", None) or self._store_items()
+        if not pool:
+            self.quiz_q.config(text="No solves yet — sync first.")
+            return
+        self._quiz_cur = random.choice(pool)
+        c = self._quiz_cur
+        self.quiz_q.config(text=f"{c.get('title','—')}   ·   "
+                           f"{LABELS.get(c.get('platform'), c.get('platform'))}   ·   {c.get('difficulty') or ''}")
+        self.quiz_a.config(text="Recall your approach, then reveal ↓")
+        self.quiz_reveal_btn.config(state="normal")
+
+    def _quiz_reveal(self):
+        c = self._quiz_cur or {}
+        self.quiz_a.config(text=c.get("approach") or "(no approach stored — open the solution in your repo)")
 
     # ---------------- status ----------------
     def refresh_status(self):

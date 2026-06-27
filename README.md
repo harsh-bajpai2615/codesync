@@ -37,6 +37,9 @@ GitKosh is a tiny macOS app that turns your scattered competitive-programming so
 - **Shareable stats card.** An auto-updating image — solved count, streak, difficulty split, top topics — to embed in your GitHub **profile** README (one-click *Copy embed code*).
 - **One-click portfolio site.** Publish a searchable, themed **GitHub Pages** site of your solves straight from the app.
 - **Progress posts.** Generate dev.to / LinkedIn / X drafts from your recent solves — a built-in personal-brand engine.
+- **AI solution coach.** Every write-up honestly assesses whether *your* solution is optimal — and suggests a better approach (with complexity) when it isn't.
+- **Insights dashboard.** In-app analytics: topic strengths, difficulty mastery, pace & streak, “% optimal”, a *revisit* list, and copy-able **résumé bullets** (also saved as `insights.md`).
+- **Quiz me.** Spaced-repetition recall — GitKosh shows a past problem and you recall the approach before revealing it.
 - **Reset & re-backfill.** One click rebuilds the whole repo as a clean, backdated history that mirrors your real solving timeline.
 - **Bring-your-own AI — including free & local.** Google Gemini, Groq, or **one-click local Ollama** (no key, no limits, fully private).
 - **Daily auto-sync.** A background scheduler runs even when the app is closed — no reminders, no clicking.
@@ -50,6 +53,12 @@ GitKosh is a tiny macOS app that turns your scattered competitive-programming so
 <div align="center"><img src="docs/showcase.png" width="540" alt="GitKosh Showcase tab" /></div>
 
 A live stats card, a one-click portfolio website, and shareable progress posts — all generated from your own solves, right inside the app.
+
+## 📊 Insights tab
+
+<div align="center"><img src="docs/insights.png" width="540" alt="GitKosh Insights tab" /></div>
+
+Topic strengths, difficulty mastery, solving pace, AI solution-quality coaching, résumé bullets, and a built-in spaced-repetition quiz.
 
 ## 📥 Install
 

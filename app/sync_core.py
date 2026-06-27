@@ -13,7 +13,7 @@ import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from gitkosh.readme_gen import ReadmeGenerator
+from gitkosh.readme_gen import ReadmeGenerator, parse_optimal
 from gitkosh.store import Store
 from gitkosh.platforms import REGISTRY
 
@@ -23,6 +23,7 @@ from .dashboard import render as render_dashboard
 from .detect import DETECTORS
 from .github_api import GitHubAPI
 from .native_session import NativeSession
+from .insights import render_md as render_insights
 from .site import render as render_site, badges_md
 from .study import export_files as export_study
 
@@ -229,7 +230,7 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False, r
                     "platform": sub.platform, "title": sub.title,
                     "difficulty": sub.difficulty, "tags": sub.tags, "lang": sub.lang,
                     "url": sub.url, "dir": f"{name}/{sub.dirname}", "timestamp": sub.timestamp,
-                    "approach": _approach(readme),
+                    "approach": _approach(readme), "optimal": parse_optimal(readme),
                 })
             result["pushed"], result["url"] = len(done), url
             log(f"✓ Pushed {len(done)} problem(s), dated to the days you solved them. {url}")
@@ -238,6 +239,7 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False, r
                 allitems = store.all()
                 owner, repo = gh._resolve()
                 final = {"README.md": render_dashboard(allitems)}
+                final["insights.md"] = render_insights(allitems)
                 final.update(export_study(allitems))
                 final["docs/index.html"] = render_site(allitems, owner, repo)
                 final["docs/.nojekyll"] = ""
