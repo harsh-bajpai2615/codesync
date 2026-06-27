@@ -5,7 +5,7 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 // Sample data so the UI previews fully in a plain browser (no Python bridge).
 const SAMPLE = {
-  version: "v0.13.0",
+  version: "v1.0.0",
   github: "harsh-bajpai2615",
   sites: { leetcode: true, codeforces: false, codechef: false, neetcode: false, atcoder: false, geeksforgeeks: false },
   provider: "ollama",
@@ -107,6 +107,21 @@ function updateKeyField(provider, key) {
   $("#keyWrap").classList.toggle("hidden", !show);
   $("#keyHint").classList.toggle("hidden", !show);
   if (key !== undefined && $("#apiKey")) $("#apiKey").value = key || "";
+  const note = $("#provNote");
+  if (note) {
+    if (provider === "ollama") {
+      note.className = "provNote rec";
+      note.innerHTML = "<b>Ollama — recommended.</b> Free, fully local & private — the best experience on a Mac. " +
+        "The first reply downloads the model, so give it a few seconds.";
+    } else if (provider === "none") {
+      note.className = "provNote";
+      note.innerHTML = "AI features (tutor, write-ups, quiz grading) are off. Pick <b>Ollama</b> to turn them on for free.";
+    } else {
+      note.className = "provNote warn";
+      note.innerHTML = "⚠ Cloud keys work, but replies can be <b>slower</b> and may hit <b>rate limits</b> under heavy use. " +
+        "For the smoothest, private experience we recommend <b>Ollama</b> (free, local).";
+    }
+  }
 }
 
 /* ---------- showcase ---------- */
@@ -341,11 +356,23 @@ async function sendChat(text) {
   text = (text || $("#chatInput").value).trim(); if (!text) return;
   $("#chatInput").value = "";
   chat.push({ role: "user", content: text });
-  chat.push({ role: "bot", content: "…" }); renderChat();
+  const placeholder = { role: "bot", content: "…", pending: true };
+  const idx = chat.push(placeholder) - 1; renderChat();
+  if ($("#chatSend")) $("#chatSend").disabled = true;
+  // Reassure the user while a local model warms up — it can take a few seconds.
+  const warm = setTimeout(() => {
+    if (chat[idx] && chat[idx].pending) {
+      chat[idx].content = "Thinking… the local model is warming up — the first reply can take ~10s.";
+      renderChat();
+    }
+  }, 9000);
   let reply;
-  if (api()) reply = await act("tutor_chat", chat.filter((m) => m.content !== "…"));
-  else reply = "(Preview) Open GitKosh with an AI provider to chat. Tip: identify the pattern, find the invariant, then improve on brute force.";
-  chat[chat.length - 1] = { role: "bot", content: reply || "No reply." }; renderChat();
+  if (api()) reply = await act("tutor_chat", chat.filter((m) => !m.pending));
+  else reply = "(Preview) Open GitKosh with an AI engine to chat. Tip: identify the pattern, find the invariant, then improve on brute force.";
+  clearTimeout(warm);
+  chat[idx] = { role: "bot", content: reply || "No reply — check your AI engine in Setup (Ollama recommended)." };
+  renderChat();
+  if ($("#chatSend")) $("#chatSend").disabled = false;
 }
 async function renderLearn() {
   if (!learnInit) {
@@ -359,6 +386,7 @@ async function renderLearn() {
     $("#testBtn").addEventListener("click", runTests);
     $("#editor").addEventListener("keydown", editorTab);
     $("#vizPlay").addEventListener("click", vizPlay);
+    $("#vizStop").addEventListener("click", vizHalt);
     $("#vizShuffle").addEventListener("click", vizInit);
     vizInit();
   }
@@ -394,9 +422,13 @@ function showPattern(i) {
 }
 
 /* sorting visualizer */
-let vizArr = [], vizBusy = false;
+let vizArr = [], vizBusy = false, vizStop = false;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+class VizStopped extends Error {}
+async function vizTick(hi) { vizDraw(hi); await sleep(VIZ_DELAY); if (vizStop) throw new VizStopped(); }
+let VIZ_DELAY = 7;
 function vizInit() {
+  if (vizBusy) return;  // don't reshuffle mid-sort
   vizArr = Array.from({ length: 46 }, () => 0.08 + Math.random() * 0.9);
   vizDraw();
 }
@@ -413,15 +445,20 @@ function vizDraw(hi = []) {
 }
 async function vizPlay() {
   if (vizBusy) return;
-  vizBusy = true; $("#vizPlay").textContent = "Sorting…";
+  vizBusy = true; vizStop = false;
+  $("#vizPlay").textContent = "Sorting…"; $("#vizPlay").disabled = true;
+  $("#vizStop").disabled = false; $("#vizShuffle").disabled = true; $("#vizAlgo").disabled = true;
   const f = { bubble: bubbleSort, insertion: insertionSort, selection: selectionSort, quick: () => quickSort(0, vizArr.length - 1) };
-  await f[$("#vizAlgo").value]();
-  vizDraw(); vizBusy = false; $("#vizPlay").textContent = "▶ Play";
+  try { await f[$("#vizAlgo").value](); } catch (e) { if (!(e instanceof VizStopped)) throw e; }
+  vizDraw(); vizBusy = false;
+  $("#vizPlay").textContent = "▶ Play"; $("#vizPlay").disabled = false;
+  $("#vizStop").disabled = true; $("#vizShuffle").disabled = false; $("#vizAlgo").disabled = false;
 }
-async function bubbleSort() { const a = vizArr, n = a.length; for (let i = 0; i < n; i++) for (let j = 0; j < n - i - 1; j++) { vizDraw([j, j + 1]); await sleep(6); if (a[j] > a[j + 1]) [a[j], a[j + 1]] = [a[j + 1], a[j]]; } }
-async function insertionSort() { const a = vizArr, n = a.length; for (let i = 1; i < n; i++) { const k = a[i]; let j = i - 1; while (j >= 0 && a[j] > k) { a[j + 1] = a[j]; j--; vizDraw([j + 1, i]); await sleep(9); } a[j + 1] = k; } }
-async function selectionSort() { const a = vizArr, n = a.length; for (let i = 0; i < n; i++) { let m = i; for (let j = i + 1; j < n; j++) { vizDraw([m, j]); await sleep(4); if (a[j] < a[m]) m = j; }[a[i], a[m]] = [a[m], a[i]]; } }
-async function quickSort(lo, hi) { if (lo >= hi) return; const a = vizArr, p = a[hi]; let i = lo; for (let j = lo; j < hi; j++) { vizDraw([j, hi]); await sleep(9); if (a[j] < p) { [a[i], a[j]] = [a[j], a[i]]; i++; } }[a[i], a[hi]] = [a[hi], a[i]]; await quickSort(lo, i - 1); await quickSort(i + 1, hi); }
+function vizHalt() { vizStop = true; }
+async function bubbleSort() { const a = vizArr, n = a.length; for (let i = 0; i < n; i++) for (let j = 0; j < n - i - 1; j++) { await vizTick([j, j + 1]); if (a[j] > a[j + 1]) [a[j], a[j + 1]] = [a[j + 1], a[j]]; } }
+async function insertionSort() { const a = vizArr, n = a.length; for (let i = 1; i < n; i++) { const k = a[i]; let j = i - 1; while (j >= 0 && a[j] > k) { a[j + 1] = a[j]; j--; await vizTick([j + 1, i]); } a[j + 1] = k; } }
+async function selectionSort() { const a = vizArr, n = a.length; for (let i = 0; i < n; i++) { let m = i; for (let j = i + 1; j < n; j++) { await vizTick([m, j]); if (a[j] < a[m]) m = j; }[a[i], a[m]] = [a[m], a[i]]; } }
+async function quickSort(lo, hi) { if (lo >= hi) return; const a = vizArr, p = a[hi]; let i = lo; for (let j = lo; j < hi; j++) { await vizTick([j, hi]); if (a[j] < p) { [a[i], a[j]] = [a[j], a[i]]; i++; } }[a[i], a[hi]] = [a[hi], a[i]]; await quickSort(lo, i - 1); await quickSort(i + 1, hi); }
 async function loadProblem() {
   const pid = $("#probSelect").value;
   $("#runOut").textContent = ""; $("#runStatus").textContent = "";
@@ -461,12 +498,42 @@ function editorTab(e) {
   }
 }
 
+/* ---------- first-run welcome ---------- */
+let welcomeHandled = false;
+function maybeWelcome() {
+  if (welcomeHandled) return;          // boot() can fire twice (DOMContentLoaded + pywebviewready)
+  let seen;
+  try { seen = localStorage.getItem("gk_welcomed"); } catch (e) { seen = "1"; }
+  if (seen) { welcomeHandled = true; return; }
+  const m = $("#welcome"); if (!m) return;
+  welcomeHandled = true;
+  m.classList.remove("hidden");
+  const close = (provider) => {
+    try { localStorage.setItem("gk_welcomed", "1"); } catch (e) {}
+    m.classList.add("hidden");
+    const btn = $(`#providerSeg button[data-v="${provider}"]`);
+    if (btn) {
+      $$("#providerSeg button").forEach((x) => x.classList.toggle("on", x === btn));
+      updateKeyField(provider);
+      act("set_provider", provider);
+    }
+    switchTabByName("setup");
+  };
+  $("#welcomeGotIt").addEventListener("click", () => close("ollama"));
+  $("#welcomeSkip").addEventListener("click", () => close("gemini"));
+}
+function switchTabByName(name) {
+  const item = $(`.nav-item[data-tab="${name}"]`);
+  if (item) switchTab(name, item);
+}
+
 /* ---------- boot ---------- */
 function boot() {
   renderSetup();
   const t = new URLSearchParams(location.search).get("tab");
   const item = (t && $(`.nav-item[data-tab="${t}"]`)) || $(".nav-item.active");
   if (item) { if (t) switchTab(t, item); else moveNavPill(item); }
+  maybeWelcome();
 }
 if (window.pywebview) boot(); else window.addEventListener("DOMContentLoaded", boot);
 window.addEventListener("pywebviewready", boot);

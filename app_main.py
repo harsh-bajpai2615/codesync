@@ -48,8 +48,16 @@ def main():
         except Exception as e:  # noqa: BLE001
             print(f"[GitKosh] reminder skipped: {e}")
     else:
-        from app.gui import main as gui_main
-        gui_main()
+        # Default: the modern web-stack UI (pywebview + webui/). Fall back to the
+        # legacy Tkinter panel if pywebview isn't available for any reason.
+        try:
+            from app.webmain import main as web_main
+        except Exception as e:  # noqa: BLE001
+            print(f"[GitKosh] web UI unavailable ({e}); using classic UI")
+            from app.gui import main as gui_main
+            gui_main()
+        else:
+            web_main()
 
 
 if __name__ == "__main__":

@@ -30,6 +30,34 @@ from gitkosh.store import Store
 WINDOW = None
 
 
+def _webui_index():
+    """Path to webui/index.html — works in dev and inside the py2app bundle.
+
+    py2app exposes bundled data files via the RESOURCEPATH env var
+    (Contents/Resources); in dev we resolve relative to the repo root."""
+    res = os.environ.get("RESOURCEPATH")
+    if res and os.path.isdir(res):
+        cand = os.path.join(res, "webui", "index.html")
+        if os.path.exists(cand):
+            return cand
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        "webui", "index.html")
+
+
+def _main_executable():
+    """The bundle's main app binary. In a py2app .app, sys.executable points at the
+    sibling 'python' helper, so relaunch the other executable in Contents/MacOS/."""
+    macos = os.path.dirname(sys.executable)
+    try:
+        for f in os.listdir(macos):
+            full = os.path.join(macos, f)
+            if f != "python" and os.path.isfile(full) and os.access(full, os.X_OK):
+                return full
+    except OSError:
+        pass
+    return sys.executable
+
+
 def _items():
     try:
         return Store(STATE_DIR).all()
@@ -148,8 +176,11 @@ class Api:
         try:
             out = str(STATE_DIR / "storage_state.json")
             env = dict(os.environ, GITKOSH_ROLE="login", GITKOSH_OUT=out, GITKOSH_PLATFORMS=name)
-            root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            subprocess.run([sys.executable, os.path.join(root, "app_main.py")], env=env, timeout=900)
+            if getattr(sys, "frozen", None):
+                subprocess.run([_main_executable()], env=env, timeout=900)
+            else:
+                subprocess.run([sys.executable, "-m", "app.login_helper",
+                                "--out", out, "--platforms", name], timeout=900)
         except Exception:  # noqa: BLE001
             pass
         return True
@@ -255,7 +286,7 @@ class Api:
 
 def main():
     global WINDOW
-    index = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "webui", "index.html")
+    index = _webui_index()
     tab = os.environ.get("GITKOSH_WEBTAB")
     url = "file://" + index + (f"?tab={tab}" if tab else "")
     WINDOW = webview.create_window("GitKosh", url=url, js_api=Api(), width=1080, height=780,

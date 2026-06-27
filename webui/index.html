@@ -12,11 +12,13 @@
     <aside class="sidebar">
       <div class="brand">
         <div class="logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-6.7-3"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.7 3"/>
-            <path d="M21 3v5h-5"/><path d="M3 21v-5h5"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3.5h8l5 6.5-9 11-9-11z"/>
+            <path d="M3 10h18"/>
+            <path d="M8 3.5 8.7 10 12 20.5 15.3 10 16 3.5"/>
+            <path d="M12 3.5 8.7 10M12 3.5 15.3 10"/></svg>
         </div>
-        <div><div class="brand-name">GitKosh</div><div class="brand-sub" id="version">v0.13.0</div></div>
+        <div><div class="brand-name">GitKosh</div><div class="brand-sub" id="version">v1.0.0</div></div>
       </div>
       <nav id="nav">
         <button class="nav-item active" data-tab="setup"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg></span> Setup &amp; Sync</button>
@@ -49,12 +51,15 @@
           </div>
 
           <div class="card">
-            <div class="card-head"><h2>Write-ups</h2></div>
-            <p class="muted">Choose an AI provider — or run a free local model.</p>
+            <div class="card-head"><h2>AI engine</h2></div>
+            <p class="muted">Powers your write-ups, the DSA tutor, quiz grading & coaching.</p>
             <div class="seg" id="providerSeg">
-              <button data-v="ollama" class="on">Ollama</button><button data-v="gemini">Gemini</button>
+              <button data-v="ollama" class="on">Ollama ★</button><button data-v="gemini">Gemini</button>
               <button data-v="groq">Groq</button><button data-v="none">None</button>
             </div>
+            <div class="provNote rec" id="provNote">
+              <b>Ollama — recommended.</b> Free, fully local & private — the best experience on a Mac.
+              The first reply downloads the model, so give it a few seconds.</div>
             <div class="keywrap hidden" id="keyWrap">
               <input id="apiKey" type="password" placeholder="Paste your API key">
               <button class="btn sm btn-accent" id="btnSaveKey">Save</button>
@@ -182,7 +187,7 @@
             <select id="vizAlgo" class="sel"><option value="bubble">Bubble sort</option><option value="insertion">Insertion sort</option><option value="selection">Selection sort</option><option value="quick">Quick sort</option></select>
           </div>
           <canvas id="vizCanvas" class="viz"></canvas>
-          <div class="row" style="margin-top:10px"><button class="btn btn-accent" id="vizPlay">▶ Play</button><button class="btn" id="vizShuffle">Shuffle</button></div>
+          <div class="row" style="margin-top:10px"><button class="btn btn-accent" id="vizPlay">▶ Play</button><button class="btn" id="vizStop" disabled>■ Stop</button><button class="btn" id="vizShuffle">Shuffle</button></div>
         </div>
         <div class="card">
           <div class="card-head"><h2>Solve</h2><select id="probSelect" class="sel"></select></div>
@@ -213,6 +218,32 @@
     </main>
   </div>
   <div class="toast" id="toast"></div>
+
+  <div class="modal hidden" id="welcome">
+    <div class="modal-card">
+      <div class="modal-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3.5h8l5 6.5-9 11-9-11z"/><path d="M3 10h18"/>
+          <path d="M8 3.5 8.7 10 12 20.5 15.3 10 16 3.5"/><path d="M12 3.5 8.7 10M12 3.5 15.3 10"/></svg>
+      </div>
+      <h2>Welcome to GitKosh</h2>
+      <p>Your code, problems & progress — in one beautiful place. For the smoothest,
+        fully-private experience we recommend <b>Ollama</b>: a free AI model that runs
+        locally on your Mac, powering the tutor, write-ups, quizzes & coaching.</p>
+      <div class="modal-steps">
+        <div class="step"><span class="num">1</span> Install Ollama from <b>ollama.com</b> (free)</div>
+        <div class="step"><span class="num">2</span> In Terminal run <code>ollama pull llama3.1</code></div>
+        <div class="step"><span class="num">3</span> That's it — GitKosh uses it automatically</div>
+      </div>
+      <p class="modal-warn">Prefer a cloud key (Gemini / Groq)? That works too — but
+        replies can be slower and may hit rate limits during heavy use.</p>
+      <div class="modal-actions">
+        <button class="btn btn-accent" id="welcomeGotIt">Use Ollama (recommended)</button>
+        <button class="btn ghost" id="welcomeSkip">I'll use a cloud key</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
