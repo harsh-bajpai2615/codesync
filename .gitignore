@@ -19,3 +19,7 @@ dist_icon/logo_72.png
 config.yaml
 .codesync/
 .env
+
+# macOS
+.DS_Store
+**/.DS_Store
