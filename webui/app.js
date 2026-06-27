@@ -56,6 +56,7 @@ function switchTab(tab, item) {
   if (tab === "contests") renderContests();
   if (tab === "showcase") renderCard();
   if (tab === "practice") renderPractice();
+  if (tab === "learn") renderLearn();
 }
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab, b)));
 
@@ -300,6 +301,96 @@ window.gkProgress = (text, pct) => {
   $("#progBar").style.width = (pct || 0) + "%";
 };
 window.gkRefresh = () => { renderSetup(); };
+
+/* ---------- learn (AI tutor + in-app solve) ---------- */
+const SAMPLE_PROBLEMS = [
+  { id: "contains-duplicate", title: "Contains Duplicate", difficulty: "Easy", topic: "Array / Hashing" },
+  { id: "maximum-subarray", title: "Maximum Subarray", difficulty: "Medium", topic: "DP / Greedy" }];
+let chat = [], learnInit = false;
+
+function mdLite(t) {
+  let s = esc(t);
+  s = s.replace(/```([\s\S]*?)```/g, (m, c) => `<pre>${c.trim()}</pre>`);
+  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  return s;
+}
+function renderChat() {
+  const c = $("#chat");
+  c.innerHTML = chat.map((m) =>
+    `<div class="msg ${m.role === "user" ? "user" : "bot"}${m.content === "…" ? " typing" : ""}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("");
+  c.scrollTop = c.scrollHeight;
+}
+async function sendChat(text) {
+  text = (text || $("#chatInput").value).trim(); if (!text) return;
+  $("#chatInput").value = "";
+  chat.push({ role: "user", content: text });
+  chat.push({ role: "bot", content: "…" }); renderChat();
+  let reply;
+  if (api()) reply = await act("tutor_chat", chat.filter((m) => m.content !== "…"));
+  else reply = "(Preview) Open GitKosh with an AI provider to chat. Tip: identify the pattern, find the invariant, then improve on brute force.";
+  chat[chat.length - 1] = { role: "bot", content: reply || "No reply." }; renderChat();
+}
+async function renderLearn() {
+  if (!learnInit) {
+    learnInit = true;
+    if (!chat.length) { chat.push({ role: "bot", content: "Hi! I'm your DSA tutor 👋 Ask me to explain a concept, give a hint, or review your approach — or tap a chip below." }); renderChat(); }
+    $("#probSelect").addEventListener("change", loadProblem);
+    $("#chatSend").addEventListener("click", () => sendChat());
+    $("#chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendChat(); });
+    $$("#tutorChips .chip").forEach((c) => c.addEventListener("click", () => sendChat(c.dataset.q)));
+    $("#runBtn").addEventListener("click", runCode);
+    $("#testBtn").addEventListener("click", runTests);
+    $("#editor").addEventListener("keydown", editorTab);
+  }
+  if (!window._learnReal) {  // (re)load once the Python bridge is actually available
+    const live = !!api();
+    const probs = live ? await act("list_problems") : SAMPLE_PROBLEMS;
+    $("#probSelect").innerHTML = `<option value="__scratch">Scratchpad (free Python)</option>` +
+      (probs || []).map((p) => `<option value="${p.id}">${p.title} · ${p.difficulty}</option>`).join("");
+    if (probs && probs.length) $("#probSelect").value = probs[0].id;
+    if (live) window._learnReal = true;
+    await loadProblem();
+  }
+}
+async function loadProblem() {
+  const pid = $("#probSelect").value;
+  $("#runOut").textContent = ""; $("#runStatus").textContent = "";
+  if (pid === "__scratch") {
+    $("#stdinWrap").classList.remove("hidden"); $("#testBtn").style.display = "none";
+    $("#probStatement").textContent = "Free Python scratchpad — read input() and print() output, then Run.";
+    $("#editor").value = "# Scratchpad — write Python, add input below, then Run\nprint('Hello from GitKosh')\n";
+    return;
+  }
+  $("#stdinWrap").classList.add("hidden"); $("#testBtn").style.display = "";
+  const p = api() ? await act("get_problem", pid) : { statement: "(preview) Solve in the app.", starter: "def solve():\n    pass\n" };
+  $("#probStatement").textContent = p.statement || "";
+  $("#editor").value = p.starter || "";
+}
+async function runCode() {
+  const out = $("#runOut"); out.textContent = "Running…"; $("#runStatus").textContent = "";
+  if (!api()) { toast("Run works inside the app."); out.textContent = ""; return; }
+  const r = await act("run_code", $("#editor").value, $("#stdin") ? $("#stdin").value : "");
+  out.textContent = (r.stdout || "") + (r.stderr ? "\n" + r.stderr : "");
+  $("#runStatus").textContent = (r.ok ? "✓ ran" : "✗ error") + `  ${r.ms || 0}ms`;
+  $("#runStatus").className = "runstatus " + (r.ok ? "ok" : "bad");
+}
+async function runTests() {
+  const out = $("#runOut"); out.textContent = "Running tests…"; $("#runStatus").textContent = "";
+  if (!api()) { toast("Tests run inside the app."); out.textContent = ""; return; }
+  const r = await act("run_tests", $("#editor").value, $("#probSelect").value);
+  out.textContent = r.output || "";
+  $("#runStatus").textContent = `${r.passed}/${r.total} passed`;
+  $("#runStatus").className = "runstatus " + (r.ok ? "ok" : "bad");
+}
+function editorTab(e) {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const t = e.target, s = t.selectionStart, en = t.selectionEnd;
+    t.value = t.value.slice(0, s) + "    " + t.value.slice(en);
+    t.selectionStart = t.selectionEnd = s + 4;
+  }
+}
 
 /* ---------- boot ---------- */
 function boot() {

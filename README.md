@@ -149,6 +149,11 @@ It also adds a **Practice** tab — a daily-use study system:
 - **Roadmaps** — live **Blind 75** & **NeetCode 150** progress from your solves.
 - The scheduled daily run also sends a **macOS reminder** when reviews are due.
 
+And a **Learn** tab — *learn + solve in one place*:
+
+- **AI DSA tutor** — a chat that explains concepts, gives hints, and reviews your approach (uses your AI provider; Ollama works offline).
+- **In-app practice** — a code editor that **runs your Python against test cases** (built-in problems with pass/fail), plus a free scratchpad with custom stdin.
+
 It's a working prototype (real data via a JS↔Python bridge); bundling it as the default app is the
 next step. `webui/index.html` also opens directly in a browser with sample data.
 

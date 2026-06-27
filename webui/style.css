@@ -174,6 +174,28 @@ textarea{width:100%;margin-top:12px;background:rgba(0,0,0,.25);border:1px solid 
 .sessbar{height:4px;background:rgba(255,255,255,.08);border-radius:4px;margin-bottom:14px;overflow:hidden}
 .sessbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
 
+/* learn — tutor chat */
+.chat{max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;padding-right:4px}
+.msg{padding:10px 14px;border-radius:13px;max-width:86%;white-space:pre-wrap;font-size:13.5px;line-height:1.55}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--card-bd);border-bottom-left-radius:4px}
+.msg code{background:rgba(0,0,0,.35);padding:1px 5px;border-radius:5px;font-family:"SF Mono",Menlo,monospace;font-size:12.5px}
+.msg pre{background:#0a0c12;border:1px solid var(--card-bd);border-radius:8px;padding:10px;margin:6px 0;overflow:auto;font-family:"SF Mono",Menlo,monospace;font-size:12px}
+.msg.typing{color:var(--mut)}
+.chatbar{display:flex;gap:8px}
+.chatbar input{flex:1;background:rgba(0,0,0,.28);border:1px solid var(--card-bd);border-radius:10px;color:var(--ink);padding:10px 13px;font:13px inherit;outline:none}
+.chatbar input:focus{border-color:var(--acc)}
+/* learn — solve */
+.sel{background:rgba(0,0,0,.28);border:1px solid var(--card-bd);color:var(--ink);border-radius:10px;padding:8px 12px;font:13px inherit;cursor:pointer}
+.editor{width:100%;min-height:230px;background:#0a0c12;border:1px solid var(--card-bd);border-radius:12px;
+  color:#e6e9f5;font:13px/1.6 "SF Mono",Menlo,Consolas,monospace;padding:14px;margin-top:12px;resize:vertical;
+  white-space:pre;tab-size:4;outline:none}
+.editor:focus{border-color:var(--acc)}
+.stdin{width:100%;margin-top:8px;background:rgba(0,0,0,.28);border:1px solid var(--card-bd);border-radius:10px;color:var(--ink);padding:9px 12px;font:13px "SF Mono",Menlo,monospace}
+.runstatus{font-weight:700;align-self:center}.runstatus.ok{color:var(--ok)}.runstatus.bad{color:var(--bad)}
+.runout{margin-top:12px;background:#0a0c12;border:1px solid var(--card-bd);border-radius:12px;padding:14px;
+  color:#cdd3e6;font:12.5px/1.55 "SF Mono",Menlo,monospace;white-space:pre-wrap;min-height:42px;max-height:260px;overflow:auto}
+
 /* toast */
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);
   background:rgba(20,22,32,.92);border:1px solid var(--card-bd);color:#fff;padding:12px 20px;border-radius:12px;

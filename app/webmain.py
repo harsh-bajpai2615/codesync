@@ -16,7 +16,7 @@ import threading
 
 import webview
 
-from . import coach, constants, github_auth, posts, roadmap, site, srs
+from . import coach, constants, github_auth, posts, problems, roadmap, runner, site, srs
 from .appsupport import STATE_DIR, load_config, save_config
 from .cards import render_png
 from .contests import cf_rating, upcoming as cf_upcoming
@@ -207,6 +207,29 @@ class Api:
     def quiz_review(self, key, rating):
         srs.review(STATE_DIR, key, rating)
         return srs.stats(_items(), STATE_DIR)
+
+    # ---- learn (AI tutor + in-app practice) ----
+    def tutor_chat(self, history):
+        rg = ReadmeGenerator(load_config()["readme"])
+        convo = "\n".join(f"{'Student' if m.get('role') == 'user' else 'Tutor'}: {m.get('content', '')}"
+                          for m in (history or [])[-12:])
+        out = rg.freeform(
+            "You are an expert, encouraging data-structures & algorithms tutor. Answer clearly and "
+            "concisely with tiny examples. When asked for a hint, give a nudge — don't dump the full "
+            "solution unless explicitly asked. Use Markdown.\n\n" + convo + "\nTutor:")
+        return out or "Pick an AI provider in Setup (Ollama is free & local) to chat with the tutor."
+
+    def list_problems(self):
+        return problems.listing()
+
+    def get_problem(self, pid):
+        return problems.get(pid)
+
+    def run_code(self, code, stdin=""):
+        return runner.run_python(code or "", stdin or "")
+
+    def run_tests(self, code, pid):
+        return problems.run_tests(code or "", pid)
 
     def grade_answer(self, key, answer):
         appr = ""
