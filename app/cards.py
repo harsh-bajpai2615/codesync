@@ -82,8 +82,17 @@ def render_png(items: list, username: str = "", subtitle: str = "Competitive Pro
     # ---- header: logo + name ----
     lx, ly = pad, pad
     d.rounded_rectangle([lx, ly, lx + 52, ly + 52], radius=14, fill=ACCENT)
-    f_gk = _font(24, True)
-    d.text((lx + 26 - _w(d, "GK", f_gk) / 2, ly + 12), "GK", font=f_gk, fill=(255, 255, 255))
+    # binary-tree mark (matches the GitKosh app logo): a root branching to two nodes
+    root = (lx + 26, ly + 16)
+    left = (lx + 15, ly + 38)
+    right = (lx + 37, ly + 38)
+    for ch in (left, right):
+        d.line([root, ch], fill=(255, 255, 255), width=3)
+    r = 5
+    d.ellipse([root[0] - r, root[1] - r, root[0] + r, root[1] + r], fill=(255, 255, 255))
+    for ch in (left, right):
+        d.ellipse([ch[0] - r, ch[1] - r, ch[0] + r, ch[1] + r], fill=(255, 255, 255))
+        d.ellipse([ch[0] - 2, ch[1] - 2, ch[0] + 2, ch[1] + 2], fill=ACCENT)
     tx = lx + 68
     d.text((tx, ly + 2), username or "your profile", font=_font(26, True), fill=INK)
     d.text((tx, ly + 34), subtitle, font=_font(15), fill=MUTED)

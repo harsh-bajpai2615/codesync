@@ -89,6 +89,22 @@ def _prog(text, pct=8):
     _js(f"window.gkProgress && window.gkProgress({json.dumps(text or '')}, {pct})")
 
 
+# Some local models (e.g. Ollama) occasionally echo the prompt before answering.
+# We append a sentinel and keep only what the model writes after the LAST one, so
+# every response reads like it came from a polished assistant.
+_SENTINEL = "===GITKOSH_REPLY_BELOW==="
+
+
+def _ask(prompt):
+    rg = ReadmeGenerator(load_config()["readme"])
+    full = (prompt.rstrip() + "\n\nIMPORTANT: Do not repeat this prompt, the problem, or the user's code. "
+            "Write ONLY your response, in GitHub-flavored Markdown, after the marker line.\n" + _SENTINEL + "\n")
+    out = rg.freeform(full) or ""
+    if _SENTINEL in out:
+        out = out.rsplit(_SENTINEL, 1)[-1]
+    return out.strip()
+
+
 class Api:
     # ---- read ----
     def get_state(self):
@@ -242,14 +258,47 @@ class Api:
 
     # ---- learn (AI tutor + in-app practice) ----
     def tutor_chat(self, history):
-        rg = ReadmeGenerator(load_config()["readme"])
         convo = "\n".join(f"{'Student' if m.get('role') == 'user' else 'Tutor'}: {m.get('content', '')}"
                           for m in (history or [])[-12:])
-        out = rg.freeform(
+        out = _ask(
             "You are an expert, encouraging data-structures & algorithms tutor. Answer clearly and "
-            "concisely with tiny examples. When asked for a hint, give a nudge — don't dump the full "
-            "solution unless explicitly asked. Use Markdown.\n\n" + convo + "\nTutor:")
+            "concisely with well-structured GitHub-flavored Markdown — use short headings, bullet lists "
+            "and fenced code blocks where helpful. When asked for a hint, give a nudge; don't dump the "
+            "full solution unless explicitly asked.\n\nConversation so far:\n" + convo)
         return out or "Pick an AI provider in Setup (Ollama is free & local) to chat with the tutor."
+
+    def get_onboarded(self):
+        return bool(load_config().get("onboarded"))
+
+    def set_onboarded(self):
+        cfg = load_config()
+        cfg["onboarded"] = True
+        save_config(cfg)
+        return True
+
+    def get_code(self, pid):
+        """Return the user's saved in-progress code for a problem (or '' if none)."""
+        return (load_config().get("solutions", {}) or {}).get(pid, "")
+
+    def save_code(self, pid, code):
+        """Persist the user's in-progress code so it survives problem switches & restarts."""
+        if not pid or pid == "__scratch":
+            return False
+        cfg = load_config()
+        sols = cfg.setdefault("solutions", {})
+        if code and code.strip():
+            sols[pid] = code
+        else:
+            sols.pop(pid, None)
+        save_config(cfg)
+        return True
+
+    def reset_code(self, pid):
+        """Forget saved code for a problem (used by the Reset button)."""
+        cfg = load_config()
+        if (cfg.get("solutions") or {}).pop(pid, None) is not None:
+            save_config(cfg)
+        return True
 
     def get_gamify(self):
         return gamify.compute(_items(), STATE_DIR)
@@ -269,6 +318,70 @@ class Api:
     def run_tests(self, code, pid):
         return problems.run_tests(code or "", pid)
 
+    def ai_review(self, code, pid, attempt=1):
+        prob = problems.get(pid)
+        if not prob:
+            return "Unknown problem."
+        code = (code or "").strip()
+        try:
+            attempt = max(1, int(attempt))
+        except Exception:  # noqa: BLE001
+            attempt = 1
+        stage = min(attempt, 5)
+        starter = (prob.get("starter") or "").strip()
+        stub = (not code) or code == starter or (code.replace("pass", "").strip() == starter.replace("pass", "").strip())
+
+        # Decide correctness deterministically when we can, so the coaching never
+        # mislabels a wrong/empty answer as correct (model-independent).
+        correct = None            # True / False / None (unknown → let the model judge)
+        test_section = ""
+        if not stub and pid in problems.TESTED:
+            tr = problems.run_tests(code, pid)
+            correct = bool(tr.get("ok"))
+            v = "ALL TESTS PASSED" if correct else f"{tr.get('passed', 0)}/{tr.get('total', 0)} TESTS PASSED"
+            test_section = "## Automated test results\n" + v + "\n" + (tr.get("output", "") or "") + "\n\n"
+        elif stub:
+            correct = False
+
+        header = (
+            "You are an elite, supportive coding-interview coach. Be warm, precise and concrete, and never "
+            "discourage the student. Reply in GitHub-flavored Markdown, starting directly with a heading.\n\n"
+            f"## Problem: {prob['title']} ({prob['difficulty']} · {prob['topic']})\n{prob['statement']}\n\n"
+            f"## Student's submission (attempt #{attempt})\n```python\n{code or '(empty stub)'}\n```\n\n"
+            + test_section)
+
+        review_branch = (
+            "The student's solution is CORRECT. Celebrate, then review it with EXACTLY these sections:\n"
+            "### ✅ Correct — great work!\nOne line on why it works.\n"
+            "### ⏱ Complexity\nTime & space, each with a one-line justification.\n"
+            "### 🧹 Code quality\nSpecific praise plus any naming / readability / edge-handling nits.\n"
+            "### 🚀 Optimize\nCan it be faster, cleaner or use less memory? Give the key idea and a short improved "
+            "snippet only if it materially helps; if it is already optimal, say so clearly.")
+
+        ladder = (
+            f"The student's solution is NOT correct yet{' (the automated tests above are failing)' if test_section else ''}. "
+            "Stay encouraging and reveal ONLY the help for the current level — never anything more advanced. "
+            f"This is attempt #{attempt}, so give level {stage}:\n"
+            "- Level 1 → `### 💡 Hint`: one small conceptual nudge — what to think about. No code, no step list.\n"
+            "- Level 2 → `### 💡 Bigger hint`: name the right pattern / data structure and the key insight. No full algorithm.\n"
+            "- Level 3 → `### 🧭 Algorithm`: the approach as a clear plain-language bullet list. No code.\n"
+            "- Level 4 → `### 📝 Pseudocode`: language-agnostic pseudocode of the full approach.\n"
+            "- Level 5 → `### 🎯 Worked solution`: the complete, correct, idiomatic Python solution in a code block, "
+            "a short explanation, and its time/space complexity.\n"
+            "End (except at level 5) with one warm line inviting another attempt.")
+
+        if correct is True:
+            body = header + review_branch
+        elif correct is False:
+            body = header + ladder
+        else:  # unknown: let the model judge, but give it both clearly-separated branches
+            body = (header + "FIRST decide if the solution is correct and complete for all valid inputs "
+                    "(treat an empty/stub body as incorrect).\n\nIf CORRECT:\n" + review_branch
+                    + "\n\nIf NOT correct:\n" + ladder)
+
+        out = _ask(body)
+        return out or "Couldn't review — pick an AI engine in Setup (Ollama recommended)."
+
     def grade_answer(self, key, answer):
         appr = ""
         for it in _items():
@@ -277,7 +390,7 @@ class Api:
                 break
         if not appr:
             return "No reference approach is stored for this problem — re-sync with an AI provider on."
-        out = ReadmeGenerator(load_config()["readme"]).freeform(
+        out = _ask(
             "You are a coding-interview coach. Grade my recalled approach against the reference. "
             "Reply in 3 short lines: a verdict (✅ solid / ⚠️ partial / ❌ off), what I got right, "
             "and what I missed.\n\nReference:\n" + appr + "\n\nMy answer:\n" + answer)

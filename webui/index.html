@@ -165,7 +165,30 @@
 
       <!-- LEARN -->
       <section class="page" id="page-learn">
-        <header class="hero"><h1>Learn &amp; Solve</h1><p>Ask the AI tutor anything — and practice problems right here.</p></header>
+        <header class="hero"><h1>Learn &amp; Solve</h1><p>Practice the full NeetCode 150 + Blind 75 right here — run, test &amp; get AI review. Ask the tutor anything.</p></header>
+        <div class="card">
+          <div class="card-head">
+            <h2>Solve <span class="count" id="probCount"></span></h2>
+            <input id="probSearch" class="probsearch" placeholder="Search problems…" spellcheck="false">
+          </div>
+          <select id="probSelect" class="sel wide"></select>
+          <div class="probmeta" id="probMeta"></div>
+          <div id="probStatement" class="statement"></div>
+          <div class="codewrap" id="codewrap">
+            <pre class="editor-hl" id="editorHL" aria-hidden="true"><code></code></pre>
+            <textarea id="editor" class="editor code" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+          </div>
+          <div id="stdinWrap" class="hidden"><input id="stdin" class="stdin" placeholder="Custom input (stdin)…"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn btn-accent" id="runBtn">▶ Run</button>
+            <button class="btn" id="testBtn">Run tests</button>
+            <button class="btn btn-ai" id="reviewBtn">✨ AI Review</button>
+            <button class="btn ghost sm" id="resetBtn">Reset</button>
+            <span id="runStatus" class="runstatus"></span>
+          </div>
+          <pre id="runOut" class="runout"></pre>
+          <div id="reviewOut" class="reviewout md hidden"></div>
+        </div>
         <div class="card">
           <div class="card-head"><h2>AI DSA Tutor</h2></div>
           <div class="chat" id="chat"></div>
@@ -188,18 +211,6 @@
           </div>
           <canvas id="vizCanvas" class="viz"></canvas>
           <div class="row" style="margin-top:10px"><button class="btn btn-accent" id="vizPlay">▶ Play</button><button class="btn" id="vizStop" disabled>■ Stop</button><button class="btn" id="vizShuffle">Shuffle</button></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>Solve</h2><select id="probSelect" class="sel"></select></div>
-          <div id="probStatement" class="muted"></div>
-          <textarea id="editor" class="editor" spellcheck="false"></textarea>
-          <div id="stdinWrap" class="hidden"><input id="stdin" class="stdin" placeholder="Custom input (stdin)…"></div>
-          <div class="row" style="margin-top:10px">
-            <button class="btn btn-accent" id="runBtn">▶ Run</button>
-            <button class="btn" id="testBtn">Run tests</button>
-            <span id="runStatus" class="runstatus"></span>
-          </div>
-          <pre id="runOut" class="runout"></pre>
         </div>
       </section>
 

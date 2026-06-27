@@ -4,7 +4,7 @@
 
 # GitKosh
 
-**Automatically sync your competitive-programming solutions from LeetCode, Codeforces, CodeChef, NeetCode, AtCoder & GeeksforGeeks to GitHub — each with an AI-written explanation, on a daily schedule that even keeps your contribution streak alive.**
+**An all-in-one DSA workspace for your Mac.** Practice the full **NeetCode 150 + Blind 75** in a built-in editor with progressive **AI review**, an offline DSA tutor, and spaced-repetition revision — *and* automatically sync your solves from LeetCode, Codeforces, CodeChef, NeetCode, AtCoder & GeeksforGeeks to GitHub, each with an AI-written explanation, on a daily schedule that even keeps your contribution streak alive.
 
 ![platform](https://img.shields.io/badge/platform-macOS%2012%2B-000?logo=apple)
 ![python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)
@@ -23,13 +23,19 @@
 
 ## What is GitKosh?
 
-GitKosh is a tiny macOS app that turns your scattered competitive-programming solves into a clean, organized, **documented** GitHub repository — automatically. Log into your accounts once; GitKosh pulls every accepted submission, writes a per-problem README (problem summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it all to GitHub. Put it on a daily schedule and it keeps running — even keeping your contribution graph green.
+GitKosh is a macOS app with two halves that feed each other:
+
+1. **Learn & practice** — a built-in code editor for the full **NeetCode 150 + Blind 75** (144 curated problems) with syntax highlighting, one-click **Run / Run tests**, and a progressive **AI review** that coaches you from a gentle hint all the way to a worked solution. Plus an offline AI DSA tutor, a pattern library, an algorithm visualizer, and a spaced-repetition **Quiz Me**.
+2. **Sync & showcase** — turn your scattered competitive-programming solves into a clean, organized, **documented** GitHub repository, automatically. Log into your accounts once; GitKosh pulls every accepted submission, writes a per-problem README (problem summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it all to GitHub. Put it on a daily schedule and it keeps running — even keeping your contribution graph green.
 
 > It's a **mediator**, not an editor. Keep solving on the platforms you love; GitKosh archives and documents the work for you. Your passwords are never stored — it logs in through the system's WebKit cookie store.
 
 ## ✨ Features
 
-- **5 logins — that's the whole UI.** LeetCode, Codeforces, CodeChef, NeetCode, AtCoder, GeeksforGeeks + GitHub. A guided 3-step flow makes the order obvious.
+- **Solve in-app — 144 problems.** A built-in Python editor with **syntax highlighting** for the full **NeetCode 150 + Blind 75**: pick a problem, write your solution, **Run** it or **Run tests** against built-in cases — no browser, no setup. Your work is auto-saved per problem.
+- **Progressive AI review that won't just hand you the answer.** Stuck? It escalates one step at a time — *small hint → bigger hint → algorithm in bullets → pseudocode → worked solution*. Got it right? It reviews **time/space complexity, code quality, and concrete optimizations**. (Uses your AI provider; Ollama runs free & offline.)
+- **AI DSA tutor + pattern library + visualizer.** A chat tutor that explains concepts and gives nudges, a browsable library of the core patterns, and an animated sorting-algorithm visualizer — all in the **Learn** tab.
+- **5 logins — that's the whole sync UI.** LeetCode, Codeforces, CodeChef, NeetCode, AtCoder, GeeksforGeeks + GitHub. A guided 3-step flow makes the order obvious.
 - **AI write-ups for every problem.** Problem summary → **numbered algorithm of your actual code** → time/space complexity → key insight, in clean Markdown.
 - **Auto-generated dashboard.** Your repo's front page becomes a living portfolio: totals, solving streak, difficulty/language/topic breakdowns, and an index of every problem.
 - **Real-date commits.** Each solution is committed on the day you *actually solved it*, so your GitHub contribution graph reflects your true history — not one giant dump dated today.
@@ -49,6 +55,16 @@ GitKosh is a tiny macOS app that turns your scattered competitive-programming so
 - **In-app auto-update.** New versions install themselves with one click.
 - **Nothing to install on your Mac.** No `git`, no terminal, no Python — it talks to GitHub over the API and ships its own runtime.
 - **Live progress.** A real progress bar: *Fetching → Writing READMEs i/N → Pushing → Done.*
+
+## 🎓 Learn & Solve tab
+
+<div align="center"><img src="docs/webui-learn.png" width="620" alt="GitKosh Learn & Solve tab — in-app editor with the NeetCode 150 + Blind 75" /></div>
+
+Practice the full **NeetCode 150 + Blind 75** without leaving the app: a syntax-highlighted Python editor, **Run / Run tests**, an offline AI tutor, a pattern library, and an algorithm visualizer — all on one page.
+
+<div align="center"><img src="docs/ide.png" width="620" alt="GitKosh in-app code editor with progressive AI review" /></div>
+
+Tap **✨ AI Review** and GitKosh coaches you *progressively* — a small hint first, then a bigger one, then the algorithm, then pseudocode, and only the full worked solution if you still need it. Solve it correctly and it switches to reviewing your complexity, code quality, and how to optimize further.
 
 ## ✨ Showcase tab
 
@@ -125,23 +141,23 @@ CodeChef ─┼─▶ extractors ─▶ submissions ─▶  README generator ─
 NeetCode ─┘   GitHub Device Flow (token)     scheduler (daily) + streak keeper
 ```
 
-## 🧪 Next-gen web UI (preview)
+## 🖥️ The app
 
-A modern, animated UI built on **pywebview** (a native WebKit window) is in `webui/` +
-`app/webmain.py`. It reuses the **same Python backend** — no logic duplicated — and adds a
-glassmorphism sidebar, gradient buttons, animated stat tiles, difficulty bars, and a live rating
-chart.
+GitKosh ships as a modern, animated desktop app built on **pywebview** (a native WebKit window),
+in `webui/` + `app/webmain.py`. A glassmorphism sidebar, gradient buttons, animated stat tiles,
+difficulty bars, and a live rating chart — all driven by the **same Python backend** over a
+JS↔Python bridge, with no logic duplicated.
 
-<div align="center"><img src="docs/webui.png" width="640" alt="GitKosh next-gen web UI" /></div>
+<div align="center"><img src="docs/webui.png" width="640" alt="GitKosh app — Setup & Sync" /></div>
 
-Run the preview:
+Run it from source:
 
 ```bash
 .venv-app/bin/python -m pip install pywebview
 .venv-app/bin/python -m app.webmain
 ```
 
-It also adds a **Practice** tab — a daily-use study system:
+The **Practice** tab is a daily-use study system:
 
 - **Spaced-repetition Quiz Me** (SM-2): rate *Again / Hard / Good / Easy*; only due cards resurface; review-streak tracking.
 - **Three quiz modes:** Recall, **Type → AI-graded** recall, and **Pattern** (multiple-choice topic guess).
@@ -149,13 +165,11 @@ It also adds a **Practice** tab — a daily-use study system:
 - **Roadmaps** — live **Blind 75** & **NeetCode 150** progress from your solves.
 - The scheduled daily run also sends a **macOS reminder** when reviews are due.
 
-And a **Learn** tab — *learn + solve in one place*:
+The **Learn** tab is *learn + solve in one place* — see [Learn & Solve](#-learn--solve-tab) above:
+the in-app editor for all 144 problems, progressive AI review, the DSA tutor, the pattern library,
+and the algorithm visualizer.
 
-- **AI DSA tutor** — a chat that explains concepts, gives hints, and reviews your approach (uses your AI provider; Ollama works offline).
-- **In-app practice** — a code editor that **runs your Python against test cases** (built-in problems with pass/fail), plus a free scratchpad with custom stdin.
-
-It's a working prototype (real data via a JS↔Python bridge); bundling it as the default app is the
-next step. `webui/index.html` also opens directly in a browser with sample data.
+> `webui/index.html` also opens directly in a browser with sample data.
 
 ## 🛠️ Build from source
 

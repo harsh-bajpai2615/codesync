@@ -339,12 +339,47 @@ const SAMPLE_PROBLEMS = [
   { id: "maximum-subarray", title: "Maximum Subarray", difficulty: "Medium", topic: "DP / Greedy" }];
 let chat = [], learnInit = false;
 
-function mdLite(t) {
-  let s = esc(t);
-  s = s.replace(/```([\s\S]*?)```/g, (m, c) => `<pre>${c.trim()}</pre>`);
-  s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
-  s = s.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
-  return s;
+// Full-ish Markdown → HTML (headings, lists, code blocks, inline, links, quotes).
+function mdLite(src) {
+  if (!src) return "";
+  const blocks = [];
+  src = String(src).replace(/```(\w*)\n?([\s\S]*?)```/g, (m, lang, code) =>
+    " " + (blocks.push(`<pre class="md-pre"><code>${esc(code.replace(/\n+$/, ""))}</code></pre>`) - 1) + " ");
+  const inline = (s) => {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, (m, c) => `<code>${c}</code>`);
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+    s = s.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    return s;
+  };
+  const out = [];
+  let list = null, para = [];
+  const closeList = () => { if (list) { out.push(`<${list.t}>` + list.items.map((x) => `<li>${x}</li>`).join("") + `</${list.t}>`); list = null; } };
+  const closePara = () => { if (para.length) { out.push(`<p>${inline(para.join(" "))}</p>`); para = []; } };
+  for (const raw of src.split("\n")) {
+    const line = raw.replace(/\s+$/, "");
+    let m = line.match(/^ (\d+) $/);
+    if (m) { closePara(); closeList(); out.push(blocks[+m[1]]); continue; }
+    if (!line.trim()) { closePara(); closeList(); continue; }
+    if ((m = line.match(/^(#{1,6})\s+(.*)$/))) {
+      closePara(); closeList();
+      const lvl = Math.min(m[1].length + 2, 6);  // demote: chat ## shouldn't be page-title sized
+      out.push(`<div class="md-h md-h${lvl}">${inline(m[2])}</div>`); continue;
+    }
+    if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) {
+      closePara(); if (!list || list.t !== "ul") { closeList(); list = { t: "ul", items: [] }; }
+      list.items.push(inline(m[1])); continue;
+    }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      closePara(); if (!list || list.t !== "ol") { closeList(); list = { t: "ol", items: [] }; }
+      list.items.push(inline(m[1])); continue;
+    }
+    if ((m = line.match(/^\s*>\s?(.*)$/))) { closePara(); closeList(); out.push(`<blockquote>${inline(m[1])}</blockquote>`); continue; }
+    para.push(line.trim());
+  }
+  closePara(); closeList();
+  return out.join("");
 }
 function renderChat() {
   const c = $("#chat");
@@ -379,12 +414,21 @@ async function renderLearn() {
     learnInit = true;
     if (!chat.length) { chat.push({ role: "bot", content: "Hi! I'm your DSA tutor 👋 Ask me to explain a concept, give a hint, or review your approach — or tap a chip below." }); renderChat(); }
     $("#probSelect").addEventListener("change", loadProblem);
+    $("#probSearch").addEventListener("input", () => buildProblemOptions($("#probSearch").value));
     $("#chatSend").addEventListener("click", () => sendChat());
     $("#chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendChat(); });
     $$("#tutorChips .chip").forEach((c) => c.addEventListener("click", () => sendChat(c.dataset.q)));
     $("#runBtn").addEventListener("click", runCode);
     $("#testBtn").addEventListener("click", runTests);
+    $("#reviewBtn").addEventListener("click", aiReview);
+    $("#resetBtn").addEventListener("click", async () => {
+      const pid = $("#probSelect").value;
+      if (api() && pid && pid !== "__scratch") await act("reset_code", pid);
+      loadProblem(true);
+    });
     $("#editor").addEventListener("keydown", editorTab);
+    $("#editor").addEventListener("input", () => { syncHL(); saveCodeDebounced(); });
+    $("#editor").addEventListener("scroll", () => { const hl = $("#editorHL"); hl.scrollTop = $("#editor").scrollTop; hl.scrollLeft = $("#editor").scrollLeft; });
     $("#vizPlay").addEventListener("click", vizPlay);
     $("#vizStop").addEventListener("click", vizHalt);
     $("#vizShuffle").addEventListener("click", vizInit);
@@ -392,14 +436,106 @@ async function renderLearn() {
   }
   if (!window._learnReal) {  // (re)load once the Python bridge is actually available
     const live = !!api();
-    const probs = live ? await act("list_problems") : SAMPLE_PROBLEMS;
-    $("#probSelect").innerHTML = `<option value="__scratch">Scratchpad (free Python)</option>` +
-      (probs || []).map((p) => `<option value="${p.id}">${p.title} · ${p.difficulty}</option>`).join("");
-    if (probs && probs.length) $("#probSelect").value = probs[0].id;
+    PROBLEMS = live ? (await act("list_problems") || []) : SAMPLE_PROBLEMS;
+    buildProblemOptions("");
     renderPatterns(live ? await act("get_patterns") : PATTERNS_SAMPLE);
     if (live) window._learnReal = true;
+    const pq = new URLSearchParams(location.search).get("p");
+    if (pq && [...$("#probSelect").options].some((o) => o.value === pq)) $("#probSelect").value = pq;
     await loadProblem();
   }
+}
+
+/* ---------- in-app IDE: full NeetCode 150 catalog ---------- */
+let PROBLEMS = [];
+const reviewAttempts = {};
+function buildProblemOptions(filter) {
+  const sel = $("#probSelect");
+  const prev = sel.value;
+  const q = (filter || "").trim().toLowerCase();
+  const matches = PROBLEMS.filter((p) => !q || p.title.toLowerCase().includes(q) || (p.topic || "").toLowerCase().includes(q));
+  $("#probCount").textContent = q ? `(${matches.length})` : `· ${PROBLEMS.length} problems`;
+  const groups = { Easy: [], Medium: [], Hard: [] };
+  matches.forEach((p) => (groups[p.difficulty] || (groups[p.difficulty] = [])).push(p));
+  const opt = (p) => `<option value="${p.id}">${p.tested ? "✓ " : ""}${esc(p.title)}${p.blind75 ? "  ·  B75" : ""}</option>`;
+  let html = `<option value="__scratch">⌨︎ Scratchpad (free Python)</option>`;
+  for (const lvl of ["Easy", "Medium", "Hard"]) {
+    if (groups[lvl] && groups[lvl].length) html += `<optgroup label="${lvl} (${groups[lvl].length})">` + groups[lvl].map(opt).join("") + `</optgroup>`;
+  }
+  sel.innerHTML = html;
+  if ([...sel.options].some((o) => o.value === prev)) sel.value = prev;
+  else if (q && matches.length) { sel.value = matches[0].id; loadProblem(); }
+}
+
+const DIFF_CLASS = { Easy: "easy", Medium: "med", Hard: "hard" };
+async function loadProblem(forceReset) {
+  const pid = $("#probSelect").value;
+  $("#runOut").textContent = ""; $("#runStatus").textContent = "";
+  $("#reviewOut").classList.add("hidden"); $("#reviewOut").innerHTML = "";
+  if (pid === "__scratch") {
+    $("#stdinWrap").classList.remove("hidden"); $("#testBtn").style.display = "none"; $("#reviewBtn").style.display = "none";
+    $("#probMeta").innerHTML = "";
+    $("#probStatement").textContent = "Free Python scratchpad — read input() and print() output, then Run.";
+    setEditor("# Scratchpad — write Python, add input below, then Run\nprint('Hello from GitKosh')\n");
+    return;
+  }
+  $("#stdinWrap").classList.add("hidden"); $("#testBtn").style.display = ""; $("#reviewBtn").style.display = "";
+  const p = api() ? await act("get_problem", pid) : (PROBLEMS.find((x) => x.id === pid) || { statement: "(preview) Solve in the app.", starter: "def solve():\n    pass\n" });
+  if (forceReset) reviewAttempts[pid] = 0;
+  const dc = DIFF_CLASS[p.difficulty] || "med";
+  $("#probMeta").innerHTML =
+    `<span class="dchip ${dc}">${esc(p.difficulty || "")}</span>` +
+    (p.topic ? `<span class="tchip">${esc(p.topic)}</span>` : "") +
+    (p.blind75 ? `<span class="tchip b75">Blind 75</span>` : "") +
+    (p.tested ? `<span class="tchip tested">✓ auto-tested</span>` : `<span class="tchip">AI-reviewed</span>`) +
+    (p.url ? `<a class="lc" href="${p.url}" target="_blank" rel="noopener">LeetCode ↗</a>` : "");
+  $("#probStatement").textContent = p.statement || "";
+  let code = p.starter || "";
+  if (!forceReset && api()) {
+    const saved = await act("get_code", pid);
+    if (saved && saved.trim()) code = saved;
+  }
+  setEditor(code);
+}
+function setEditor(v) { $("#editor").value = v; syncHL(); $("#editor").scrollTop = 0; }
+let _saveTimer = null;
+function saveCodeDebounced() {
+  const pid = $("#probSelect").value;
+  if (!api() || !pid || pid === "__scratch") return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(() => act("save_code", pid, $("#editor").value), 600);
+}
+
+/* lightweight Python syntax highlighting (offline, no deps) */
+const PY_RE = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|\b(\d+\.?\d*j?)\b|\b(False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)\b|\b(print|len|range|int|str|list|dict|set|tuple|sum|min|max|abs|sorted|enumerate|zip|map|filter|float|bool|input|open|isinstance|type|reversed|any|all|round|ord|chr|format|repr|hash|self)\b/g;
+function pyHighlight(src) {
+  let s = src.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s.replace(PY_RE, (m, com, str, num, kw, bi) => {
+    if (com !== undefined) return `<span class="tok-com">${com}</span>`;
+    if (str !== undefined) return `<span class="tok-str">${str}</span>`;
+    if (num !== undefined) return `<span class="tok-num">${num}</span>`;
+    if (kw !== undefined) return `<span class="tok-kw">${kw}</span>`;
+    if (bi !== undefined) return `<span class="tok-bi">${bi}</span>`;
+    return m;
+  });
+}
+function syncHL() {
+  const ta = $("#editor"), hl = $("#editorHL");
+  if (!ta || !hl) return;
+  hl.firstChild.innerHTML = pyHighlight(ta.value) + "\n";
+  hl.scrollTop = ta.scrollTop; hl.scrollLeft = ta.scrollLeft;
+}
+async function aiReview() {
+  const pid = $("#probSelect").value;
+  if (pid === "__scratch") { toast("Pick a problem to get an AI review."); return; }
+  if (!api()) { toast("AI Review runs inside the app with an AI engine on."); return; }
+  const box = $("#reviewOut");
+  box.classList.remove("hidden");
+  reviewAttempts[pid] = (reviewAttempts[pid] || 0) + 1;
+  box.innerHTML = `<div class="md-loading">✨ Reviewing your solution… <span class="muted">(local model may take a few seconds)</span></div>`;
+  const r = await act("ai_review", $("#editor").value, pid, reviewAttempts[pid]);
+  box.innerHTML = mdLite(r || "Couldn't review — check your AI engine in Setup.");
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function renderPatterns(pats) {
@@ -459,21 +595,8 @@ async function bubbleSort() { const a = vizArr, n = a.length; for (let i = 0; i 
 async function insertionSort() { const a = vizArr, n = a.length; for (let i = 1; i < n; i++) { const k = a[i]; let j = i - 1; while (j >= 0 && a[j] > k) { a[j + 1] = a[j]; j--; await vizTick([j + 1, i]); } a[j + 1] = k; } }
 async function selectionSort() { const a = vizArr, n = a.length; for (let i = 0; i < n; i++) { let m = i; for (let j = i + 1; j < n; j++) { await vizTick([m, j]); if (a[j] < a[m]) m = j; }[a[i], a[m]] = [a[m], a[i]]; } }
 async function quickSort(lo, hi) { if (lo >= hi) return; const a = vizArr, p = a[hi]; let i = lo; for (let j = lo; j < hi; j++) { await vizTick([j, hi]); if (a[j] < p) { [a[i], a[j]] = [a[j], a[i]]; i++; } }[a[i], a[hi]] = [a[hi], a[i]]; await quickSort(lo, i - 1); await quickSort(i + 1, hi); }
-async function loadProblem() {
-  const pid = $("#probSelect").value;
-  $("#runOut").textContent = ""; $("#runStatus").textContent = "";
-  if (pid === "__scratch") {
-    $("#stdinWrap").classList.remove("hidden"); $("#testBtn").style.display = "none";
-    $("#probStatement").textContent = "Free Python scratchpad — read input() and print() output, then Run.";
-    $("#editor").value = "# Scratchpad — write Python, add input below, then Run\nprint('Hello from GitKosh')\n";
-    return;
-  }
-  $("#stdinWrap").classList.add("hidden"); $("#testBtn").style.display = "";
-  const p = api() ? await act("get_problem", pid) : { statement: "(preview) Solve in the app.", starter: "def solve():\n    pass\n" };
-  $("#probStatement").textContent = p.statement || "";
-  $("#editor").value = p.starter || "";
-}
 async function runCode() {
+  $("#reviewOut").classList.add("hidden");
   const out = $("#runOut"); out.textContent = "Running…"; $("#runStatus").textContent = "";
   if (!api()) { toast("Run works inside the app."); out.textContent = ""; return; }
   const r = await act("run_code", $("#editor").value, $("#stdin") ? $("#stdin").value : "");
@@ -482,6 +605,7 @@ async function runCode() {
   $("#runStatus").className = "runstatus " + (r.ok ? "ok" : "bad");
 }
 async function runTests() {
+  $("#reviewOut").classList.add("hidden");
   const out = $("#runOut"); out.textContent = "Running tests…"; $("#runStatus").textContent = "";
   if (!api()) { toast("Tests run inside the app."); out.textContent = ""; return; }
   const r = await act("run_tests", $("#editor").value, $("#probSelect").value);
@@ -495,21 +619,25 @@ function editorTab(e) {
     const t = e.target, s = t.selectionStart, en = t.selectionEnd;
     t.value = t.value.slice(0, s) + "    " + t.value.slice(en);
     t.selectionStart = t.selectionEnd = s + 4;
+    syncHL();
   }
 }
 
 /* ---------- first-run welcome ---------- */
 let welcomeHandled = false;
-function maybeWelcome() {
+async function maybeWelcome() {
   if (welcomeHandled) return;          // boot() can fire twice (DOMContentLoaded + pywebviewready)
-  let seen;
-  try { seen = localStorage.getItem("gk_welcomed"); } catch (e) { seen = "1"; }
-  if (seen) { welcomeHandled = true; return; }
-  const m = $("#welcome"); if (!m) return;
   welcomeHandled = true;
+  // Durable flag lives in the Python config (WKWebView file:// localStorage isn't
+  // persisted, which made the prompt reappear every launch).
+  let seen = false;
+  if (api()) { try { seen = await act("get_onboarded"); } catch (e) {} }
+  else { try { seen = !!localStorage.getItem("gk_welcomed"); } catch (e) { seen = true; } }
+  if (seen) return;
+  const m = $("#welcome"); if (!m) return;
   m.classList.remove("hidden");
   const close = (provider) => {
-    try { localStorage.setItem("gk_welcomed", "1"); } catch (e) {}
+    if (api()) act("set_onboarded"); else { try { localStorage.setItem("gk_welcomed", "1"); } catch (e) {} }
     m.classList.add("hidden");
     const btn = $(`#providerSeg button[data-v="${provider}"]`);
     if (btn) {
@@ -535,5 +663,13 @@ function boot() {
   if (item) { if (t) switchTab(t, item); else moveNavPill(item); }
   maybeWelcome();
 }
-if (window.pywebview) boot(); else window.addEventListener("DOMContentLoaded", boot);
+// Always boot once the DOM is parsed — pywebview can inject its bridge before the
+// document finishes loading, so guarding on `window.pywebview` alone can run boot()
+// too early (nav not built yet → ?tab deep-link silently ignored). readyState is the
+// reliable signal. pywebviewready re-runs boot to refresh data once the bridge is live.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot, { once: true });
+} else {
+  boot();
+}
 window.addEventListener("pywebviewready", boot);
