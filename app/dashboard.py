@@ -101,6 +101,19 @@ def render(items: list, repo_slug: str = "") -> str:
         out.append(" · ".join(f"`{t}` {n}" for t, n in tags.most_common(15)))
         out.append("")
 
+    # browse by topic — the interview-prep "patterns" view
+    if tags:
+        out.append("## Browse by topic\n")
+        for t, n in tags.most_common(20):
+            rows = sorted((i for i in items if t in (i.get("tags") or [])),
+                          key=lambda i: i.get("timestamp", 0), reverse=True)
+            out.append(f"<details><summary><b>{t}</b> ({n})</summary>\n")
+            for i in rows:
+                d = i.get("dir")
+                title = i.get("title", "—")
+                out.append(f"- [{title}](./{d})" if d else f"- {title}")
+            out.append("\n</details>\n")
+
     # index per platform
     out.append("## All solutions\n")
     for p, _ in plat.most_common():

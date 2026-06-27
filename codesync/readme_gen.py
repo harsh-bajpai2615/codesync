@@ -151,6 +151,14 @@ class ReadmeGenerator:
             os.environ.get(llm.get("api_key_env", ""), "") if llm.get("api_key_env") else ""
         )
         self.base_url = llm.get("base_url") or _DEFAULT_BASE.get(self.provider, "")
+        self.footer = (readme_cfg or {}).get("footer", True)
+
+    @staticmethod
+    def _footer(sub: "Submission") -> str:
+        link = f"[{sub.platform} problem]({sub.url})" if sub.url else sub.platform
+        return ("\n\n---\n<sub>" + link +
+                " · synced & documented by "
+                "[GitKosh](https://github.com/harsh-bajpai2615/gitkosh)</sub>\n")
 
     def self_test(self):
         """Quick check that the configured LLM works. Returns (ok, error_message)."""
@@ -169,16 +177,20 @@ class ReadmeGenerator:
             return False, msg
 
     def generate(self, sub: "Submission") -> str:
-        if self.mode != "llm":
-            return _minimal(sub)
-        fn = _PROVIDERS.get(self.provider)
-        if not fn:
-            print(f"  ! unknown LLM provider '{self.provider}', writing minimal README")
-            return _minimal(sub)
-        try:
-            body = fn(_prompt(sub), self.model, self.api_key, self.base_url)
-            if body:
-                return body.rstrip() + "\n"
-        except Exception as e:  # noqa: BLE001
-            print(f"  ! LLM README failed for {sub.slug} ({self.provider}): {e}; falling back to minimal")
-        return _minimal(sub)
+        out = None
+        if self.mode == "llm":
+            fn = _PROVIDERS.get(self.provider)
+            if not fn:
+                print(f"  ! unknown LLM provider '{self.provider}', writing minimal README")
+            else:
+                try:
+                    body = fn(_prompt(sub), self.model, self.api_key, self.base_url)
+                    if body:
+                        out = body.rstrip() + "\n"
+                except Exception as e:  # noqa: BLE001
+                    print(f"  ! LLM README failed for {sub.slug} ({self.provider}): {e}; falling back to minimal")
+        if out is None:
+            out = _minimal(sub)
+        if self.footer:
+            out = out.rstrip() + self._footer(sub)
+        return out

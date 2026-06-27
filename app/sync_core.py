@@ -9,6 +9,7 @@ the scheduler just logs.
 from __future__ import annotations
 
 import json
+import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
@@ -22,6 +23,7 @@ from .dashboard import render as render_dashboard
 from .detect import DETECTORS
 from .github_api import GitHubAPI
 from .native_session import NativeSession
+from .study import export_files as export_study
 
 
 def _iso(ts):
@@ -30,6 +32,16 @@ def _iso(ts):
         return datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat()
     except Exception:  # noqa: BLE001
         return None
+
+
+def _approach(md: str) -> str:
+    """Pull the Algorithm / Approach / Key Insight sections from a README for study cards."""
+    parts = []
+    for header in ("Algorithm", "Approach", "Key Insight"):
+        m = re.search(rf"^#+\s*{header}\s*$(.*?)(?=^#+\s|\Z)", md or "", re.M | re.S)
+        if m and m.group(1).strip():
+            parts.append(m.group(1).strip())
+    return "\n".join(parts).strip()[:1500]
 
 CP = ["leetcode", "codeforces", "codechef", "neetcode"]
 DOMAINS = {"leetcode": "leetcode.com", "codeforces": "codeforces.com",
@@ -174,31 +186,34 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False, r
             progress("step", i=i, n=total, text="Writing READMEs",
                      sub=f"{LABELS.get(name, name)}: {sub.title}")
             base = f"{name}/{sub.dirname}"
+            readme = rg.generate(sub)
             commits.append({
-                "files": {f"{base}/solution.{sub.ext}": sub.code,
-                          f"{base}/README.md": rg.generate(sub)},
+                "files": {f"{base}/solution.{sub.ext}": sub.code, f"{base}/README.md": readme},
                 "message": f"{LABELS.get(name, name)}: {sub.title} ({sub.lang})",
                 "date": _iso(sub.timestamp),
             })
-            done.append((name, sub))
+            done.append((name, sub, readme))
             log(f"  ✓ {base}")
 
     if done:
         progress("busy", text=f"Committing {len(done)} problem(s) (backdated to solve days)…")
         try:
             url = gh.push_commits(commits, orphan=reset, force=reset)
-            for name, sub in done:
+            for name, sub, readme in done:
                 store.mark(sub.key, {
                     "platform": sub.platform, "title": sub.title,
                     "difficulty": sub.difficulty, "tags": sub.tags, "lang": sub.lang,
                     "url": sub.url, "dir": f"{name}/{sub.dirname}", "timestamp": sub.timestamp,
+                    "approach": _approach(readme),
                 })
             result["pushed"], result["url"] = len(done), url
             log(f"✓ Pushed {len(done)} problem(s), dated to the days you solved them. {url}")
-            progress("busy", text="Updating dashboard…")
+            progress("busy", text="Updating dashboard & study exports…")
             try:
-                gh.push_commits([{"files": {"README.md": render_dashboard(store.all())},
-                                  "message": "GitKosh: update dashboard", "date": None}])
+                final = {"README.md": render_dashboard(store.all())}
+                final.update(export_study(store.all()))
+                gh.push_commits([{"files": final,
+                                  "message": "GitKosh: update dashboard & study exports", "date": None}])
             except Exception as e:  # noqa: BLE001
                 log(f"  (dashboard update skipped: {e})")
             progress("done", text=f"✓ Done — pushed {len(done)} problem(s).", ok=True)

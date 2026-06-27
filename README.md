@@ -33,6 +33,8 @@ GitKosh is a tiny macOS app that turns your scattered competitive-programming so
 - **AI write-ups for every problem.** Problem summary → **numbered algorithm of your actual code** → time/space complexity → key insight, in clean Markdown.
 - **Auto-generated dashboard.** Your repo's front page becomes a living portfolio: totals, solving streak, difficulty/language/topic breakdowns, and an index of every problem.
 - **Real-date commits.** Each solution is committed on the day you *actually solved it*, so your GitHub contribution graph reflects your true history — not one giant dump dated today.
+- **Interview-prep exports.** A *Browse by topic* (patterns) view in the dashboard, plus a `study/` folder: **Anki** cards, a **Notion** CSV, and a spaced-repetition **“revise these”** list — auto-generated from your solves.
+- **Reset & re-backfill.** One click rebuilds the whole repo as a clean, backdated history that mirrors your real solving timeline.
 - **Bring-your-own AI — including free & local.** Google Gemini, Groq, or **one-click local Ollama** (no key, no limits, fully private).
 - **Daily auto-sync.** A background scheduler runs even when the app is closed — no reminders, no clicking.
 - **Streak keeper.** On days with no new solves, it makes a small dated commit so your GitHub streak stays alive.
