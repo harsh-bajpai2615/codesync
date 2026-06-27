@@ -20,17 +20,17 @@ body{
 .sidebar{width:228px;flex:0 0 228px;padding:22px 16px;display:flex;flex-direction:column;gap:8px;
   background:rgba(10,12,20,.55);backdrop-filter:blur(20px);border-right:1px solid var(--card-bd)}
 .brand{display:flex;align-items:center;gap:12px;padding:6px 8px 18px}
-.logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:22px;color:#fff;
-  background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 24px rgba(124,92,252,.45);
-  animation:spin 9s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:0 0 44px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 24px rgba(124,92,252,.45)}
+.logo svg{width:25px;height:25px}
 .brand-name{font-weight:800;font-size:18px;letter-spacing:.2px}
 .brand-sub{color:var(--mut);font-size:12px}
 nav{position:relative;display:flex;flex-direction:column;gap:4px;margin-top:6px}
 .nav-item{position:relative;z-index:2;display:flex;align-items:center;gap:11px;padding:11px 14px;border:0;
   background:transparent;color:var(--mut);font:600 13.5px/1 inherit;border-radius:12px;cursor:pointer;
   text-align:left;transition:color .25s,transform .15s}
-.nav-item .ic{width:18px;text-align:center;opacity:.9}
+.nav-item .ic{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;opacity:.95}
+.nav-item .ic svg{width:18px;height:18px}
 .nav-item:hover{color:var(--ink)}
 .nav-item.active{color:#fff}
 .nav-pill{position:absolute;left:0;right:0;height:42px;border-radius:12px;z-index:1;
