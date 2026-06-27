@@ -48,7 +48,7 @@ class LoginDelegate(NSObject):
         self.window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
             rect, _STYLE, NSBackingStoreBuffered, False
         )
-        self.window.setTitle_("codesync — log in, then click Save & Finish")
+        self.window.setTitle_("GitKosh — log in, then click Save & Finish")
         self.window.center()
         content = self.window.contentView()
 

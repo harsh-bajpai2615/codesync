@@ -1,6 +1,6 @@
 """Per-user application paths and config bootstrap.
 
-Everything lives under ~/Library/Application Support/codesync. The app is a
+Everything lives under ~/Library/Application Support/GitKosh. The app is a
 mediator: it holds session cookies (CP sites) + a GitHub token, and pushes via
 the GitHub API — there is no local git repo.
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import yaml
 
-APP_DIR = Path(os.path.expanduser("~/Library/Application Support/codesync"))
+APP_DIR = Path(os.path.expanduser("~/Library/Application Support/GitKosh"))
 CONFIG_PATH = APP_DIR / "config.yaml"
 STATE_DIR = APP_DIR / "state"
 

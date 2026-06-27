@@ -30,7 +30,7 @@ def main():
         cfg = load_config()
         keep = os.environ.get("CODESYNC_KEEP_STREAK") == "1"
         limit = int(os.environ.get("CODESYNC_LIMIT", "0") or "0")
-        print(f"[codesync] scheduled sync starting (keep_streak={keep}, limit={limit})")
+        print(f"[GitKosh] scheduled sync starting (keep_streak={keep}, limit={limit})")
         run_sync(cfg, STATE_DIR, stop_on_seen=True, limit=limit, keep_streak=keep, log=print)
     else:
         from app.gui import main as gui_main

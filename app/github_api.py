@@ -65,7 +65,7 @@ class GitHubAPI:
                                f"Create it on GitHub first, or use '{login}/{repo}'.")
         cr = self.s.post(f"{API}/user/repos", json={
             "name": repo, "private": self.private, "auto_init": False,
-            "description": "Competitive-programming solutions, synced by codesync.",
+            "description": "Competitive-programming solutions, synced by GitKosh.",
         }, timeout=30)
         cr.raise_for_status()
         return f"{owner}/{repo}"
@@ -85,9 +85,9 @@ class GitHubAPI:
     def _seed_initial(self, owner, repo) -> None:
         """Empty repos reject the Git Data API; create a first commit via Contents API."""
         body = {
-            "message": "Initialize repository (CodeSync)",
+            "message": "Initialize repository (GitKosh)",
             "content": base64.b64encode(
-                "# Competitive Programming\n\nSolutions synced automatically by CodeSync.\n".encode()
+                "# Competitive Programming\n\nSolutions synced automatically by GitKosh.\n".encode()
             ).decode("ascii"),
             "branch": self.branch,
         }

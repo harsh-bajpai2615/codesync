@@ -168,7 +168,7 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False,
     if files:
         progress("busy", text=f"Pushing {len(done)} problem(s) to GitHub…")
         try:
-            url = gh.push(files, f"codesync: {len(done)} solution(s)")
+            url = gh.push(files, f"GitKosh: {len(done)} solution(s)")
             for sub in done:
                 store.mark(sub.key, {"platform": sub.platform, "timestamp": sub.timestamp, "title": sub.title})
             result["pushed"], result["url"] = len(done), url

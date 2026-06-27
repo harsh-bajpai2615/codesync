@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build codesync.app + codesync.dmg from a python.org framework Python (relocatable,
+# Build gitkosh.app + gitkosh.dmg from a python.org framework Python (relocatable,
 # distributable). Falls back to whatever python3 is on PATH with a warning.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -33,7 +33,7 @@ echo "==> Building app (py2app)"
 rm -rf build dist
 "$PY" setup.py py2app
 
-APP="dist/codesync.app"
+APP="dist/gitkosh.app"
 [ -d "$APP" ] || { echo "Build failed: $APP not found"; exit 1; }
 echo "==> Built $APP"
 
@@ -43,14 +43,14 @@ codesign --force --deep --sign - "$APP" && codesign --verify --deep "$APP" \
   && echo "  ad-hoc signature OK" || echo "  (ad-hoc signing skipped/failed; continuing)"
 
 echo "==> Making DMG"
-DMG="dist/codesync.dmg"
+DMG="dist/gitkosh.dmg"
 STAGE="$(mktemp -d)"
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 rm -f "$DMG"
-hdiutil create -volname "codesync" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+hdiutil create -volname "gitkosh" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
 rm -rf "$STAGE"
 echo "==> Done: $DMG"
 echo
-echo "Install: open the DMG, drag codesync.app to Applications."
+echo "Install: open the DMG, drag gitkosh.app to Applications."
 echo "First launch on any Mac (unsigned): right-click the app -> Open -> Open."

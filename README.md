@@ -1,31 +1,31 @@
 <div align="center">
 
-<img src="docs/logo.png" width="120" alt="CodeSync logo" />
+<img src="docs/logo.png" width="120" alt="GitKosh logo" />
 
-# CodeSync
+# GitKosh
 
 **Automatically sync your competitive-programming solutions from LeetCode, Codeforces, CodeChef & NeetCode to GitHub — each with an AI-written explanation, on a daily schedule that even keeps your contribution streak alive.**
 
 ![platform](https://img.shields.io/badge/platform-macOS%2012%2B-000?logo=apple)
 ![python](https://img.shields.io/badge/python-3.13-3776AB?logo=python&logoColor=white)
-![release](https://img.shields.io/github/v/release/harsh-bajpai2615/codesync?color=5B5BD6)
+![release](https://img.shields.io/github/v/release/harsh-bajpai2615/gitkosh?color=5B5BD6)
 ![license](https://img.shields.io/badge/license-MIT-16A34A)
 
-[**⬇ Download for macOS**](https://github.com/harsh-bajpai2615/codesync/releases/latest) · [Features](#-features) · [How it works](#%EF%B8%8F-how-it-works) · [Build from source](#%EF%B8%8F-build-from-source)
+[**⬇ Download for macOS**](https://github.com/harsh-bajpai2615/gitkosh/releases/latest) · [Features](#-features) · [How it works](#%EF%B8%8F-how-it-works) · [Build from source](#%EF%B8%8F-build-from-source)
 
 <br/>
 
-<img src="docs/screenshot.png" width="540" alt="CodeSync app" />
+<img src="docs/screenshot.png" width="540" alt="GitKosh app" />
 
 </div>
 
 ---
 
-## What is CodeSync?
+## What is GitKosh?
 
-CodeSync is a tiny macOS app that turns your scattered competitive-programming solves into a clean, organized, **documented** GitHub repository — automatically. Log into your accounts once; CodeSync pulls every accepted submission, writes a per-problem README (problem summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it all to GitHub. Put it on a daily schedule and it keeps running — even keeping your contribution graph green.
+GitKosh is a tiny macOS app that turns your scattered competitive-programming solves into a clean, organized, **documented** GitHub repository — automatically. Log into your accounts once; GitKosh pulls every accepted submission, writes a per-problem README (problem summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it all to GitHub. Put it on a daily schedule and it keeps running — even keeping your contribution graph green.
 
-> It's a **mediator**, not an editor. Keep solving on the platforms you love; CodeSync archives and documents the work for you. Your passwords are never stored — it logs in through the system's WebKit cookie store.
+> It's a **mediator**, not an editor. Keep solving on the platforms you love; GitKosh archives and documents the work for you. Your passwords are never stored — it logs in through the system's WebKit cookie store.
 
 ## ✨ Features
 
@@ -40,8 +40,8 @@ CodeSync is a tiny macOS app that turns your scattered competitive-programming s
 
 ## 📥 Install
 
-1. Download the latest **`codesync.dmg`** from [**Releases**](https://github.com/harsh-bajpai2615/codesync/releases/latest).
-2. Open it and drag **CodeSync** into **Applications**.
+1. Download the latest **`gitkosh.dmg`** from [**Releases**](https://github.com/harsh-bajpai2615/gitkosh/releases/latest).
+2. Open it and drag **GitKosh** into **Applications**.
 3. First launch (the app isn't notarized yet): **right-click → Open → Open** — once. After that it opens normally and updates itself.
 
 ## 🚀 Usage
@@ -70,7 +70,7 @@ leetcode/0001-two-sum/
 
 ## ⏰ Automation & streak keeping
 
-Turn on **“Sync automatically every day”** and CodeSync installs a macOS LaunchAgent that runs a sync daily — even with the app closed. With **“Keep my GitHub streak alive”** on, days with no new solves still get a small dated commit to `activity/streak.md`, so your contribution graph stays green.
+Turn on **“Sync automatically every day”** and GitKosh installs a macOS LaunchAgent that runs a sync daily — even with the app closed. With **“Keep my GitHub streak alive”** on, days with no new solves still get a small dated commit to `activity/streak.md`, so your contribution graph stays green.
 
 ## 🏗️ How it works
 
@@ -93,9 +93,9 @@ NeetCode ─┘   GitHub Device Flow (token)     scheduler (daily) + streak keep
 Requires macOS and a [python.org](https://www.python.org/downloads/macos/) framework Python (3.13 recommended).
 
 ```bash
-git clone https://github.com/harsh-bajpai2615/codesync
-cd codesync
-./build_app.sh          # → dist/codesync.app + dist/codesync.dmg
+git clone https://github.com/harsh-bajpai2615/gitkosh
+cd gitkosh
+./build_app.sh          # → dist/gitkosh.app + dist/gitkosh.dmg
 ```
 
 Cut a release that installed copies will auto-update to:
@@ -109,7 +109,7 @@ Cut a release that installed copies will auto-update to:
 
 ```
 app/            macOS app — GUI, WebKit login, sync core, scheduler, updater, Ollama setup
-codesync/       platform extractors, README generator, GitHub helpers
+gitkosh/       platform extractors, README generator, GitHub helpers
 setup.py        py2app bundle config           build_app.sh   build .app + .dmg
 release.sh      build + publish a release       tools/         app-icon generator
 ```
@@ -120,7 +120,7 @@ release.sh      build + publish a release       tools/         app-icon generato
 - **Not notarized yet** — first launch needs right-click→Open; updates after that are seamless.
 - **CodeChef** is best-effort (Cloudflare, no public API).
 - Free **Gemini** has a low daily cap — use **Ollama** (local) or **Groq** for large backfills.
-- Your data (logins, settings, history) lives in `~/Library/Application Support/codesync/` and survives updates.
+- Your data (logins, settings, history) lives in `~/Library/Application Support/gitkosh/` and survives updates.
 
 ## License
 

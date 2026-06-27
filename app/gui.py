@@ -92,7 +92,7 @@ class App:
         self.stop_evt = threading.Event()
         self.pills = {}
 
-        root.title("CodeSync")
+        root.title("GitKosh")
         root.configure(bg=BG)
         root.geometry("760x780")
         root.minsize(560, 520)
@@ -183,7 +183,7 @@ class App:
         if self.logo_img:
             tk.Label(head, image=self.logo_img, bg=CARD).pack(side="left", padx=(14, 12), pady=12)
         txt = tk.Frame(head, bg=CARD); txt.pack(side="left", pady=12)
-        tk.Label(txt, text="CodeSync", bg=CARD, fg=INK, font=(FONT, 22, "bold")).pack(anchor="w")
+        tk.Label(txt, text="GitKosh", bg=CARD, fg=INK, font=(FONT, 22, "bold")).pack(anchor="w")
         tk.Label(txt, text=f"Sync your coding-platform solutions to GitHub  ·  v{constants.VERSION}",
                  bg=CARD, fg=MUTED, font=(FONT, 12)).pack(anchor="w")
 
@@ -475,9 +475,9 @@ class App:
         info = self.update_info
         if not info:
             return
-        if not messagebox.askyesno("Update CodeSync",
+        if not messagebox.askyesno("Update GitKosh",
                                    f"Download and install v{info['version']}? "
-                                   "CodeSync will relaunch. Your logins and settings are kept."):
+                                   "GitKosh will relaunch. Your logins and settings are kept."):
             return
         self.update_lbl.config(text=f"Updating to v{info['version']}…")
         self.logq.put(f"Updating to v{info['version']}…\n")

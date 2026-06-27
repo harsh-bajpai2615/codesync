@@ -21,9 +21,9 @@ OPTIONS = {
     # PyObjC frameworks used by the native login window.
     "includes": ["objc", "Foundation", "Cocoa", "WebKit", "tkinter"],
     "plist": {
-        "CFBundleName": "CodeSync",
-        "CFBundleDisplayName": "CodeSync",
-        "CFBundleIdentifier": "com.harshbajpai.codesync",
+        "CFBundleName": "GitKosh",
+        "CFBundleDisplayName": "GitKosh",
+        "CFBundleIdentifier": "com.harshbajpai.gitkosh",
         "CFBundleShortVersionString": VERSION,
         "CFBundleVersion": VERSION,
         "LSMinimumSystemVersion": "12.0",
@@ -34,7 +34,7 @@ OPTIONS = {
 
 setup(
     app=APP,
-    name="codesync",
+    name="GitKosh",
     options={"py2app": OPTIONS},
     setup_requires=["py2app"],
 )

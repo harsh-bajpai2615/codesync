@@ -1,7 +1,7 @@
 """Daily background scheduling via a macOS LaunchAgent.
 
 Writes ~/Library/LaunchAgents/<LABEL>.plist that launchd runs every day at a set
-time — even when CodeSync isn't open, no human prompt. The agent launches the app
+time — even when GitKosh isn't open, no human prompt. The agent launches the app
 binary with CODESYNC_ROLE=sync (handled in app_main.py) to run a headless sync.
 """
 from __future__ import annotations
@@ -12,9 +12,9 @@ import subprocess
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-LABEL = "com.harshbajpai.codesync.sync"
+LABEL = "com.harshbajpai.gitkosh.sync"
 PLIST_PATH = Path(os.path.expanduser(f"~/Library/LaunchAgents/{LABEL}.plist"))
-LOG_PATH = os.path.expanduser("~/Library/Application Support/codesync/scheduler.log")
+LOG_PATH = os.path.expanduser("~/Library/Application Support/GitKosh/scheduler.log")
 
 
 def is_enabled() -> bool:
