@@ -283,6 +283,8 @@ class App:
         self.sync_btn.pack(side="left")
         self.watch_btn = ttk.Button(bar, text="Auto-sync: off", style="Ghost.TButton", command=self.toggle_watch)
         self.watch_btn.pack(side="left", padx=8)
+        self.reset_btn = ttk.Button(bar, text="Reset & re-backfill", style="Ghost.TButton", command=self.do_reset)
+        self.reset_btn.pack(side="left", padx=(0, 8))
         tk.Label(bar, text="limit", bg=BG, fg=MUTED, font=(FONT, 10)).pack(side="left")
         self.limit_var = tk.StringVar(value="0")
         self._entry(bar, self.limit_var, 4).pack(side="left", padx=4, ipady=3)
@@ -332,6 +334,7 @@ class App:
         ready = gh_ok and any_cp
         self.sync_btn.config(state="normal" if ready else "disabled")
         self.watch_btn.config(state="normal" if ready else "disabled")
+        self.reset_btn.config(state="normal" if ready else "disabled")
         if ready:
             self.hint.config(text="")
         elif not gh_ok:
@@ -566,6 +569,21 @@ class App:
         self.worker = threading.Thread(target=self._run, args=(False, limit), daemon=True)
         self.worker.start()
 
+    def do_reset(self):
+        if self.worker and self.worker.is_alive():
+            return
+        if not messagebox.askyesno(
+            "Reset & re-backfill",
+            "This clears GitKosh's local sync history and rebuilds your repo from scratch — "
+            "one commit per problem, backdated to the day you actually solved it, so your "
+            "contribution graph reflects your real history.\n\n"
+            "Your existing commit history in the repo will be REPLACED. Continue?"):
+            return
+        self.save_settings()
+        self.sync_btn.config(state="disabled")
+        self.worker = threading.Thread(target=self._run, args=(False, 0, True), daemon=True)
+        self.worker.start()
+
     def toggle_watch(self):
         if self.worker and self.worker.is_alive() and not self.stop_evt.is_set():
             self.stop_evt.set()
@@ -587,10 +605,10 @@ class App:
                 time.sleep(1)
         self.root.after(0, lambda: self.watch_btn.config(text="Auto-sync: off"))
 
-    def _run(self, stop_on_seen, limit):
+    def _run(self, stop_on_seen, limit, reset=False):
         with contextlib.redirect_stdout(QueueWriter(self.logq)):
             try:
-                self._do_sync(stop_on_seen, limit)
+                self._do_sync(stop_on_seen, limit, reset)
             except Exception as e:  # noqa: BLE001
                 print(f"ERROR: {e}")
         self.root.after(0, self.refresh_status)
@@ -641,10 +659,10 @@ class App:
         elif stage == "done":
             self._prog_done(text, ok)
 
-    def _do_sync(self, stop_on_seen, limit):
+    def _do_sync(self, stop_on_seen, limit, reset=False):
         res = run_sync(
             self.cfg, STATE_DIR,
-            stop_on_seen=stop_on_seen, limit=limit,
+            stop_on_seen=stop_on_seen, limit=limit, reset=reset,
             keep_streak=bool(self.streak_var.get()),
             log=print,                       # redirected to the Activity log by _run
             progress=self._progress_cb,

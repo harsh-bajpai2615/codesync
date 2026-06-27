@@ -39,3 +39,7 @@ class Store:
 
     def all(self) -> list:
         return list(self._data.values())
+
+    def clear(self) -> None:
+        self._data = {}
+        self.flush()

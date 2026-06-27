@@ -157,24 +157,30 @@ class GitHubAPI:
         self._author_cache = {"name": d.get("name") or login, "email": email}
         return self._author_cache
 
-    def push_commits(self, commits: list) -> str:
+    def push_commits(self, commits: list, orphan: bool = False, force: bool = False) -> str:
         """Create a chain of commits, one per entry, each backdated to its own date.
 
         commits: [{"files": {path: text}, "message": str, "date": iso8601 | None}]
         Each commit builds on the previous; the branch moves once at the end — so a big
         backfill becomes many commits dated to the real solve days (fills the contribution
-        graph historically). Returns the last commit's URL.
+        graph historically). With orphan=True the chain starts from no parent (fresh
+        history); force=True replaces the branch (used by reset & re-backfill).
+        Returns the last commit's URL.
         """
         commits = [c for c in commits if c.get("files")]
         if not commits:
             return ""
         owner, repo = self._resolve()
-        base_commit, base_tree = self._get_base(owner, repo)
-        if base_commit is None:
-            self._seed_initial(owner, repo)
+        if orphan:
+            parent, tree_base = None, None
+        else:
             base_commit, base_tree = self._get_base(owner, repo)
+            if base_commit is None:
+                self._seed_initial(owner, repo)
+                base_commit, base_tree = self._get_base(owner, repo)
+            parent, tree_base = base_commit, base_tree
         author = self._author()
-        parent, tree_base, last_url = base_commit, base_tree, ""
+        last_url = ""
         for c in commits:
             tree = [{"path": p, "mode": "100644", "type": "blob",
                      "sha": self._blob(owner, repo, txt)} for p, txt in c["files"].items()]
@@ -193,6 +199,11 @@ class GitHubAPI:
             cm.raise_for_status()
             j = cm.json()
             parent, tree_base, last_url = j["sha"], tree_sha, j.get("html_url", j["sha"])
-        self.s.patch(f"{API}/repos/{owner}/{repo}/git/refs/heads/{self.branch}",
-                     json={"sha": parent, "force": False}, timeout=30).raise_for_status()
+        up = self.s.patch(f"{API}/repos/{owner}/{repo}/git/refs/heads/{self.branch}",
+                          json={"sha": parent, "force": bool(force or orphan)}, timeout=30)
+        if up.status_code == 422:  # ref doesn't exist yet — create it
+            self.s.post(f"{API}/repos/{owner}/{repo}/git/refs",
+                        json={"ref": f"refs/heads/{self.branch}", "sha": parent}, timeout=30).raise_for_status()
+        else:
+            up.raise_for_status()
         return last_url

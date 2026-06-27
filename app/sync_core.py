@@ -86,9 +86,11 @@ def _keep_streak(gh: GitHubAPI, log) -> bool:
     return True
 
 
-def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False,
+def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False, reset=False,
              log=print, progress=_noop, should_stop=lambda: False) -> dict:
     result = {"found": 0, "pushed": 0, "streak": False, "error": None, "url": None}
+    if reset:
+        stop_on_seen, limit = False, 0  # re-pull everything
 
     gh_info = github_auth.load_github(state_dir)
     if not gh_info:
@@ -117,6 +119,9 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False,
         _write_last(state_dir, result); return result
 
     store = Store(state_dir)
+    if reset:
+        log("Reset: clearing local history and rebuilding the repo with real solve dates…")
+        store.clear()
     logged = connected_platforms(state_dir)
 
     # discover
@@ -181,7 +186,7 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False,
     if done:
         progress("busy", text=f"Committing {len(done)} problem(s) (backdated to solve days)…")
         try:
-            url = gh.push_commits(commits)
+            url = gh.push_commits(commits, orphan=reset, force=reset)
             for name, sub in done:
                 store.mark(sub.key, {
                     "platform": sub.platform, "title": sub.title,
