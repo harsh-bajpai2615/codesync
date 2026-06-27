@@ -1,37 +1,28 @@
-"""Generate the gitkosh app icon + an embedded header logo.
+"""Generate the GitKosh app icon, README logo, and embedded header logo.
 
 Produces:
   - dist_icon/icon_1024.png      (master, for .icns via iconutil)
-  - app/logo_data.py             (base64 of a 72px logo for the GUI header)
-Theme: indigo gradient rounded square + white circular "sync" arrows.
+  - dist_icon/logo_72.png        (small raster)
+  - docs/logo.png                (README header logo)
+  - app/logo_data.py             (base64 of a 72px logo for the Tk header)
+
+Mark: an indigo gradient rounded square holding a white binary tree of
+connected nodes — trees & graphs are the emblem of data structures &
+algorithms, the craft GitKosh helps you learn, practice and collect.
 """
 import base64
-import math
 import os
 
 from PIL import Image, ImageDraw
 
-OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "dist_icon")
-APP_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "app")
+ROOT = os.path.dirname(os.path.dirname(__file__))
+OUT_DIR = os.path.join(ROOT, "dist_icon")
+APP_DIR = os.path.join(ROOT, "app")
+DOCS_DIR = os.path.join(ROOT, "docs")
 S = 1024
 TOP = (129, 140, 248)   # indigo-400
 BOT = (79, 70, 229)     # indigo-600
 WHITE = (255, 255, 255, 255)
-
-
-def rad(d):
-    return math.radians(d)
-
-
-def arrowhead(draw, cx, cy, R, theta_deg, size, width):
-    th = rad(theta_deg)
-    px, py = cx + R * math.cos(th), cy + R * math.sin(th)
-    tx, ty = -math.sin(th), math.cos(th)          # tangent (clockwise)
-    rx, ry = math.cos(th), math.sin(th)           # radial
-    tip = (px + tx * size, py + ty * size)
-    left = (px + rx * (width * 0.95), py + ry * (width * 0.95))
-    right = (px - rx * (width * 0.95), py - ry * (width * 0.95))
-    draw.polygon([tip, left, right], fill=WHITE)
 
 
 def build():
@@ -39,10 +30,10 @@ def build():
     # macOS icons leave a transparent margin (~10%); art occupies the inset square.
     margin = 100
     x0, y0 = margin, margin
-    side = S - 2 * margin            # ~824
+    side = S - 2 * margin
     x1, y1 = x0 + side, y0 + side
 
-    # vertical gradient (full canvas; masked to the inset rounded square below)
+    # vertical gradient masked to the inset rounded square
     grad = Image.new("RGBA", (S, S))
     gd = ImageDraw.Draw(grad)
     for y in range(S):
@@ -57,20 +48,39 @@ def build():
     img.paste(grad, (0, 0), mask)
 
     d = ImageDraw.Draw(img)
-    cx = cy = S // 2
-    R = int(side * 0.28)            # scaled to the inset art
-    w = int(side * 0.08)
-    box = [cx - R, cy - R, cx + R, cy + R]
-    d.arc(box, start=35, end=175, fill=WHITE, width=w)
-    d.arc(box, start=215, end=355, fill=WHITE, width=w)
-    arrowhead(d, cx, cy, R, 175, int(side * 0.145), w / 2 + side * 0.025)
-    arrowhead(d, cx, cy, R, 355, int(side * 0.145), w / 2 + side * 0.025)
-    dot = int(side * 0.068)
-    d.ellipse([cx - dot, cy - dot, cx + dot, cy + dot], fill=WHITE)
+    cx = S // 2
+    # binary tree: a root branching down to two children
+    root = (cx, 372)
+    left = (cx - 150, 652)
+    right = (cx + 150, 652)
+    nodes = [root, left, right]
+    R = 78          # node radius
+    ew = 48         # edge width
+
+    # edges first (centre-to-centre), nodes drawn over the ends
+    for child in (left, right):
+        d.line([root, child], fill=WHITE, width=ew)
+        # round the joints
+    for (nx, ny) in nodes:
+        d.ellipse([nx - R, ny - R, nx + R, ny + R], fill=WHITE)
+    # hollow out the children a touch to read as distinct nodes (subtle facets)
+    inner = int(R * 0.42)
+    grad_at = lambda y: (
+        int(TOP[0] * (1 - y / S) + BOT[0] * (y / S)),
+        int(TOP[1] * (1 - y / S) + BOT[1] * (y / S)),
+        int(TOP[2] * (1 - y / S) + BOT[2] * (y / S)), 255)
+    for (nx, ny) in (left, right):
+        d.ellipse([nx - inner, ny - inner, nx + inner, ny + inner], fill=grad_at(ny))
 
     master = os.path.join(OUT_DIR, "icon_1024.png")
     img.save(master)
     print("wrote", master)
+
+    # README logo (square, sized down by the README's width attr)
+    os.makedirs(DOCS_DIR, exist_ok=True)
+    logo = img.resize((512, 512), Image.LANCZOS)
+    logo.save(os.path.join(DOCS_DIR, "logo.png"))
+    print("wrote", os.path.join(DOCS_DIR, "logo.png"))
 
     # header logo (72px) -> base64 into app/logo_data.py
     small = img.resize((72, 72), Image.LANCZOS)
