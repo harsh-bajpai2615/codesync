@@ -113,7 +113,7 @@ Cut a release that installed copies will auto-update to:
 
 ```
 app/            macOS app — GUI, WebKit login, sync core, scheduler, updater, Ollama setup
-codesync/       platform extractors, README generator, GitHub helpers
+gitkosh/       platform extractors, README generator, GitHub helpers
 setup.py        py2app bundle config           build_app.sh   build .app + .dmg
 release.sh      build + publish a release       tools/         app-icon generator
 ```

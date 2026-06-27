@@ -1,4 +1,4 @@
-"""py2app build config — produces codesync.app.
+"""py2app build config — produces gitkosh.app.
 
 Build:  .venv/bin/python setup.py py2app
 The GUI (Tkinter) and the login window (PyObjC WebKit) live in one bundle; the
@@ -14,7 +14,7 @@ OPTIONS = {
     "argv_emulation": False,
     "iconfile": "dist_icon/AppIcon.icns",
     "packages": [
-        "codesync", "app",
+        "gitkosh", "app",
         "requests", "urllib3", "idna", "certifi", "charset_normalizer",
         "bs4", "soupsieve", "html2text", "yaml",
     ],

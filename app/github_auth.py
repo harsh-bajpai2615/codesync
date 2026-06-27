@@ -17,7 +17,7 @@ import requests
 DEVICE_CODE_URL = "https://github.com/login/device/code"
 TOKEN_URL = "https://github.com/login/oauth/access_token"
 SCOPE = "repo"
-_HEADERS = {"Accept": "application/json", "User-Agent": "codesync"}
+_HEADERS = {"Accept": "application/json", "User-Agent": "gitkosh"}
 
 
 def start_device_flow(client_id: str) -> dict:

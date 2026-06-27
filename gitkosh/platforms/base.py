@@ -68,7 +68,7 @@ class Submission:
 
 
 class Platform:
-    """Subclass per site. `session` is a codesync.auth.Session."""
+    """Subclass per site. `session` is a gitkosh.auth.Session."""
     name = "base"
 
     def __init__(self, session, config: dict, root_cfg=None):

@@ -61,8 +61,8 @@ class GitHubSync:
             return False
         # Use a configured identity only if the repo has none, to avoid global prompts.
         if _run(["git", "config", "user.email"], cwd=self.repo, check=False).returncode != 0:
-            _run(["git", "config", "user.email", "codesync@local"], cwd=self.repo)
-            _run(["git", "config", "user.name", "codesync"], cwd=self.repo)
+            _run(["git", "config", "user.email", "gitkosh@local"], cwd=self.repo)
+            _run(["git", "config", "user.name", "gitkosh"], cwd=self.repo)
         _run(["git", "commit", "-m", message], cwd=self.repo)
         return True
 

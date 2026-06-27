@@ -13,9 +13,9 @@ import re
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-from codesync.readme_gen import ReadmeGenerator
-from codesync.store import Store
-from codesync.platforms import REGISTRY
+from gitkosh.readme_gen import ReadmeGenerator
+from gitkosh.store import Store
+from gitkosh.platforms import REGISTRY
 
 from . import github_auth
 from .appsupport import save_config

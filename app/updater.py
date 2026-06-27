@@ -71,7 +71,7 @@ def download_and_apply(url: str, log: Callable[[str], None] = lambda m: None) ->
     buf = io.BytesIO()
     for chunk in r.iter_content(1 << 20):
         buf.write(chunk)
-    tmp = Path(tempfile.mkdtemp(prefix="codesync-update-"))
+    tmp = Path(tempfile.mkdtemp(prefix="gitkosh-update-"))
     log("Extracting…")
     with zipfile.ZipFile(buf) as z:
         z.extractall(tmp)

@@ -51,13 +51,13 @@ class Config:
 
     @property
     def profile_dir(self) -> Path:
-        d = _expand(self.data.get("paths", {}).get("profile_dir", "~/.codesync/browser-profile"))
+        d = _expand(self.data.get("paths", {}).get("profile_dir", "~/.gitkosh/browser-profile"))
         d.mkdir(parents=True, exist_ok=True)
         return d
 
     @property
     def state_dir(self) -> Path:
-        d = _expand(self.data.get("paths", {}).get("state_dir", "~/.codesync/state"))
+        d = _expand(self.data.get("paths", {}).get("state_dir", "~/.gitkosh/state"))
         d.mkdir(parents=True, exist_ok=True)
         return d
 

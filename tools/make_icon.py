@@ -1,4 +1,4 @@
-"""Generate the codesync app icon + an embedded header logo.
+"""Generate the gitkosh app icon + an embedded header logo.
 
 Produces:
   - dist_icon/icon_1024.png      (master, for .icns via iconutil)

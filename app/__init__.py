@@ -1,1 +1,1 @@
-"""codesync macOS app (Tkinter control panel + native WebKit login)."""
+"""gitkosh macOS app (Tkinter control panel + native WebKit login)."""

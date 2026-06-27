@@ -1,4 +1,4 @@
-# ---- codesync configuration ----
+# ---- gitkosh configuration ----
 # Copy to config.yaml and edit. config.yaml is git-ignored.
 
 # Local path to the git repo where solutions get written + committed.
@@ -42,5 +42,5 @@ watch:
   interval_minutes: 15
 
 paths:
-  profile_dir: ~/.codesync/browser-profile
-  state_dir: ~/.codesync/state
+  profile_dir: ~/.gitkosh/browser-profile
+  state_dir: ~/.gitkosh/state

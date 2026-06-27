@@ -2,7 +2,7 @@
 
 Writes ~/Library/LaunchAgents/<LABEL>.plist that launchd runs every day at a set
 time — even when GitKosh isn't open, no human prompt. The agent launches the app
-binary with CODESYNC_ROLE=sync (handled in app_main.py) to run a headless sync.
+binary with GITKOSH_ROLE=sync (handled in app_main.py) to run a headless sync.
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def read_schedule() -> Optional[Tuple[int, int, bool]]:
     try:
         d = plistlib.loads(PLIST_PATH.read_bytes())
         ci = d.get("StartCalendarInterval", {}) or {}
-        ks = (d.get("EnvironmentVariables", {}) or {}).get("CODESYNC_KEEP_STREAK") == "1"
+        ks = (d.get("EnvironmentVariables", {}) or {}).get("GITKOSH_KEEP_STREAK") == "1"
         return int(ci.get("Hour", 9)), int(ci.get("Minute", 0)), ks
     except Exception:  # noqa: BLE001
         return None
@@ -41,8 +41,8 @@ def enable(program_args: List[str], hour: int, minute: int, keep_streak: bool) -
         "Label": LABEL,
         "ProgramArguments": program_args,
         "EnvironmentVariables": {
-            "CODESYNC_ROLE": "sync",
-            "CODESYNC_KEEP_STREAK": "1" if keep_streak else "0",
+            "GITKOSH_ROLE": "sync",
+            "GITKOSH_KEEP_STREAK": "1" if keep_streak else "0",
         },
         "StartCalendarInterval": {"Hour": int(hour), "Minute": int(minute)},
         "RunAtLoad": False,

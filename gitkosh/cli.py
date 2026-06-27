@@ -1,8 +1,8 @@
-"""codesync command-line interface.
+"""gitkosh command-line interface.
 
-  codesync login [--platforms a,b]    # log into sites once in a browser
-  codesync backfill [--platforms ...] # bulk-pull all past accepted solutions
-  codesync watch [--platforms ...]    # poll for new accepted solves and push
+  gitkosh login [--platforms a,b]    # log into sites once in a browser
+  gitkosh backfill [--platforms ...] # bulk-pull all past accepted solutions
+  gitkosh watch [--platforms ...]    # poll for new accepted solves and push
 """
 from __future__ import annotations
 
@@ -63,7 +63,7 @@ def _process(subs_iter, platform_name, store, gh, readme_gen, stop_on_seen: bool
 def _run_once(config, args, stop_on_seen):
     session = Session(config.profile_dir, config.state_dir)
     if not session.has_state():
-        print("No saved session. Run `codesync login` first.")
+        print("No saved session. Run `gitkosh login` first.")
         return 0
     store = Store(config.state_dir)
     gh = GitHubSync(config.output_repo, config.github)
@@ -103,7 +103,7 @@ def cmd_watch(args, config: Config):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog="codesync", description="Sync competitive-programming solutions to GitHub.")
+    p = argparse.ArgumentParser(prog="gitkosh", description="Sync competitive-programming solutions to GitHub.")
     p.add_argument("-c", "--config", default="config.yaml", help="path to config.yaml")
     sub = p.add_subparsers(dest="cmd", required=True)
 

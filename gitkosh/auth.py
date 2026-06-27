@@ -124,7 +124,7 @@ class Session:
 
     def _cookies(self) -> List[dict]:
         if not self.state_path.exists():
-            raise RuntimeError("No saved session. Run `codesync login` first.")
+            raise RuntimeError("No saved session. Run `gitkosh login` first.")
         return json.loads(self.state_path.read_text()).get("cookies", [])
 
     def cookie(self, name: str, domain_contains: str = "") -> Optional[str]:

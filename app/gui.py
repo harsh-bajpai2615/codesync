@@ -1,4 +1,4 @@
-"""codesync — mediator between LeetCode/Codeforces/CodeChef/NeetCode and GitHub.
+"""gitkosh — mediator between LeetCode/Codeforces/CodeChef/NeetCode and GitHub.
 
 Guided, themed UI: log into your 5 accounts (GitHub first), then sync. No coding
 happens here; a platform's web view is only its login screen.
@@ -17,9 +17,9 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 
-from codesync.readme_gen import ReadmeGenerator
-from codesync.store import Store
-from codesync.platforms import REGISTRY
+from gitkosh.readme_gen import ReadmeGenerator
+from gitkosh.store import Store
+from gitkosh.platforms import REGISTRY
 
 from . import constants, github_auth, ollama_setup, scheduler, updater
 from .appsupport import STATE_DIR, load_config, save_config
@@ -368,7 +368,7 @@ class App:
         def run():
             try:
                 if getattr(sys, "frozen", None):
-                    env = dict(os.environ, CODESYNC_ROLE="login", CODESYNC_OUT=out, CODESYNC_PLATFORMS=name)
+                    env = dict(os.environ, GITKOSH_ROLE="login", GITKOSH_OUT=out, GITKOSH_PLATFORMS=name)
                     subprocess.run([_main_executable()], env=env, check=False)
                 else:
                     subprocess.run([sys.executable, "-m", "app.login_helper", "--out", out, "--platforms", name], check=False)

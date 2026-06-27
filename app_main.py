@@ -2,7 +2,7 @@
 """Single entry point for the bundled app.
 
 Normally launches the Tkinter control panel. When relaunched with
-CODESYNC_ROLE=login (the GUI does this to show the native WebKit login window),
+GITKOSH_ROLE=login (the GUI does this to show the native WebKit login window),
 it runs the login helper instead — a separate process avoids the
 AppKit/Tkinter run-loop conflict.
 """
@@ -16,20 +16,20 @@ warnings.filterwarnings("ignore", message="Unable to find acceptable character d
 
 
 def main():
-    role = os.environ.get("CODESYNC_ROLE")
+    role = os.environ.get("GITKOSH_ROLE")
     if role == "login":
         from app.login_helper import main as login_main
         login_main([
-            "--out", os.environ.get("CODESYNC_OUT", ""),
-            "--platforms", os.environ.get("CODESYNC_PLATFORMS", "leetcode"),
+            "--out", os.environ.get("GITKOSH_OUT", ""),
+            "--platforms", os.environ.get("GITKOSH_PLATFORMS", "leetcode"),
         ])
     elif role == "sync":
         # Headless scheduled run (launched by the LaunchAgent).
         from app.appsupport import load_config, STATE_DIR
         from app.sync_core import run_sync
         cfg = load_config()
-        keep = os.environ.get("CODESYNC_KEEP_STREAK") == "1"
-        limit = int(os.environ.get("CODESYNC_LIMIT", "0") or "0")
+        keep = os.environ.get("GITKOSH_KEEP_STREAK") == "1"
+        limit = int(os.environ.get("GITKOSH_LIMIT", "0") or "0")
         print(f"[GitKosh] scheduled sync starting (keep_streak={keep}, limit={limit})")
         run_sync(cfg, STATE_DIR, stop_on_seen=True, limit=limit, keep_streak=keep, log=print)
     else:
