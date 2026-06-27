@@ -125,6 +125,25 @@ CodeChef ─┼─▶ extractors ─▶ submissions ─▶  README generator ─
 NeetCode ─┘   GitHub Device Flow (token)     scheduler (daily) + streak keeper
 ```
 
+## 🧪 Next-gen web UI (preview)
+
+A modern, animated UI built on **pywebview** (a native WebKit window) is in `webui/` +
+`app/webmain.py`. It reuses the **same Python backend** — no logic duplicated — and adds a
+glassmorphism sidebar, gradient buttons, animated stat tiles, difficulty bars, and a live rating
+chart.
+
+<div align="center"><img src="docs/webui.png" width="640" alt="GitKosh next-gen web UI" /></div>
+
+Run the preview:
+
+```bash
+.venv-app/bin/python -m pip install pywebview
+.venv-app/bin/python -m app.webmain
+```
+
+It's a working prototype (real data via a JS↔Python bridge); bundling it as the default app is the
+next step. `webui/index.html` also opens directly in a browser with sample data.
+
 ## 🛠️ Build from source
 
 Requires macOS and a [python.org](https://www.python.org/downloads/macos/) framework Python (3.13 recommended).

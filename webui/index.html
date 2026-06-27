@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitKosh</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">⟳</div>
+        <div><div class="brand-name">GitKosh</div><div class="brand-sub" id="version">v0.13.0</div></div>
+      </div>
+      <nav id="nav">
+        <button class="nav-item active" data-tab="setup"><span class="ic">⚙</span> Setup &amp; Sync</button>
+        <button class="nav-item" data-tab="showcase"><span class="ic">✦</span> Showcase</button>
+        <button class="nav-item" data-tab="insights"><span class="ic">📊</span> Insights</button>
+        <button class="nav-item" data-tab="contests"><span class="ic">🏆</span> Contests</button>
+        <div class="nav-pill" id="navPill"></div>
+      </nav>
+      <div class="side-foot">
+        <div class="status-row"><span class="dot" id="ghDot"></span> <span id="ghStatus">Not connected</span></div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <!-- SETUP -->
+      <section class="page active" id="page-setup">
+        <header class="hero">
+          <h1>Welcome back</h1>
+          <p>Connect your accounts, then sync. GitKosh documents, dates &amp; showcases your solves.</p>
+        </header>
+
+        <div class="grid">
+          <div class="card glow">
+            <div class="card-head"><h2>GitHub</h2><span class="badge" id="ghBadge">checking…</span></div>
+            <p class="muted">Step 1 — connect GitHub first.</p>
+            <button class="btn btn-accent" id="btnGithub">Connect GitHub</button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>Write-ups</h2></div>
+            <p class="muted">Choose an AI provider — or run a free local model.</p>
+            <div class="seg" id="providerSeg">
+              <button data-v="ollama" class="on">Ollama</button><button data-v="gemini">Gemini</button>
+              <button data-v="groq">Groq</button><button data-v="none">None</button>
+            </div>
+            <div class="keywrap hidden" id="keyWrap">
+              <input id="apiKey" type="password" placeholder="Paste your API key">
+              <button class="btn sm btn-accent" id="btnSaveKey">Save</button>
+            </div>
+            <div class="muted hidden" id="keyHint" style="margin:10px 0 0">
+              Free keys: aistudio.google.com/apikey · console.groq.com</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Coding sites</h2></div>
+          <div class="sites" id="sites"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Sync</h2></div>
+          <div class="row">
+            <button class="btn btn-accent" id="btnSync">Sync now</button>
+            <button class="btn" id="btnReset">Reset &amp; re-backfill</button>
+          </div>
+          <div class="progress hidden" id="progWrap"><div class="bar-bg"><div class="bar-fill" id="progBar"></div></div>
+            <div class="muted" id="progText"></div></div>
+        </div>
+      </section>
+
+      <!-- SHOWCASE -->
+      <section class="page" id="page-showcase">
+        <header class="hero"><h1>Showcase</h1><p>A shareable card, a portfolio site, and progress posts.</p></header>
+        <div class="card">
+          <div class="card-head"><h2>Profile stats card</h2></div>
+          <div class="card-preview"><img id="cardImg" alt="stats card"></div>
+          <div class="row">
+            <button class="btn btn-accent" id="btnCopyEmbed">Copy embed code</button>
+            <button class="btn" id="btnRefreshCard">Refresh</button>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="card">
+            <div class="card-head"><h2>Portfolio site</h2></div>
+            <p class="muted">Publish a searchable GitHub Pages site of your solves.</p>
+            <button class="btn btn-accent" id="btnPublish">Publish / update site</button>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Share progress</h2></div>
+            <button class="btn btn-accent" id="btnPost">Generate post</button>
+            <textarea id="postBox" rows="4" placeholder="Your draft post appears here…"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSIGHTS -->
+      <section class="page" id="page-insights">
+        <header class="hero"><h1>Insights</h1><p>Strengths, pace, solution quality &amp; résumé bullets.</p></header>
+        <div class="tiles" id="tiles"></div>
+        <div class="grid">
+          <div class="card">
+            <div class="card-head"><h2>Difficulty</h2></div>
+            <div id="diffBars"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Strongest topics</h2></div>
+            <div class="chips" id="topics"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Résumé bullets</h2><button class="btn sm" id="btnCopyResume">Copy</button></div>
+          <ul id="resume" class="resume"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Quiz me</h2><button class="btn sm btn-accent" id="btnQuiz">Show a problem</button></div>
+          <div class="quiz" id="quiz"><div class="quiz-q">Click “Show a problem” to recall one from memory.</div></div>
+        </div>
+      </section>
+
+      <!-- CONTESTS -->
+      <section class="page" id="page-contests">
+        <header class="hero"><h1>Contests</h1><p>Upcoming rounds and your Codeforces rating curve.</p></header>
+        <div class="card">
+          <div class="card-head"><h2>Upcoming</h2><button class="btn sm" id="btnRefreshContests">Refresh</button></div>
+          <div id="contestList"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h2>Codeforces rating</h2><span class="muted" id="ratingMeta"></span></div>
+          <svg id="ratingChart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
