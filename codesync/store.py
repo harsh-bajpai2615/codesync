@@ -36,3 +36,6 @@ class Store:
 
     def count(self) -> int:
         return len(self._data)
+
+    def all(self) -> list:
+        return list(self._data.values())

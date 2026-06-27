@@ -9,7 +9,7 @@ the scheduler just logs.
 from __future__ import annotations
 
 import json
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 from codesync.readme_gen import ReadmeGenerator
@@ -18,9 +18,18 @@ from codesync.platforms import REGISTRY
 
 from . import github_auth
 from .appsupport import save_config
+from .dashboard import render as render_dashboard
 from .detect import DETECTORS
 from .github_api import GitHubAPI
 from .native_session import NativeSession
+
+
+def _iso(ts):
+    """Epoch seconds -> ISO-8601 UTC, for backdating commits to the real solve day."""
+    try:
+        return datetime.fromtimestamp(int(ts), tz=timezone.utc).isoformat()
+    except Exception:  # noqa: BLE001
+        return None
 
 CP = ["leetcode", "codeforces", "codechef", "neetcode"]
 DOMAINS = {"leetcode": "leetcode.com", "codeforces": "codeforces.com",
@@ -149,30 +158,44 @@ def run_sync(cfg, state_dir, *, stop_on_seen=True, limit=0, keep_streak=False,
             break
     result["found"] = len(subs)
 
-    # write READMEs
-    files, done = {}, []
+    # generate READMEs + build one backdated commit per problem (real solve date)
+    done, commits = [], []
     if subs:
         total = len(subs)
         log(f"Found {total} new problem(s).")
-        for i, (name, sub) in enumerate(subs, 1):
+        for i, (name, sub) in enumerate(sorted(subs, key=lambda x: x[1].timestamp or 0), 1):
             if should_stop():
                 break
             progress("step", i=i, n=total, text="Writing READMEs",
                      sub=f"{LABELS.get(name, name)}: {sub.title}")
             base = f"{name}/{sub.dirname}"
-            files[f"{base}/solution.{sub.ext}"] = sub.code
-            files[f"{base}/README.md"] = rg.generate(sub)
-            done.append(sub)
+            commits.append({
+                "files": {f"{base}/solution.{sub.ext}": sub.code,
+                          f"{base}/README.md": rg.generate(sub)},
+                "message": f"{LABELS.get(name, name)}: {sub.title} ({sub.lang})",
+                "date": _iso(sub.timestamp),
+            })
+            done.append((name, sub))
             log(f"  ✓ {base}")
 
-    if files:
-        progress("busy", text=f"Pushing {len(done)} problem(s) to GitHub…")
+    if done:
+        progress("busy", text=f"Committing {len(done)} problem(s) (backdated to solve days)…")
         try:
-            url = gh.push(files, f"GitKosh: {len(done)} solution(s)")
-            for sub in done:
-                store.mark(sub.key, {"platform": sub.platform, "timestamp": sub.timestamp, "title": sub.title})
+            url = gh.push_commits(commits)
+            for name, sub in done:
+                store.mark(sub.key, {
+                    "platform": sub.platform, "title": sub.title,
+                    "difficulty": sub.difficulty, "tags": sub.tags, "lang": sub.lang,
+                    "url": sub.url, "dir": f"{name}/{sub.dirname}", "timestamp": sub.timestamp,
+                })
             result["pushed"], result["url"] = len(done), url
-            log(f"✓ Pushed {len(done)} problem(s). {url}")
+            log(f"✓ Pushed {len(done)} problem(s), dated to the days you solved them. {url}")
+            progress("busy", text="Updating dashboard…")
+            try:
+                gh.push_commits([{"files": {"README.md": render_dashboard(store.all())},
+                                  "message": "GitKosh: update dashboard", "date": None}])
+            except Exception as e:  # noqa: BLE001
+                log(f"  (dashboard update skipped: {e})")
             progress("done", text=f"✓ Done — pushed {len(done)} problem(s).", ok=True)
         except Exception as e:  # noqa: BLE001
             result["error"] = str(e)

@@ -145,3 +145,54 @@ class GitHubAPI:
                              json={"ref": ref, "sha": commit_sha}, timeout=30)
         up.raise_for_status()
         return cm.json().get("html_url", commit_sha)
+
+    def _author(self) -> dict:
+        """Author identity for backdated commits. Uses the account's noreply email so
+        backdated commits still count toward the contribution graph."""
+        if getattr(self, "_author_cache", None):
+            return self._author_cache
+        d = self.s.get(f"{API}/user", timeout=30).json()
+        login, uid = d.get("login", "user"), d.get("id", "")
+        email = d.get("email") or f"{uid}+{login}@users.noreply.github.com"
+        self._author_cache = {"name": d.get("name") or login, "email": email}
+        return self._author_cache
+
+    def push_commits(self, commits: list) -> str:
+        """Create a chain of commits, one per entry, each backdated to its own date.
+
+        commits: [{"files": {path: text}, "message": str, "date": iso8601 | None}]
+        Each commit builds on the previous; the branch moves once at the end — so a big
+        backfill becomes many commits dated to the real solve days (fills the contribution
+        graph historically). Returns the last commit's URL.
+        """
+        commits = [c for c in commits if c.get("files")]
+        if not commits:
+            return ""
+        owner, repo = self._resolve()
+        base_commit, base_tree = self._get_base(owner, repo)
+        if base_commit is None:
+            self._seed_initial(owner, repo)
+            base_commit, base_tree = self._get_base(owner, repo)
+        author = self._author()
+        parent, tree_base, last_url = base_commit, base_tree, ""
+        for c in commits:
+            tree = [{"path": p, "mode": "100644", "type": "blob",
+                     "sha": self._blob(owner, repo, txt)} for p, txt in c["files"].items()]
+            body = {"tree": tree}
+            if tree_base:
+                body["base_tree"] = tree_base
+            tr = self.s.post(f"{API}/repos/{owner}/{repo}/git/trees", json=body, timeout=60)
+            tr.raise_for_status()
+            tree_sha = tr.json()["sha"]
+            cbody = {"message": c["message"], "tree": tree_sha,
+                     "parents": [parent] if parent else []}
+            if c.get("date"):
+                who = {"name": author["name"], "email": author["email"], "date": c["date"]}
+                cbody["author"], cbody["committer"] = who, who
+            cm = self.s.post(f"{API}/repos/{owner}/{repo}/git/commits", json=cbody, timeout=60)
+            cm.raise_for_status()
+            j = cm.json()
+            parent, tree_base, last_url = j["sha"], tree_sha, j.get("html_url", j["sha"])
+        self.s.patch(f"{API}/repos/{owner}/{repo}/git/refs/heads/{self.branch}",
+                     json={"sha": parent, "force": False}, timeout=30).raise_for_status()
+        return last_url
