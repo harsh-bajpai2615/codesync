@@ -36,13 +36,22 @@ def main():
         try:
             from app import srs, notify
             from gitkosh.store import Store
-            st = srs.stats(Store(STATE_DIR).all(), STATE_DIR)
+            items = Store(STATE_DIR).all()
+            st = srs.stats(items, STATE_DIR)
             pushed = res.get("pushed", 0)
             bits = []
             if pushed:
                 bits.append(f"Synced {pushed} new solution(s)")
             if st["due"]:
                 bits.append(f"{st['due']} problem(s) due for review")
+            # Today's study-plan target, if a plan is active.
+            plan = cfg.get("study_plan")
+            if plan:
+                from app import studyplan
+                dec = studyplan.decorate(plan, studyplan.solved_slugs(items))
+                pend = dec["progress"]["today_pending"]
+                if pend:
+                    bits.append(f"{pend} on today's {plan.get('name', '')} study plan")
             if bits:
                 notify.notify("GitKosh", " · ".join(bits))
         except Exception as e:  # noqa: BLE001

@@ -10,7 +10,6 @@ import base64
 import datetime as dt
 import json
 import os
-import re
 import subprocess
 import sys
 import threading
@@ -18,7 +17,7 @@ import threading
 import webview
 
 from . import (backfill, coach, companies, constants, gamify, github_auth,
-               ollama_setup, patterns, posts, problems, roadmap, runner, site, srs)
+               ollama_setup, patterns, posts, problems, roadmap, runner, site, srs, studyplan)
 from .appsupport import STATE_DIR, load_config, save_config
 from .cards import render_png
 from .contests import cf_rating, upcoming as cf_upcoming
@@ -68,18 +67,8 @@ def _items():
 
 def _solved_leetcode_slugs() -> set:
     """Slugs of LeetCode problems the user has actually solved (from synced history),
-    used to mark progress against company question lists."""
-    out = set()
-    for it in _items():
-        if it.get("platform") != "leetcode":
-            continue
-        slug = companies.slug_from_url(it.get("url") or "")
-        if not slug:  # fall back to the stored dir, e.g. "leetcode/0001-two-sum"
-            base = (it.get("dir") or "").split("/")[-1]
-            slug = re.sub(r"^\d+-", "", base)
-        if slug:
-            out.add(slug)
-    return out
+    used to mark progress against company question lists and study plans."""
+    return studyplan.solved_slugs(_items())
 
 
 def _connected():
@@ -636,6 +625,44 @@ class Api:
                                        f"{len(targets)} target companies", "merged")
         dec["targets"] = [names.get(s, s) for s in targets]
         return dec
+
+    # ---- auto study plan ----
+    def _questions_for(self, source, period):
+        if source == "__targets":
+            return self.target_questions(period)
+        if source == "__saved":
+            return self.saved_questions()
+        return self.company_questions(source, period)
+
+    def build_study_plan(self, source, period="all", weeks=4, per_day=3, include_solved=False):
+        r = self._questions_for(source, period)
+        if not r.get("ok"):
+            return r
+        plan = studyplan.build(r["questions"], weeks, per_day, include_solved)
+        if not plan["total"]:
+            return {"ok": False, "error": "Nothing to schedule — you've solved everything here, "
+                    "or try including solved questions / a longer window."}
+        plan.update({
+            "source": source, "company": r.get("company", source),
+            "name": r.get("name", source), "period": r.get("period", period),
+            "created": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        })
+        cfg = load_config()
+        cfg["study_plan"] = plan
+        save_config(cfg)
+        return studyplan.decorate(plan, _solved_leetcode_slugs())
+
+    def get_study_plan(self):
+        plan = load_config().get("study_plan")
+        if not plan:
+            return {"ok": False}
+        return studyplan.decorate(json.loads(json.dumps(plan)), _solved_leetcode_slugs())
+
+    def clear_study_plan(self):
+        cfg = load_config()
+        cfg.pop("study_plan", None)
+        save_config(cfg)
+        return {"ok": True}
 
     def interview_score(self, history, pid, code="", elapsed_sec=0):
         prob = problems.get(pid) or {}

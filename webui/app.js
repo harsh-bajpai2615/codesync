@@ -59,6 +59,7 @@ function switchTab(tab, item) {
   if (tab === "learn") renderLearn();
   if (tab === "interview") renderInterview();
   if (tab === "companies") renderCompanies();
+  if (tab === "plan") renderPlan();
 }
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab, b)));
 
@@ -829,6 +830,22 @@ async function renderCompanies() {
   $("#coPracticeNext").addEventListener("click", coPracticeNext);
   $("#coInterview").addEventListener("click", coInterview);
   $("#coCopy").addEventListener("click", coCopy);
+  $("#coMakePlan").addEventListener("click", () => $("#coPlanBar").classList.toggle("hidden"));
+  $("#planGenerate").addEventListener("click", coGeneratePlan);
+}
+async function coGeneratePlan() {
+  if (!CO.last || !CO.slug) { toast("Pick a company first."); return; }
+  const weeks = +$("#planWeeks").value, perDay = +$("#planPerDay").value;
+  const incl = $("#planIncludeSolved").checked;
+  $("#planGenerate").disabled = true;
+  const r = await act("build_study_plan", CO.slug, CO.period, weeks, perDay, incl);
+  $("#planGenerate").disabled = false;
+  if (!r || !r.ok) { toast((r && r.error) || "Couldn't build the plan."); return; }
+  $("#coPlanBar").classList.add("hidden");
+  toast(`Plan ready — ${r.total} questions over ${r.days.length} days`);
+  const navBtn = $$(".nav-item").find((b) => b.dataset.tab === "plan");
+  if (navBtn) switchTab("plan", navBtn);
+  renderPlan(r);
 }
 function buildCompanyOptions(filter) {
   const q = (filter || "").toLowerCase().trim();
@@ -1063,6 +1080,85 @@ function coInterview() {
       startInterview(pick);
     } else if (++tries > 30) clearInterval(t);
   }, 100);
+}
+
+/* ---------- auto study plan ---------- */
+let _planWired = false;
+async function renderPlan(planArg) {
+  if (!_planWired) {
+    _planWired = true;
+    $("#planCopy").addEventListener("click", planCopy);
+    $("#planDelete").addEventListener("click", planDelete);
+  }
+  const plan = planArg || (api() ? await act("get_study_plan") : null);
+  if (!plan || !plan.ok) {
+    $("#planEmpty").classList.remove("hidden"); $("#planView").classList.add("hidden");
+    return;
+  }
+  window._plan = plan;
+  $("#planEmpty").classList.add("hidden"); $("#planView").classList.remove("hidden");
+  const pr = plan.progress || { done: 0, total: 0, pct: 0 };
+  $("#planName").textContent = `${plan.name} — study plan`;
+  $("#planProgress").textContent = `${pr.done}/${pr.total} done (${pr.pct}%)`;
+  $("#planMeta").innerHTML =
+    `<span><b>${plan.weeks}</b> weeks · <b>${plan.per_day}</b>/day</span>` +
+    `<span>Window: <b>${esc(plan.period || "")}</b></span>` +
+    `<span>Started <b>${esc((plan.created || "").slice(0, 10))}</b></span>` +
+    (plan.include_solved ? `<span>incl. solved</span>` : "");
+  requestAnimationFrame(() => { $("#planBar").style.width = pr.pct + "%"; });
+  // today's focus
+  const today = plan.days.find((d) => d.is_today);
+  $("#planTodayCard").classList.remove("hidden");
+  if (today) {
+    $("#planTodayBadge").textContent = `${today.done}/${today.total} done`;
+    $("#planToday").innerHTML = today.items.length
+      ? today.items.map(planItemRow).join("") : `<div class="muted">Rest day — nothing scheduled 🎉</div>`;
+  } else {
+    const upcoming = plan.days.find((d) => !d.is_past);
+    $("#planTodayBadge").textContent = "";
+    $("#planToday").innerHTML = upcoming
+      ? `<div class="muted">Nothing due today. Next study day: <b>${esc(upcoming.date)}</b>.</div>`
+      : `<div class="muted">Plan complete — nice work! 🎉</div>`;
+  }
+  // full schedule grouped into weeks of 7
+  const weeks = [];
+  for (let i = 0; i < plan.days.length; i += 7) weeks.push(plan.days.slice(i, i + 7));
+  $("#planSchedule").innerHTML = weeks.map((wk, wi) =>
+    `<div class="plan-week"><div class="plan-week-h">Week ${wi + 1} · ${esc(wk[0].date)} – ${esc(wk[wk.length - 1].date)}</div>${wk.map(planDayBlock).join("")}</div>`).join("");
+  $$("#page-plan .co-open").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openInApp(a.dataset.pid); }));
+}
+function planItemRow(it) {
+  const dc = it.difficulty === "Easy" ? "easy" : it.difficulty === "Hard" ? "hard" : "med";
+  const action = (!it.solved && it.in_app) ? `<a href="#" class="co-open act" data-pid="${esc(it.slug)}">Solve in app</a>` : "";
+  return `<div class="plan-item ${it.solved ? "solved" : ""}">
+    <span class="chk">${it.solved ? "✓" : "○"}</span>
+    <span class="co-dchip ${dc}">${esc(it.difficulty || "")}</span>
+    <span class="t"><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)}</a></span>
+    <span class="act">${action}</span></div>`;
+}
+function planDayBlock(d) {
+  const complete = d.total > 0 && d.done === d.total;
+  const cls = `plan-day ${d.is_today ? "today" : ""} ${d.is_past && !complete ? "past incomplete" : ""} ${complete ? "done-day" : ""}`;
+  return `<div class="${cls}">
+    <div class="plan-day-h"><span class="date">${esc(d.weekday)} ${esc(d.date.slice(5))}</span>${d.is_today ? '<span class="tag">Today</span>' : ""}<span class="cnt">${d.done}/${d.total}</span></div>
+    ${d.items.map(planItemRow).join("")}</div>`;
+}
+function planCopy() {
+  const plan = window._plan; if (!plan) return;
+  const lines = [`# ${plan.name} — study plan (${plan.weeks} weeks, ${plan.per_day}/day)`, ""];
+  for (const d of plan.days) {
+    lines.push(`## ${d.weekday} ${d.date}`);
+    for (const it of d.items) lines.push(`- ${it.solved ? "[x]" : "[ ]"} [${it.title}](${it.url}) — ${it.difficulty || "?"}`);
+    lines.push("");
+  }
+  navigator.clipboard?.writeText(lines.join("\n"));
+  toast("Copied study plan as a checklist");
+}
+async function planDelete() {
+  await act("clear_study_plan");
+  window._plan = null;
+  toast("Study plan deleted");
+  renderPlan();
 }
 
 function renderPatterns(pats) {
