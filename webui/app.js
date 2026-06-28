@@ -837,9 +837,9 @@ async function renderCompanies() {
 async function coGeneratePlan() {
   if (!CO.last || !CO.slug) { toast("Pick a company first."); return; }
   const weeks = +$("#planWeeks").value, perDay = +$("#planPerDay").value;
-  const incl = $("#planIncludeSolved").checked;
+  const incl = $("#planIncludeSolved").checked, weak = $("#planWeakTopics").checked;
   $("#planGenerate").disabled = true;
-  const r = await act("build_study_plan", CO.slug, CO.period, weeks, perDay, incl);
+  const r = await act("build_study_plan", CO.slug, CO.period, weeks, perDay, incl, weak);
   $("#planGenerate").disabled = false;
   if (!r || !r.ok) { toast((r && r.error) || "Couldn't build the plan."); return; }
   $("#coPlanBar").classList.add("hidden");
@@ -1124,7 +1124,13 @@ async function renderPlan(planArg) {
     `<span><b>${plan.weeks}</b> weeks · <b>${plan.per_day}</b>/day</span>` +
     `<span>Window: <b>${esc(plan.period || "")}</b></span>` +
     `<span>Started <b>${esc((plan.created || "").slice(0, 10))}</b></span>` +
-    (plan.include_solved ? `<span>incl. solved</span>` : "");
+    (plan.include_solved ? `<span>incl. solved</span>` : "") +
+    (plan.topic_weighted ? `<span>⚡ weak-topic focus</span>` : "");
+  if (plan.topic_weighted && (plan.weak_topics || []).length) {
+    $("#planMeta").innerHTML +=
+      `<span style="flex-basis:100%">Emphasizing: ${plan.weak_topics.map((t) =>
+        `<span class="co-topic">${esc(t.topic)} <b>${t.pct}%</b></span>`).join(" ")}</span>`;
+  }
   requestAnimationFrame(() => { $("#planBar").style.width = pr.pct + "%"; });
   // today's focus
   const today = plan.days.find((d) => d.is_today);

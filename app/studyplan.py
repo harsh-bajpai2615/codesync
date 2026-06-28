@@ -45,16 +45,28 @@ def _item(q) -> dict:
     return it
 
 
-def build(questions, weeks=4, per_day=3, include_solved=False, start=None) -> dict:
+def build(questions, weeks=4, per_day=3, include_solved=False, weights=None, start=None) -> dict:
     """Schedule `questions` (already priority-ordered) into a dated plan.
 
     Each day gets up to per_day items with a balanced Easy/Medium/Hard mix, while
     high-frequency/high-overlap problems still land early.
+
+    If `weights` is given (topic -> weakness in 0..1), questions touching weak
+    topics are boosted so the plan emphasizes the patterns you're weakest at.
     """
     weeks = max(1, min(int(weeks or 4), 26))
     per_day = max(1, min(int(per_day or 3), 15))
     start = start or _today()
     pool = [q for q in questions if include_solved or not q.get("solved")]
+    if weights:
+        # Blend topic weakness with (normalized) frequency so weak patterns are
+        # genuinely emphasized while still-important common problems stay in play.
+        maxf = max((q.get("frequency", 0) or 0) for q in pool) or 1
+        def _score(q):
+            w = max((weights.get(t, 0.0) for t in (q.get("topics") or [])), default=0.0)
+            fn = (q.get("frequency", 0) or 0) / maxf
+            return 0.55 * w + 0.45 * fn
+        pool = sorted(pool, key=_score, reverse=True)
     selected = pool[:weeks * 7 * per_day]
 
     # Interleave difficulties (priority preserved within each) for balanced days.

@@ -635,17 +635,40 @@ class Api:
             return self.saved_questions()
         return self.company_questions(source, period)
 
-    def build_study_plan(self, source, period="all", weeks=4, per_day=3, include_solved=False):
+    @staticmethod
+    def _topic_weakness(questions):
+        """Per-topic weakness over a view: 1 - solved/total. Returns
+        (weights dict, weak_topics display list sorted weakest-first)."""
+        tot, solv = {}, {}
+        for q in questions:
+            for t in q.get("topics", []):
+                tot[t] = tot.get(t, 0) + 1
+                if q.get("solved"):
+                    solv[t] = solv.get(t, 0) + 1
+        weights = {t: 1.0 - (solv.get(t, 0) / tot[t]) for t in tot}
+        # Display the weakest reasonably-common topics (enough signal to matter).
+        common = [t for t in tot if tot[t] >= 3]
+        common.sort(key=lambda t: (weights[t], tot[t]), reverse=True)
+        weak = [{"topic": t, "solved": solv.get(t, 0), "total": tot[t],
+                 "pct": round(100 * solv.get(t, 0) / tot[t])} for t in common[:6]]
+        return weights, weak
+
+    def build_study_plan(self, source, period="all", weeks=4, per_day=3,
+                         include_solved=False, topic_weighted=False):
         r = self._questions_for(source, period)
         if not r.get("ok"):
             return r
-        plan = studyplan.build(r["questions"], weeks, per_day, include_solved)
+        weights, weak = (None, [])
+        if topic_weighted:
+            weights, weak = self._topic_weakness(r["questions"])
+        plan = studyplan.build(r["questions"], weeks, per_day, include_solved, weights=weights)
         if not plan["total"]:
             return {"ok": False, "error": "Nothing to schedule — you've solved everything here, "
                     "or try including solved questions / a longer window."}
         plan.update({
             "source": source, "company": r.get("company", source),
             "name": r.get("name", source), "period": r.get("period", period),
+            "topic_weighted": bool(topic_weighted), "weak_topics": weak,
             "created": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         })
         cfg = load_config()
