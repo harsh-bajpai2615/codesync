@@ -520,6 +520,7 @@ class Api:
             q["solved"] = q["slug"] in solved
             q["in_app"] = q["slug"] in problems.CATALOG  # solvable in the built-in IDE
             q["bookmarked"] = q["slug"] in bm
+            q["topics"] = companies.topics_for(q["slug"])  # LeetCode topic/pattern tags
             d = q.get("difficulty", "")
             diff[d] = diff.get(d, 0) + 1
             if q["solved"]:

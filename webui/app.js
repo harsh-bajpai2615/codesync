@@ -787,7 +787,7 @@ function ivQuit() {
 /* ---------- company prep ---------- */
 let CO = { init: false, slug: null, period: "all", name: "", companies: [], last: null,
   targets: [], byslug: {}, featured: [],
-  filter: { diff: "all", unsolved: false, inapp: false, saved: false, q: "", sort: "freq" } };
+  filter: { diff: "all", unsolved: false, inapp: false, saved: false, topic: "all", q: "", sort: "freq" } };
 async function renderCompanies() {
   if (CO.init) return;
   CO.init = true;
@@ -825,6 +825,7 @@ async function renderCompanies() {
   $("#coUnsolved").addEventListener("change", (e) => { CO.filter.unsolved = e.target.checked; renderTable(); });
   $("#coInApp").addEventListener("change", (e) => { CO.filter.inapp = e.target.checked; renderTable(); });
   $("#coSavedOnly").addEventListener("change", (e) => { CO.filter.saved = e.target.checked; renderTable(); });
+  $("#coTopic").addEventListener("change", (e) => { CO.filter.topic = e.target.value; renderTable(); });
   $("#coQ").addEventListener("input", (e) => { CO.filter.q = e.target.value; renderTable(); });
   $("#coSort").addEventListener("change", (e) => { CO.filter.sort = e.target.value; renderTable(); });
   $("#coPracticeNext").addEventListener("click", coPracticeNext);
@@ -955,7 +956,19 @@ function renderCompanyResult(r) {
     const tot = +top[1] || 0, done = +top[0] || 0;
     bar.querySelector(".co-bar-fill").style.width = (tot ? (100 * done / tot) : 0) + "%";
   }));
+  buildTopicOptions(r);
   renderTable();
+}
+// Populate the topic filter from the current dataset (sorted by frequency, with counts).
+function buildTopicOptions(r) {
+  const counts = {};
+  for (const q of r.questions) for (const t of (q.topics || [])) counts[t] = (counts[t] || 0) + 1;
+  const topics = Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+  if (!topics.includes(CO.filter.topic)) CO.filter.topic = "all";  // reset if no longer present
+  const sel = $("#coTopic");
+  sel.innerHTML = `<option value="all">All topics (${topics.length})</option>` +
+    topics.map((t) => `<option value="${esc(t)}">${esc(t)} (${counts[t]})</option>`).join("");
+  sel.value = CO.filter.topic;
 }
 function applyFilters() {
   const f = CO.filter, q = (f.q || "").toLowerCase().trim();
@@ -964,6 +977,7 @@ function applyFilters() {
   if (f.unsolved) list = list.filter((x) => !x.solved);
   if (f.inapp) list = list.filter((x) => x.in_app);
   if (f.saved) list = list.filter((x) => x.bookmarked);
+  if (f.topic !== "all") list = list.filter((x) => (x.topics || []).includes(f.topic));
   if (q) list = list.filter((x) => (x.title || "").toLowerCase().includes(q));
   const DORD = { Easy: 0, Medium: 1, Hard: 2 };
   if (f.sort === "diff") list.sort((a, b) => (DORD[a.difficulty] ?? 9) - (DORD[b.difficulty] ?? 9) || (b.frequency || 0) - (a.frequency || 0));
@@ -996,7 +1010,7 @@ function renderTable() {
     return `<tr class="${q.solved ? "done" : ""}">
       <td>${i + 1}</td>
       <td><button class="co-star ${q.bookmarked ? "on" : ""}" data-slug="${esc(q.slug)}" title="Save to my list">${q.bookmarked ? "★" : "☆"}</button></td>
-      <td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.title)}</a>${q.in_app ? ' <span class="co-dchip" style="background:rgba(124,92,252,.16);color:#b9a7ff">in-app</span>' : ""} ${q.companies && q.companies.length ? `<span class="co-cocount" title="${esc(q.companies.join(', '))}">${q.company_count} cos</span>` : ""}${q.companies && q.companies.length ? `<span class="co-askedat">${esc(q.companies.join(", "))}</span>` : ""}</td>
+      <td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.title)}</a>${q.in_app ? ' <span class="co-dchip" style="background:rgba(124,92,252,.16);color:#b9a7ff">in-app</span>' : ""} ${q.companies && q.companies.length ? `<span class="co-cocount" title="${esc(q.companies.join(', '))}">${q.company_count} cos</span>` : ""}${q.companies && q.companies.length ? `<span class="co-askedat">${esc(q.companies.join(", "))}</span>` : ""}${q.topics && q.topics.length ? `<span class="co-topics">${q.topics.map((t) => `<span class="co-topic ${t === CO.filter.topic ? "on" : ""}" data-topic="${esc(t)}">${esc(t)}</span>`).join("")}</span>` : ""}</td>
       <td><span class="co-dchip ${dc}">${esc(q.difficulty || "")}</span></td>
       <td class="freq">${(q.frequency || 0).toFixed(0)}%<span class="co-freqbar" style="width:${bar}px"></span></td>
       <td class="acc">${esc(q.acceptance || "")}</td>
@@ -1007,6 +1021,12 @@ function renderTable() {
     <tbody>${rows}</tbody></table></div>`;
   $$("#coTableWrap .co-open").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openInApp(a.dataset.pid); }));
   $$("#coTableWrap .co-star").forEach((s) => s.addEventListener("click", () => coToggleStar(s.dataset.slug)));
+  // click a topic chip to filter by it (toggle off if already active)
+  $$("#coTableWrap .co-topic").forEach((c) => c.addEventListener("click", () => {
+    CO.filter.topic = (CO.filter.topic === c.dataset.topic) ? "all" : c.dataset.topic;
+    $("#coTopic").value = CO.filter.topic;
+    renderTable();
+  }));
 }
 async function coToggleStar(slug) {
   const q = (CO.last.questions || []).find((x) => x.slug === slug);
@@ -1032,10 +1052,10 @@ async function coToggleStar(slug) {
   if (chip) chip.innerHTML = `<b>${savedCount}</b> saved`;
 }
 function coClearFilters() {
-  CO.filter = { diff: "all", unsolved: false, inapp: false, saved: false, q: "", sort: "freq" };
+  CO.filter = { diff: "all", unsolved: false, inapp: false, saved: false, topic: "all", q: "", sort: "freq" };
   $$("#coDiff button").forEach((b) => b.classList.toggle("on", b.dataset.d === "all"));
   $("#coUnsolved").checked = false; $("#coInApp").checked = false; $("#coSavedOnly").checked = false;
-  $("#coQ").value = ""; $("#coSort").value = "freq";
+  $("#coQ").value = ""; $("#coSort").value = "freq"; $("#coTopic").value = "all";
   renderTable();
 }
 function coCopy() {

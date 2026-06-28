@@ -23,14 +23,28 @@ _RAW = ("https://raw.githubusercontent.com/snehasishroy/"
         "leetcode-companywise-interview-questions/master")
 
 
-def _data_path() -> Path:
-    """Locate companies.json in dev (next to this file) or in the py2app bundle
-    (Contents/Resources/data/), where DATA_FILES places it."""
-    dev = Path(__file__).with_name("data") / "companies.json"
+def _data_path(name="companies.json") -> Path:
+    """Locate a bundled data file in dev (next to this file under data/) or in the
+    py2app bundle (Contents/Resources/data/), where DATA_FILES places it."""
+    dev = Path(__file__).with_name("data") / name
     if dev.exists():
         return dev
-    bundled = Path(sys.executable).resolve().parent.parent / "Resources" / "data" / "companies.json"
+    bundled = Path(sys.executable).resolve().parent.parent / "Resources" / "data" / name
     return bundled if bundled.exists() else dev
+
+
+_topics = None
+
+
+def topics_for(slug: str) -> list:
+    """LeetCode topic tags for a problem slug (e.g. ['Array','Hash Table']), or []."""
+    global _topics
+    if _topics is None:
+        try:
+            _topics = json.loads(_data_path("leetcode_topics.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            _topics = {}
+    return _topics.get(slug, [])
 
 # Recency windows the dataset ships (smaller companies only have the longer ones;
 # fetch() falls back to "all" when a requested window is missing for a company).

@@ -422,3 +422,9 @@ a.lc:hover{text-decoration:underline}
 .plan-item .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-item .act{font-size:12px;white-space:nowrap}
 #planToday .plan-item{font-size:14px;padding:7px 4px}
+
+/* ---- company prep: topic chips ---- */
+.co-topics{display:block;margin-top:3px;line-height:1.7}
+.co-topic{display:inline-block;font-size:10.5px;padding:1px 7px;margin:0 4px 2px 0;border-radius:6px;background:rgba(255,255,255,.06);color:var(--mut);cursor:pointer;transition:all .12s}
+.co-topic:hover{background:rgba(124,92,252,.18);color:#cbb9ff}
+.co-topic.on{background:var(--acc,#7c5cfc);color:#fff}

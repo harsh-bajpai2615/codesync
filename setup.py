@@ -15,8 +15,9 @@ DATA_FILES = [
     ("webui", [
         "webui/index.html", "webui/app.js", "webui/style.css", "webui/sample-card.png",
     ]),
-    # Bundled company-question catalog (resolved at runtime from Resources/data/).
-    ("data", ["app/data/companies.json"]),
+    # Bundled company-question catalog + LeetCode topic map (resolved at runtime
+    # from Resources/data/).
+    ("data", ["app/data/companies.json", "app/data/leetcode_topics.json"]),
 ]
 
 OPTIONS = {
