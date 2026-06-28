@@ -580,6 +580,63 @@ class Api:
         qs.sort(key=lambda x: x.get("frequency", 0) or 0, reverse=True)
         return self._decorate_questions(qs, "__saved", "My saved list", "saved")
 
+    # ---- multi-company target sheet (placement shortlist) ----
+    def get_targets(self):
+        targets = load_config().get("targets") or []
+        names = {c["slug"]: c["name"] for c in companies.list_companies()["companies"]}
+        return [{"slug": s, "name": names.get(s, s)} for s in targets if s in names]
+
+    def set_targets(self, slugs):
+        valid = {c["slug"] for c in companies.list_companies()["companies"]}
+        # de-dupe, keep order, validate, cap at 8 (a focused shortlist)
+        seen, out = set(), []
+        for s in (slugs or []):
+            if s in valid and s not in seen:
+                seen.add(s)
+                out.append(s)
+        out = out[:8]
+        cfg = load_config()
+        cfg["targets"] = out
+        save_config(cfg)
+        return {"ok": True, "targets": out}
+
+    def target_questions(self, period="all"):
+        targets = load_config().get("targets") or []
+        if not targets:
+            return {"ok": False, "error": "Pick some target companies first."}
+        names = {c["slug"]: c["name"] for c in companies.list_companies()["companies"]}
+        merged = {}  # slug -> merged question (with the set of asking companies)
+        for slug in targets:
+            res = companies.fetch(slug, period, STATE_DIR)
+            if not res.get("ok"):
+                continue
+            cname = names.get(slug, slug)
+            for q in res["questions"]:
+                m = merged.get(q["slug"])
+                if not m:
+                    m = {"id": q.get("id", ""), "slug": q["slug"], "title": q.get("title", ""),
+                         "difficulty": q.get("difficulty", ""), "url": q.get("url", ""),
+                         "acceptance": q.get("acceptance", ""), "companies": [], "_freqs": []}
+                    merged[q["slug"]] = m
+                if cname not in m["companies"]:
+                    m["companies"].append(cname)
+                m["_freqs"].append(q.get("frequency", 0) or 0)
+                if not m["difficulty"] and q.get("difficulty"):
+                    m["difficulty"] = q["difficulty"]
+        qs = []
+        for m in merged.values():
+            m["company_count"] = len(m["companies"])
+            m["companies"] = sorted(m["companies"])
+            m["frequency"] = max(m["_freqs"]) if m["_freqs"] else 0
+            m.pop("_freqs", None)
+            qs.append(m)
+        # most-overlapping (asked by the most of your targets) first, then frequency
+        qs.sort(key=lambda x: (x["company_count"], x["frequency"]), reverse=True)
+        dec = self._decorate_questions(qs, "__targets",
+                                       f"{len(targets)} target companies", "merged")
+        dec["targets"] = [names.get(s, s) for s in targets]
+        return dec
+
     def interview_score(self, history, pid, code="", elapsed_sec=0):
         prob = problems.get(pid) or {}
         test_section = ""

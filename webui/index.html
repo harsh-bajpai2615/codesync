@@ -277,8 +277,21 @@
       <!-- COMPANIES -->
       <section class="page" id="page-companies">
         <header class="hero"><h1>Company prep</h1><p>The most-asked LeetCode questions at top companies — ranked by frequency, matched against what you've already solved.</p></header>
+
+        <div class="card" id="coTargets">
+          <div class="card-head"><h2>🎯 My target companies</h2><span class="muted" id="coTargetCount"></span></div>
+          <p class="muted">Build one merged sheet across your placement shortlist (up to 8). Questions asked by the most of your targets rank first — the highest-leverage problems to solve.</p>
+          <div id="coTargetChips" class="co-target-chips"></div>
+          <div class="muted" style="margin:10px 0 4px">Quick add (featured):</div>
+          <div id="coTargetFeatured" class="co-featured"></div>
+          <div class="row" style="margin-top:10px">
+            <select id="coTargetAdd" class="sel wide"></select>
+            <button class="btn btn-accent" id="coBuildTargets">Build target sheet</button>
+          </div>
+        </div>
+
         <div class="card">
-          <div class="card-head"><h2>Pick a company</h2></div>
+          <div class="card-head"><h2>Pick a single company</h2></div>
           <div class="muted" style="margin-bottom:6px">Featured (FAANG &amp; placement favourites):</div>
           <div id="coFeatured" class="co-featured"></div>
           <div class="row" style="margin-top:10px">
@@ -312,6 +325,7 @@
             <input id="coQ" class="probsearch sm" placeholder="Filter by title…" spellcheck="false">
             <select id="coSort" class="sel sm">
               <option value="freq">Sort: Frequency</option>
+              <option value="companies">Sort: Most companies</option>
               <option value="diff">Sort: Difficulty</option>
               <option value="acc">Sort: Acceptance</option>
               <option value="title">Sort: Title (A–Z)</option>

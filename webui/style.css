@@ -392,3 +392,12 @@ a.lc:hover{text-decoration:underline}
 .co-star{cursor:pointer;background:none;border:0;font-size:15px;line-height:1;color:#555;padding:2px}
 .co-star.on{color:#fbbf24}
 .co-empty{padding:24px;text-align:center;color:var(--mut)}
+
+/* ---- company prep: target sheet ---- */
+.co-target-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:30px}
+.co-target-chips:empty::before{content:"No targets yet — add from below.";color:var(--mut);font-size:12.5px}
+.co-target-chips .co-tchip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:5px 8px 5px 11px;border-radius:999px;background:var(--acc,#7c5cfc);color:#fff}
+.co-target-chips .co-tchip button{background:rgba(255,255,255,.25);border:0;color:#fff;width:16px;height:16px;border-radius:50%;cursor:pointer;line-height:1;font-size:12px;padding:0}
+.co-target-chips .co-tchip button:hover{background:rgba(255,255,255,.45)}
+.co-askedat{display:block;font-size:11px;color:var(--mut);margin-top:2px}
+.co-cocount{font-size:11px;padding:1px 7px;border-radius:6px;background:rgba(124,92,252,.16);color:#b9a7ff;white-space:nowrap}
