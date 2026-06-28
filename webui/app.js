@@ -58,6 +58,7 @@ function moveNavPill(item) {
   pill.style.transform = `translateY(${item.offsetTop}px)`;
 }
 function switchTab(tab, item) {
+  if (tab !== "interview") { try { ivStopAudio(); } catch (e) {} }  // don't keep talking/listening off-tab
   $$(".nav-item").forEach((b) => b.classList.toggle("active", b === item));
   $$(".page").forEach((p) => p.classList.remove("active"));
   const page = $("#page-" + tab); page.classList.add("active");
@@ -759,10 +760,12 @@ async function aiReview() {
 }
 
 /* ---------- mock interview ---------- */
-let IV = { init: false, pid: null, chat: [], t0: 0, timer: null, running: false };
+let IV = { init: false, pid: null, title: "", chat: [], t0: 0, timer: null, running: false };
 async function renderInterview() {
   if (!IV.init) {
     IV.init = true;
+    // Warm up system voices so a high-quality one is picked once they load.
+    try { if (window.speechSynthesis) { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = () => { VOICE.voice = null; }; } } catch (e) {}
     const sel = $("#ivProblem");
     const list = api() ? (await act("interview_problems") || []) : SAMPLE_PROBLEMS;
     sel.innerHTML = list.map((p) => `<option value="${p.id}">${esc(p.title)} · ${esc(p.difficulty)}</option>`).join("");
@@ -793,7 +796,7 @@ async function startInterview(pid) {
   if (!api()) { toast("Mock interview runs inside GitKosh with an AI engine on."); return; }
   const r = await act("interview_start", pid);
   if (!r || !r.ok) { toast((r && r.error) || "Couldn't start the interview."); return; }
-  IV.pid = r.pid; IV.chat = [{ role: "bot", content: r.opener }]; IV.running = true;
+  IV.pid = r.pid; IV.title = r.problem.title || ""; IV.chat = [{ role: "bot", content: r.opener }]; IV.running = true;
   $("#ivSetup").classList.add("hidden"); $("#ivLive").classList.remove("hidden");
   $("#ivScorecard").classList.add("hidden"); $("#ivScorecard").innerHTML = "";
   $("#ivTitle").textContent = `${r.problem.title} · ${r.problem.difficulty}`;
@@ -801,7 +804,7 @@ async function startInterview(pid) {
   $("#ivCode").value = r.problem.starter || "";
   ivRenderChat();
   IV.t0 = Date.now(); clearInterval(IV.timer); IV.timer = setInterval(ivTick, 1000); ivTick();
-  ttsSpeak(r.opener);  // voice-first: interviewer greets aloud
+  ttsSpeak(r.opener, autoListen);  // voice-first: greet aloud, then auto-listen
   $("#ivInput").focus();
 }
 async function ivSend(text) {
@@ -818,33 +821,66 @@ async function ivSend(text) {
   IV.chat[idx] = { role: "bot", content: reply || "Let's continue — what's your next step?" };
   ivRenderChat();
   $("#ivSend").disabled = false;
-  ttsSpeak(IV.chat[idx].content);  // interviewer asks the next turn aloud
+  ttsSpeak(IV.chat[idx].content, autoListen);  // ask aloud, then auto-listen for the answer
 }
 
 /* ---------- voice: TTS (interviewer speaks) + STT (you answer) ---------- */
-const VOICE = { on: true, recording: false, busy: false };
+const VOICE = { on: true, recording: false, busy: false, fails: 0, voice: null, utter: null, gen: 0 };
 function stripForSpeech(md) {
-  return String(md || "").replace(/```[\s\S]*?```/g, " code block ")
-    .replace(/[#*`_>~|]/g, "").replace(/\[(.*?)\]\(.*?\)/g, "$1")
-    .replace(/\s+/g, " ").trim();
+  return String(md || "").replace(/```[\s\S]*?```/g, " — code — ")
+    .replace(/`([^`]+)`/g, "$1").replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/[#*_>~|]/g, "").replace(/\s+/g, " ").trim();
 }
-function ttsSpeak(text) {
-  if (!VOICE.on) return;
-  const say = stripForSpeech(text);
-  if (!say) return;
+function pickVoice() {
+  try {
+    const vs = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];
+    if (!vs.length) return null;          // not ready yet — use default, retry next time
+    if (VOICE.voice) return VOICE.voice;
+    const pref = ["Samantha", "Google US English", "Microsoft Aria Online (Natural) - English (United States)", "Alex", "Karen", "Daniel"];
+    let v = null;
+    for (const n of pref) { v = vs.find((x) => x.name === n); if (v) break; }
+    if (!v) v = vs.find((x) => /en[-_]US/i.test(x.lang)) || vs.find((x) => /^en/i.test(x.lang)) || null;
+    VOICE.voice = v;
+    return v;
+  } catch (e) { return null; }
+}
+function markSpeaking(on) {
+  const b = [...document.querySelectorAll("#ivChat .msg.bot")].pop();
+  if (b) b.classList.toggle("speaking", on);
+}
+function ttsSpeak(text, onDone) {
+  const say = VOICE.on ? stripForSpeech(text) : "";
+  if (!say) { if (onDone) onDone(); return; }
+  // Generation token: any newer speak() or stopSpeaking() invalidates this turn's
+  // pending callbacks, so a stale safety-timer can't fire during the next question.
+  const myGen = ++VOICE.gen;
+  let fired = false;
+  const fin = () => { if (fired || myGen !== VOICE.gen) return; fired = true; markSpeaking(false); if (onDone) onDone(); };
   try {
     if (window.speechSynthesis) {            // built-in, offline, cancelable
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(say);
-      u.lang = "en-US"; u.rate = 1.02;
+      u.lang = "en-US"; u.rate = 1.02; u.pitch = 1.0;
+      const v = pickVoice(); if (v) u.voice = v;
+      u.onend = fin; u.onerror = fin;
+      VOICE.utter = u; markSpeaking(true);
       window.speechSynthesis.speak(u);
+      // safety net only — onend is primary; keep it generous so it never preempts real speech
+      setTimeout(fin, Math.min(90000, 3500 + say.length * 75));
       return;
     }
   } catch (e) { /* fall through to native */ }
+  markSpeaking(true);
   act("voice_speak", say);                    // native `say` fallback
+  setTimeout(fin, Math.min(90000, 2500 + say.length * 70));
 }
 function stopSpeaking() {
-  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  VOICE.gen++;  // invalidate any pending fin() from the current utterance
+  try {
+    if (VOICE.utter) { VOICE.utter.onend = null; VOICE.utter.onerror = null; VOICE.utter = null; }
+    window.speechSynthesis && window.speechSynthesis.cancel();
+  } catch (e) {}
+  markSpeaking(false);
   act("voice_stop_speaking");
 }
 function toggleVoice() {
@@ -858,31 +894,61 @@ function setMic(state) {  // "idle" | "recording" | "busy"
   const m = $("#ivMic"); if (!m) return;
   m.classList.toggle("recording", state === "recording");
   m.classList.toggle("busy", state === "busy");
-  const lbl = state === "recording" ? "Tap when done" : state === "busy" ? "Transcribing…" : "Tap to answer";
-  m.innerHTML = (state === "recording" ? "⏺" : "🎤") + `<span class="lbl">${lbl}</span>`;
+  const lbl = state === "recording" ? "Listening… tap when done"
+    : state === "busy" ? "Transcribing…" : "Tap to answer";
+  m.innerHTML = (state === "recording" ? "⏺" : "🎤") + `<span class="lbl">${esc(lbl)}</span>`;
 }
-async function voiceToggleRec() {
-  if (!api()) { toast("Voice answers work inside GitKosh."); return; }
-  if (VOICE.busy) return;
-  if (VOICE.recording) {
-    VOICE.recording = false; VOICE.busy = true; setMic("busy");
-    const r = await act("voice_stop");
-    VOICE.busy = false; setMic("idle");
-    if (r && r.ok && r.text) { $("#ivInput").value = r.text; ivSend(); }
-    else toast((r && r.error) || "Couldn't hear that — try again or type.");
+// Voice-first: auto-start listening once the interviewer finishes speaking.
+function autoListen() {
+  if (!IV.running || !VOICE.on || VOICE.recording || VOICE.busy) return;
+  setTimeout(() => {
+    if (IV.running && VOICE.on && !VOICE.recording && !VOICE.busy && isTab("interview")) voiceStartRec();
+  }, 350);
+}
+function isTab(name) {
+  const p = $("#page-" + name); return p && p.classList.contains("active");
+}
+async function voiceStartRec() {
+  if (!api() || VOICE.recording || VOICE.busy) return;
+  stopSpeaking();  // make sure the AI isn't talking into the mic
+  const r = await act("voice_start");
+  if (!r || !r.ok) { toast((r && r.error) || "Microphone unavailable — check permissions."); return; }
+  VOICE.recording = true; setMic("recording");
+}
+async function voiceStopRec() {
+  if (!VOICE.recording) return;
+  VOICE.recording = false; VOICE.busy = true; setMic("busy");
+  const r = await act("voice_stop", IV.title ? [IV.title] : []);  // bias toward this problem
+  VOICE.busy = false; setMic("idle");
+  if (r && r.ok && r.text) {
+    VOICE.fails = 0;
+    $("#ivInput").value = r.text; ivSend();
   } else {
-    stopSpeaking();  // barge-in: stop the interviewer so it doesn't record itself
-    const r = await act("voice_start");
-    if (!r || !r.ok) { toast((r && r.error) || "Microphone unavailable — check permissions."); return; }
-    VOICE.recording = true; setMic("recording");
+    // Keep the hands-free flow alive: re-listen once, then fall back to manual.
+    VOICE.fails = (VOICE.fails || 0) + 1;
+    if (VOICE.fails < 2 && IV.running && VOICE.on && isTab("interview")) {
+      toast("Didn't catch that — listening again…"); autoListen();
+    } else {
+      VOICE.fails = 0;
+      toast((r && r.error) || "Couldn't hear that — tap the mic to try again, or type.");
+    }
   }
+}
+function voiceToggleRec() {
+  if (!api()) { toast("Voice answers work inside GitKosh."); return; }
+  if (VOICE.recording) voiceStopRec(); else voiceStartRec();
+}
+// Stop all audio when leaving the Interview tab (called from switchTab).
+function ivStopAudio() {
+  stopSpeaking();
+  if (VOICE.recording) { VOICE.recording = false; act("voice_stop"); setMic("idle"); }
 }
 async function ivScore() {
   if (!IV.pid) return;
   const box = $("#ivScorecard"); box.classList.remove("hidden");
   box.innerHTML = `<div class="md-loading">📋 Scoring your interview…</div>`;
   const elapsed = Math.floor((Date.now() - IV.t0) / 1000);
-  clearInterval(IV.timer); IV.running = false; stopSpeaking();
+  clearInterval(IV.timer); IV.running = false; ivStopAudio();
   const r = await act("interview_score", IV.chat.filter((m) => !m.pending), IV.pid, $("#ivCode").value, elapsed);
   box.innerHTML = mdLite(r || "Couldn't produce a scorecard — check your AI engine in Setup.");
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });

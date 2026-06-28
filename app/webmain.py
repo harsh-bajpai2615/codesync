@@ -470,11 +470,13 @@ class Api:
     # ---- mock interview ----
     _IV_SYSTEM = (
         "You are a senior software engineer conducting a real coding interview at a top tech company. "
-        "Be professional, warm but rigorous, and CONCISE — one short turn at a time. Drive the interview: "
-        "ask the candidate to clarify assumptions, justify their approach, analyze time/space complexity, "
-        "handle edge cases, and improve a brute-force answer. Probe with pointed follow-up questions. "
-        "Give only a small nudge if they're truly stuck — NEVER write the solution for them. "
-        "Ask ONE focused question per turn. Reply in short GitHub-flavored Markdown.")
+        "Be professional, warm but rigorous. Drive the interview: ask the candidate to clarify assumptions, "
+        "justify their approach, analyze time/space complexity, handle edge cases, and improve a brute-force "
+        "answer. Probe with pointed follow-up questions. Give only a small nudge if they're truly stuck — "
+        "NEVER write the solution for them. Ask ONE focused question per turn.\n"
+        "Your replies are SPOKEN ALOUD to the candidate, so keep each turn very short — 1 to 3 sentences, "
+        "conversational, no code blocks, no markdown headings, no bullet lists. Just talk like a real "
+        "interviewer would out loud.")
 
     @staticmethod
     def _iv_convo(history):
@@ -525,11 +527,11 @@ class Api:
     def voice_start(self):
         return voice.start_recording()
 
-    def voice_stop(self):
+    def voice_stop(self, hints=None):
         # Use a stored Groq key as the cloud STT fallback when on-device isn't available.
         llm = (load_config().get("readme", {}) or {}).get("llm", {}) or {}
         groq_key = llm.get("api_key", "") if llm.get("provider") == "groq" else ""
-        return voice.stop_and_transcribe(groq_key)
+        return voice.stop_and_transcribe(groq_key, hints or [])
 
     # ---- company-wise interview questions ----
     def list_companies(self):

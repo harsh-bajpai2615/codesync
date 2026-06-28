@@ -24,6 +24,20 @@ _rec_path = None
 # 'lpcm' fourcc — kAudioFormatLinearPCM (CoreAudio constant, stable).
 _FMT_LINEAR_PCM = 1819304813
 
+# Domain vocabulary to bias the speech recognizer (contextualStrings) so DSA terms
+# transcribe correctly ("two sum", not "new some").
+_DSA_HINTS = [
+    "Two Sum", "hash map", "hash table", "hash set", "array", "subarray", "string",
+    "binary search", "linked list", "dynamic programming", "memoization", "recursion",
+    "backtracking", "greedy", "sliding window", "two pointers", "prefix sum",
+    "depth first search", "breadth first search", "DFS", "BFS", "graph", "tree",
+    "binary tree", "binary search tree", "stack", "queue", "heap", "priority queue",
+    "trie", "union find", "topological sort", "time complexity", "space complexity",
+    "big O", "O of n", "O of n squared", "O of log n", "O of n log n", "constant time",
+    "linear time", "in place", "brute force", "optimal", "edge case", "base case",
+    "sorted array", "indices", "index", "target", "pointer", "iterate", "traverse",
+]
+
 
 # ---------- text to speech ----------
 def speak(text: str) -> dict:
@@ -86,8 +100,10 @@ def start_recording() -> dict:
         return {"ok": False, "error": str(e)}
 
 
-def stop_and_transcribe(groq_key: str = "") -> dict:
-    """Stop recording and transcribe — on-device first, then Groq Whisper."""
+def stop_and_transcribe(groq_key: str = "", hints=None) -> dict:
+    """Stop recording and transcribe — on-device first, then Groq Whisper.
+    `hints` are extra contextual phrases (e.g. the current problem title) that bias
+    on-device recognition toward the right vocabulary."""
     global _recorder, _rec_path
     if _recorder is None or not _rec_path:
         return {"ok": False, "error": "not recording"}
@@ -101,7 +117,7 @@ def stop_and_transcribe(groq_key: str = "") -> dict:
     try:
         text, engine = None, ""
         try:
-            text = _transcribe_ondevice(path)
+            text = _transcribe_ondevice(path, hints)
             if text:
                 engine = "on-device"
         except Exception as e:  # noqa: BLE001
@@ -125,7 +141,7 @@ def stop_and_transcribe(groq_key: str = "") -> dict:
 
 
 # ---------- transcription engines ----------
-def _transcribe_ondevice(path: str, timeout: int = 45) -> str | None:
+def _transcribe_ondevice(path: str, hints=None, timeout: int = 45) -> str | None:
     """Transcribe on-device. The Speech framework (auth prompt + recognitionTask
     callbacks) must run on the main thread, but the JS bridge calls us on a worker
     thread — so we hop the work onto the main queue and block here on an Event until
@@ -145,9 +161,12 @@ def _transcribe_ondevice(path: str, timeout: int = 45) -> str | None:
                 return
             url = Foundation.NSURL.fileURLWithPath_(path)
             req = Speech.SFSpeechURLRecognitionRequest.alloc().initWithURL_(url)
-            try:
-                if rec.supportsOnDeviceRecognition():
-                    req.setRequiresOnDeviceRecognition_(True)
+            # Use Apple's best-available recognizer (server-quality when online, the
+            # same engine as macOS Dictation; auto-falls back to on-device offline) —
+            # forcing strictly on-device noticeably hurts accuracy.
+            try:  # bias toward DSA vocabulary + the current problem title
+                phrases = list(_DSA_HINTS) + [h for h in (hints or []) if h]
+                req.setContextualStrings_(phrases)
             except Exception:  # noqa: BLE001
                 pass
 
