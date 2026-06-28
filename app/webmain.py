@@ -409,8 +409,12 @@ class Api:
     def get_problem(self, pid):
         return problems.get(pid)
 
-    def run_code(self, code, stdin=""):
-        return runner.run_python(code or "", stdin or "")
+    def run_code(self, code, stdin="", lang="python"):
+        return runner.run(code or "", lang or "python", stdin or "")
+
+    def lang_status(self):
+        """Which languages can run on this machine (for the IDE language picker)."""
+        return runner.available()
 
     def run_tests(self, code, pid):
         return problems.run_tests(code or "", pid)

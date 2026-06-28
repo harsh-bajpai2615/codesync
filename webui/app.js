@@ -497,6 +497,7 @@ async function renderLearn() {
     $("#runBtn").addEventListener("click", runCode);
     $("#testBtn").addEventListener("click", runTests);
     $("#reviewBtn").addEventListener("click", aiReview);
+    setupLangPicker();
     $("#resetBtn").addEventListener("click", async () => {
       const pid = $("#probSelect").value;
       if (api() && pid && pid !== "__scratch") await act("reset_code", pid);
@@ -525,6 +526,36 @@ async function renderLearn() {
 /* ---------- in-app IDE: full NeetCode 150 catalog ---------- */
 let PROBLEMS = [];
 const reviewAttempts = {};
+
+// Multi-language Run support. Tests stay Python-only (the catalog harness is Python).
+const LANG_LABELS = { python: "Python", cpp: "C++", java: "Java", javascript: "JavaScript" };
+const LANG_TEMPLATES = {
+  python: "# Scratchpad — write Python, add input below, then Run\nprint('Hello from GitKosh')\n",
+  cpp: "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    cout << \"Hello from GitKosh\" << endl;\n    return 0;\n}\n",
+  java: "public class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello from GitKosh\");\n    }\n}\n",
+  javascript: "// Scratchpad — write JavaScript, then Run\nconsole.log('Hello from GitKosh');\n",
+};
+let _editorBaseline = "";  // last value set programmatically — used to detect "untouched"
+function curLang() { const s = $("#langSelect"); return (s && s.value) || "python"; }
+async function setupLangPicker() {
+  const sel = $("#langSelect");
+  if (!sel || sel.dataset.ready) return;
+  sel.dataset.ready = "1";
+  const status = api() ? (await act("lang_status") || {}) : { python: true, cpp: true, java: true, javascript: true };
+  sel.innerHTML = Object.keys(LANG_LABELS).map((k) =>
+    `<option value="${k}">${LANG_LABELS[k]}${status[k] === false ? " ⚠ install needed" : ""}</option>`).join("");
+  sel.addEventListener("change", onLangChange);
+}
+function onLangChange() {
+  const lang = curLang();
+  const tb = $("#testBtn");
+  if (tb) { tb.disabled = lang !== "python"; tb.title = lang !== "python" ? "Automated tests are Python-only" : ""; }
+  // In the scratchpad, swap to the language's template if the user hasn't edited it.
+  if ($("#probSelect").value === "__scratch") {
+    const ta = $("#editor");
+    if (!ta.value.trim() || ta.value === _editorBaseline) setEditor(LANG_TEMPLATES[lang] || "");
+  }
+}
 function buildProblemOptions(filter) {
   const sel = $("#probSelect");
   const prev = sel.value;
@@ -553,8 +584,9 @@ async function loadProblem(forceReset) {
   if (pid === "__scratch") {
     $("#stdinWrap").classList.remove("hidden"); $("#testBtn").style.display = "none"; $("#reviewBtn").style.display = "none";
     $("#probMeta").innerHTML = "";
-    $("#probStatement").textContent = "Free Python scratchpad — read input() and print() output, then Run.";
-    setEditor("# Scratchpad — write Python, add input below, then Run\nprint('Hello from GitKosh')\n");
+    const lang = curLang();
+    $("#probStatement").textContent = `Free ${LANG_LABELS[lang] || "code"} scratchpad — read stdin and print output, then Run.`;
+    setEditor(LANG_TEMPLATES[lang] || LANG_TEMPLATES.python);
     return;
   }
   $("#stdinWrap").classList.add("hidden"); $("#testBtn").style.display = ""; $("#reviewBtn").style.display = "";
@@ -578,7 +610,7 @@ async function loadProblem(forceReset) {
   }
   setEditor(code);
 }
-function setEditor(v) { $("#editor").value = v; syncHL(); $("#editor").scrollTop = 0; }
+function setEditor(v) { _editorBaseline = v; $("#editor").value = v; syncHL(); $("#editor").scrollTop = 0; }
 let _saveTimer = null;
 function saveCodeDebounced() {
   const pid = $("#probSelect").value;
@@ -680,7 +712,7 @@ async function runCode() {
   $("#reviewOut").classList.add("hidden");
   const out = $("#runOut"); out.textContent = "Running…"; $("#runStatus").textContent = "";
   if (!api()) { toast("Run works inside the app."); out.textContent = ""; return; }
-  const r = await act("run_code", $("#editor").value, $("#stdin") ? $("#stdin").value : "");
+  const r = await act("run_code", $("#editor").value, $("#stdin") ? $("#stdin").value : "", curLang());
   if (!r) { out.textContent = ""; toast("Run failed — try again."); return; }
   out.textContent = (r.stdout || "") + (r.stderr ? "\n" + r.stderr : "");
   $("#runStatus").textContent = (r.ok ? "✓ ran" : "✗ error") + `  ${r.ms || 0}ms`;
