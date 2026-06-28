@@ -32,7 +32,7 @@ OPTIONS = {
     # PyObjC frameworks used by the web/login WebKit windows; proxy_tools &
     # typing_extensions are pywebview runtime deps.
     "includes": ["objc", "Foundation", "Cocoa", "WebKit", "tkinter",
-                 "proxy_tools", "typing_extensions"],
+                 "proxy_tools", "typing_extensions", "AVFoundation", "Speech"],
     "plist": {
         "CFBundleName": "GitKosh",
         "CFBundleDisplayName": "GitKosh",
@@ -41,7 +41,12 @@ OPTIONS = {
         "CFBundleVersion": VERSION,
         "LSMinimumSystemVersion": "12.0",
         "NSHighResolutionCapable": True,
-        # The app opens external login pages; no special entitlements needed unsigned.
+        # Voice mock-interview: record the candidate's spoken answers and transcribe
+        # them on-device. macOS shows these strings when first prompting for access.
+        "NSMicrophoneUsageDescription":
+            "GitKosh records your spoken answers during a voice mock interview.",
+        "NSSpeechRecognitionUsageDescription":
+            "GitKosh transcribes your spoken interview answers on-device.",
     },
 }
 

@@ -260,6 +260,7 @@
         <div class="card hidden" id="ivLive">
           <div class="card-head">
             <h2 id="ivTitle">Interview</h2>
+            <button class="btn ghost sm" id="ivVoiceToggle" title="Toggle the interviewer's voice">🔊 Voice on</button>
             <span class="iv-timer" id="ivTimer">00:00</span>
           </div>
           <div id="ivStatement" class="statement"></div>
@@ -271,8 +272,11 @@
             </div>
             <div class="iv-col">
               <div id="ivChat" class="iv-chat"></div>
+              <div class="iv-mic-row">
+                <button class="iv-mic" id="ivMic" title="Tap to answer by voice">🎤<span class="lbl">Tap to answer</span></button>
+              </div>
               <div class="iv-input">
-                <input id="ivInput" class="chat-input" placeholder="Type your thoughts, then Enter…">
+                <input id="ivInput" class="chat-input" placeholder="…or type your answer">
                 <button class="btn btn-accent sm" id="ivSend">Send</button>
               </div>
             </div>

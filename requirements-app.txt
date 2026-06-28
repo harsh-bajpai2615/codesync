@@ -5,6 +5,8 @@ html2text>=2024.2.26
 PyYAML>=6.0
 pyobjc-framework-Cocoa>=10.0
 pyobjc-framework-WebKit>=10.0
+pyobjc-framework-AVFoundation>=10.0
+pyobjc-framework-Speech>=10.0
 py2app>=0.28.10
 pywebview
 Pillow>=10.0

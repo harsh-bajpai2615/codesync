@@ -774,6 +774,8 @@ async function renderInterview() {
     $("#ivInput").addEventListener("keydown", (e) => { if (e.key === "Enter") ivSend(); });
     $("#ivScore").addEventListener("click", ivScore);
     $("#ivQuit").addEventListener("click", ivQuit);
+    $("#ivMic").addEventListener("click", voiceToggleRec);
+    $("#ivVoiceToggle").addEventListener("click", toggleVoice);
   }
 }
 function ivRenderChat() {
@@ -799,6 +801,7 @@ async function startInterview(pid) {
   $("#ivCode").value = r.problem.starter || "";
   ivRenderChat();
   IV.t0 = Date.now(); clearInterval(IV.timer); IV.timer = setInterval(ivTick, 1000); ivTick();
+  ttsSpeak(r.opener);  // voice-first: interviewer greets aloud
   $("#ivInput").focus();
 }
 async function ivSend(text) {
@@ -814,20 +817,79 @@ async function ivSend(text) {
     (t) => { IV.chat[idx] = { role: "bot", content: t }; ivRenderChat(); });
   IV.chat[idx] = { role: "bot", content: reply || "Let's continue — what's your next step?" };
   ivRenderChat();
-  $("#ivSend").disabled = false; $("#ivInput").focus();
+  $("#ivSend").disabled = false;
+  ttsSpeak(IV.chat[idx].content);  // interviewer asks the next turn aloud
+}
+
+/* ---------- voice: TTS (interviewer speaks) + STT (you answer) ---------- */
+const VOICE = { on: true, recording: false, busy: false };
+function stripForSpeech(md) {
+  return String(md || "").replace(/```[\s\S]*?```/g, " code block ")
+    .replace(/[#*`_>~|]/g, "").replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/\s+/g, " ").trim();
+}
+function ttsSpeak(text) {
+  if (!VOICE.on) return;
+  const say = stripForSpeech(text);
+  if (!say) return;
+  try {
+    if (window.speechSynthesis) {            // built-in, offline, cancelable
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(say);
+      u.lang = "en-US"; u.rate = 1.02;
+      window.speechSynthesis.speak(u);
+      return;
+    }
+  } catch (e) { /* fall through to native */ }
+  act("voice_speak", say);                    // native `say` fallback
+}
+function stopSpeaking() {
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  act("voice_stop_speaking");
+}
+function toggleVoice() {
+  VOICE.on = !VOICE.on;
+  const b = $("#ivVoiceToggle");
+  b.textContent = VOICE.on ? "🔊 Voice on" : "🔇 Voice off";
+  b.classList.toggle("off", !VOICE.on);
+  if (!VOICE.on) stopSpeaking();
+}
+function setMic(state) {  // "idle" | "recording" | "busy"
+  const m = $("#ivMic"); if (!m) return;
+  m.classList.toggle("recording", state === "recording");
+  m.classList.toggle("busy", state === "busy");
+  const lbl = state === "recording" ? "Tap when done" : state === "busy" ? "Transcribing…" : "Tap to answer";
+  m.innerHTML = (state === "recording" ? "⏺" : "🎤") + `<span class="lbl">${lbl}</span>`;
+}
+async function voiceToggleRec() {
+  if (!api()) { toast("Voice answers work inside GitKosh."); return; }
+  if (VOICE.busy) return;
+  if (VOICE.recording) {
+    VOICE.recording = false; VOICE.busy = true; setMic("busy");
+    const r = await act("voice_stop");
+    VOICE.busy = false; setMic("idle");
+    if (r && r.ok && r.text) { $("#ivInput").value = r.text; ivSend(); }
+    else toast((r && r.error) || "Couldn't hear that — try again or type.");
+  } else {
+    stopSpeaking();  // barge-in: stop the interviewer so it doesn't record itself
+    const r = await act("voice_start");
+    if (!r || !r.ok) { toast((r && r.error) || "Microphone unavailable — check permissions."); return; }
+    VOICE.recording = true; setMic("recording");
+  }
 }
 async function ivScore() {
   if (!IV.pid) return;
   const box = $("#ivScorecard"); box.classList.remove("hidden");
   box.innerHTML = `<div class="md-loading">📋 Scoring your interview…</div>`;
   const elapsed = Math.floor((Date.now() - IV.t0) / 1000);
-  clearInterval(IV.timer); IV.running = false;
+  clearInterval(IV.timer); IV.running = false; stopSpeaking();
   const r = await act("interview_score", IV.chat.filter((m) => !m.pending), IV.pid, $("#ivCode").value, elapsed);
   box.innerHTML = mdLite(r || "Couldn't produce a scorecard — check your AI engine in Setup.");
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 function ivQuit() {
   clearInterval(IV.timer); IV.running = false; IV.pid = null; IV.chat = [];
+  stopSpeaking(); if (VOICE.recording) { VOICE.recording = false; act("voice_stop"); setMic("idle"); }
   $("#ivLive").classList.add("hidden"); $("#ivSetup").classList.remove("hidden");
 }
 

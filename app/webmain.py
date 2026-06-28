@@ -17,7 +17,8 @@ import threading
 import webview
 
 from . import (backfill, coach, companies, constants, gamify, github_auth,
-               ollama_setup, patterns, posts, problems, roadmap, runner, site, srs, studyplan)
+               ollama_setup, patterns, posts, problems, roadmap, runner, site, srs,
+               studyplan, voice)
 from .appsupport import STATE_DIR, load_config, save_config
 from .cards import render_png
 from .contests import cf_rating, upcoming as cf_upcoming
@@ -510,6 +511,25 @@ class Api:
             + f"## Transcript so far\n{self._iv_convo(history)}\n\n"
             + "Respond as the interviewer for your next turn only.")
         return _ask_stream(prompt, stream_id) or _ai_hint()
+
+    # ---- voice mock interview ----
+    def voice_status(self):
+        return voice.status()
+
+    def voice_speak(self, text):
+        return voice.speak(text or "")
+
+    def voice_stop_speaking(self):
+        return voice.stop_speaking()
+
+    def voice_start(self):
+        return voice.start_recording()
+
+    def voice_stop(self):
+        # Use a stored Groq key as the cloud STT fallback when on-device isn't available.
+        llm = (load_config().get("readme", {}) or {}).get("llm", {}) or {}
+        groq_key = llm.get("api_key", "") if llm.get("provider") == "groq" else ""
+        return voice.stop_and_transcribe(groq_key)
 
     # ---- company-wise interview questions ----
     def list_companies(self):
