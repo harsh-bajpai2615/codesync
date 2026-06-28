@@ -1,0 +1,3361 @@
+{
+"source": "github.com/snehasishroy/leetcode-companywise-interview-questions",
+"count": 657,
+"featured": [
+"google",
+"microsoft",
+"amazon",
+"meta",
+"apple",
+"netflix",
+"adobe",
+"nvidia",
+"uber",
+"atlassian",
+"linkedin",
+"salesforce",
+"oracle",
+"paypal",
+"samsung",
+"qualcomm",
+"cisco",
+"intuit",
+"sap",
+"servicenow",
+"visa",
+"mastercard",
+"vmware",
+"bloomberg",
+"walmart-labs",
+"expedia",
+"tiktok",
+"databricks",
+"snowflake",
+"stripe",
+"palantir",
+"doordash",
+"dropbox",
+"pinterest",
+"sprinklr",
+"ibm",
+"nutanix",
+"rubrik",
+"akamai",
+"goldman-sachs",
+"morgan-stanley",
+"jpmorgan",
+"de-shaw",
+"tower-research",
+"worldquant",
+"optiver",
+"jane-street",
+"citadel",
+"arcesium",
+"drw",
+"american-express",
+"wells-fargo",
+"deutsche-bank",
+"flipkart",
+"swiggy",
+"zomato",
+"paytm",
+"razorpay",
+"cred",
+"phonepe",
+"meesho",
+"myntra",
+"ola",
+"freshworks",
+"zoho",
+"groww",
+"browserstack",
+"dream11"
+],
+"companies": [
+{
+"slug": "1kosmos",
+"name": "1kosmos",
+"featured": false
+},
+{
+"slug": "6sense",
+"name": "6sense",
+"featured": false
+},
+{
+"slug": "accelya",
+"name": "Accelya",
+"featured": false
+},
+{
+"slug": "accenture",
+"name": "Accenture",
+"featured": false
+},
+{
+"slug": "accolite",
+"name": "Accolite",
+"featured": false
+},
+{
+"slug": "acko",
+"name": "Acko",
+"featured": false
+},
+{
+"slug": "acorns",
+"name": "Acorns",
+"featured": false
+},
+{
+"slug": "activision",
+"name": "Activision",
+"featured": false
+},
+{
+"slug": "adobe",
+"name": "Adobe",
+"featured": true
+},
+{
+"slug": "adp",
+"name": "Adp",
+"featured": false
+},
+{
+"slug": "aetion",
+"name": "Aetion",
+"featured": false
+},
+{
+"slug": "affinity",
+"name": "Affinity",
+"featured": false
+},
+{
+"slug": "affirm",
+"name": "Affirm",
+"featured": false
+},
+{
+"slug": "agoda",
+"name": "Agoda",
+"featured": false
+},
+{
+"slug": "airbnb",
+"name": "Airbnb",
+"featured": false
+},
+{
+"slug": "airbus",
+"name": "Airbus",
+"featured": false
+},
+{
+"slug": "airtel",
+"name": "Airtel",
+"featured": false
+},
+{
+"slug": "airwallex",
+"name": "Airwallex",
+"featured": false
+},
+{
+"slug": "akamai",
+"name": "Akamai",
+"featured": true
+},
+{
+"slug": "akuna-capital",
+"name": "Akuna Capital",
+"featured": false
+},
+{
+"slug": "alibaba",
+"name": "Alibaba",
+"featured": false
+},
+{
+"slug": "allincall",
+"name": "Allincall",
+"featured": false
+},
+{
+"slug": "alphonso",
+"name": "Alphonso",
+"featured": false
+},
+{
+"slug": "alten",
+"name": "Alten",
+"featured": false
+},
+{
+"slug": "altimetrik",
+"name": "Altimetrik",
+"featured": false
+},
+{
+"slug": "amadeus",
+"name": "Amadeus",
+"featured": false
+},
+{
+"slug": "amazon",
+"name": "Amazon",
+"featured": true
+},
+{
+"slug": "amd",
+"name": "Amd",
+"featured": false
+},
+{
+"slug": "amdocs",
+"name": "Amdocs",
+"featured": false
+},
+{
+"slug": "american-airlines",
+"name": "American Airlines",
+"featured": false
+},
+{
+"slug": "american-express",
+"name": "American Express",
+"featured": true
+},
+{
+"slug": "amplitude",
+"name": "Amplitude",
+"featured": false
+},
+{
+"slug": "analytics-quotient",
+"name": "Analytics Quotient",
+"featured": false
+},
+{
+"slug": "andela",
+"name": "Andela",
+"featured": false
+},
+{
+"slug": "anduril",
+"name": "Anduril",
+"featured": false
+},
+{
+"slug": "anthropic",
+"name": "Anthropic",
+"featured": false
+},
+{
+"slug": "anyscale",
+"name": "Anyscale",
+"featured": false
+},
+{
+"slug": "aon",
+"name": "Aon",
+"featured": false
+},
+{
+"slug": "apolloio",
+"name": "Apolloio",
+"featured": false
+},
+{
+"slug": "appdynamics",
+"name": "Appdynamics",
+"featured": false
+},
+{
+"slug": "appfolio",
+"name": "Appfolio",
+"featured": false
+},
+{
+"slug": "apple",
+"name": "Apple",
+"featured": true
+},
+{
+"slug": "applied-intuition",
+"name": "Applied Intuition",
+"featured": false
+},
+{
+"slug": "aqr-capital-management",
+"name": "Aqr Capital Management",
+"featured": false
+},
+{
+"slug": "arcesium",
+"name": "Arcesium",
+"featured": true
+},
+{
+"slug": "argo-ai",
+"name": "Argo AI",
+"featured": false
+},
+{
+"slug": "arista-networks",
+"name": "Arista Networks",
+"featured": false
+},
+{
+"slug": "asana",
+"name": "Asana",
+"featured": false
+},
+{
+"slug": "ascend",
+"name": "Ascend",
+"featured": false
+},
+{
+"slug": "athenahealth",
+"name": "Athenahealth",
+"featured": false
+},
+{
+"slug": "atlassian",
+"name": "Atlassian",
+"featured": true
+},
+{
+"slug": "att",
+"name": "ATT",
+"featured": false
+},
+{
+"slug": "attentive",
+"name": "Attentive",
+"featured": false
+},
+{
+"slug": "audible",
+"name": "Audible",
+"featured": false
+},
+{
+"slug": "auriga",
+"name": "Auriga",
+"featured": false
+},
+{
+"slug": "aurora",
+"name": "Aurora",
+"featured": false
+},
+{
+"slug": "autodesk",
+"name": "Autodesk",
+"featured": false
+},
+{
+"slug": "avalara",
+"name": "Avalara",
+"featured": false
+},
+{
+"slug": "avito",
+"name": "Avito",
+"featured": false
+},
+{
+"slug": "axis-bank",
+"name": "Axis Bank",
+"featured": false
+},
+{
+"slug": "axon",
+"name": "Axon",
+"featured": false
+},
+{
+"slug": "baidu",
+"name": "Baidu",
+"featured": false
+},
+{
+"slug": "bank-of-america",
+"name": "Bank Of America",
+"featured": false
+},
+{
+"slug": "barclays",
+"name": "Barclays",
+"featured": false
+},
+{
+"slug": "bcg",
+"name": "Bcg",
+"featured": false
+},
+{
+"slug": "bending-spoons",
+"name": "Bending Spoons",
+"featured": false
+},
+{
+"slug": "bill-com",
+"name": "Bill Com",
+"featured": false
+},
+{
+"slug": "bitgo",
+"name": "Bitgo",
+"featured": false
+},
+{
+"slug": "blackbuck",
+"name": "Blackbuck",
+"featured": false
+},
+{
+"slug": "blackrock",
+"name": "Blackrock",
+"featured": false
+},
+{
+"slug": "blackstone",
+"name": "Blackstone",
+"featured": false
+},
+{
+"slug": "blend",
+"name": "Blend",
+"featured": false
+},
+{
+"slug": "blinkit",
+"name": "Blinkit",
+"featured": false
+},
+{
+"slug": "bloomberg",
+"name": "Bloomberg",
+"featured": true
+},
+{
+"slug": "bloomreach",
+"name": "Bloomreach",
+"featured": false
+},
+{
+"slug": "blue-origin",
+"name": "Blue Origin",
+"featured": false
+},
+{
+"slug": "bnp-paribas",
+"name": "Bnp Paribas",
+"featured": false
+},
+{
+"slug": "bny-mellon",
+"name": "BNY Mellon",
+"featured": false
+},
+{
+"slug": "boeing",
+"name": "Boeing",
+"featured": false
+},
+{
+"slug": "bolt",
+"name": "Bolt",
+"featured": false
+},
+{
+"slug": "bookingcom",
+"name": "Bookingcom",
+"featured": false
+},
+{
+"slug": "box",
+"name": "Box",
+"featured": false
+},
+{
+"slug": "bp",
+"name": "Bp",
+"featured": false
+},
+{
+"slug": "braze",
+"name": "Braze",
+"featured": false
+},
+{
+"slug": "bridgewater-associates",
+"name": "Bridgewater Associates",
+"featured": false
+},
+{
+"slug": "brillio",
+"name": "Brillio",
+"featured": false
+},
+{
+"slug": "broadcom",
+"name": "Broadcom",
+"featured": false
+},
+{
+"slug": "browserstack",
+"name": "BrowserStack",
+"featured": true
+},
+{
+"slug": "bt-group",
+"name": "Bt Group",
+"featured": false
+},
+{
+"slug": "buyhatke",
+"name": "Buyhatke",
+"featured": false
+},
+{
+"slug": "bytedance",
+"name": "ByteDance",
+"featured": false
+},
+{
+"slug": "c3-ai",
+"name": "C3 AI",
+"featured": false
+},
+{
+"slug": "cadence",
+"name": "Cadence",
+"featured": false
+},
+{
+"slug": "canonical",
+"name": "Canonical",
+"featured": false
+},
+{
+"slug": "canva",
+"name": "Canva",
+"featured": false
+},
+{
+"slug": "capgemini",
+"name": "Capgemini",
+"featured": false
+},
+{
+"slug": "capital-one",
+"name": "Capital One",
+"featured": false
+},
+{
+"slug": "careem",
+"name": "Careem",
+"featured": false
+},
+{
+"slug": "cars24",
+"name": "Cars24",
+"featured": false
+},
+{
+"slug": "carwale",
+"name": "Carwale",
+"featured": false
+},
+{
+"slug": "cashfree",
+"name": "Cashfree",
+"featured": false
+},
+{
+"slug": "caterpillar",
+"name": "Caterpillar",
+"featured": false
+},
+{
+"slug": "cerner",
+"name": "Cerner",
+"featured": false
+},
+{
+"slug": "chalo",
+"name": "Chalo",
+"featured": false
+},
+{
+"slug": "chargebee",
+"name": "Chargebee",
+"featured": false
+},
+{
+"slug": "checkpoint",
+"name": "Checkpoint",
+"featured": false
+},
+{
+"slug": "chewy",
+"name": "Chewy",
+"featured": false
+},
+{
+"slug": "chime",
+"name": "Chime",
+"featured": false
+},
+{
+"slug": "chubb",
+"name": "Chubb",
+"featured": false
+},
+{
+"slug": "ciena",
+"name": "Ciena",
+"featured": false
+},
+{
+"slug": "circle",
+"name": "Circle",
+"featured": false
+},
+{
+"slug": "cisco",
+"name": "Cisco",
+"featured": true
+},
+{
+"slug": "citadel",
+"name": "Citadel",
+"featured": true
+},
+{
+"slug": "citi",
+"name": "Citi",
+"featured": false
+},
+{
+"slug": "citrix",
+"name": "Citrix",
+"featured": false
+},
+{
+"slug": "clari",
+"name": "Clari",
+"featured": false
+},
+{
+"slug": "cleartrip",
+"name": "Cleartrip",
+"featured": false
+},
+{
+"slug": "clevertap",
+"name": "Clevertap",
+"featured": false
+},
+{
+"slug": "cloudera",
+"name": "Cloudera",
+"featured": false
+},
+{
+"slug": "cloudflare",
+"name": "Cloudflare",
+"featured": false
+},
+{
+"slug": "clutter",
+"name": "Clutter",
+"featured": false
+},
+{
+"slug": "cme-group",
+"name": "Cme Group",
+"featured": false
+},
+{
+"slug": "cockroach-labs",
+"name": "Cockroach Labs",
+"featured": false
+},
+{
+"slug": "code-studio",
+"name": "Code Studio",
+"featured": false
+},
+{
+"slug": "coditas",
+"name": "Coditas",
+"featured": false
+},
+{
+"slug": "cognizant",
+"name": "Cognizant",
+"featured": false
+},
+{
+"slug": "cohesity",
+"name": "Cohesity",
+"featured": false
+},
+{
+"slug": "coinbase",
+"name": "Coinbase",
+"featured": false
+},
+{
+"slug": "coindcx",
+"name": "Coindcx",
+"featured": false
+},
+{
+"slug": "coinswitch-kuber",
+"name": "Coinswitch Kuber",
+"featured": false
+},
+{
+"slug": "comcast",
+"name": "Comcast",
+"featured": false
+},
+{
+"slug": "commvault",
+"name": "Commvault",
+"featured": false
+},
+{
+"slug": "compass",
+"name": "Compass",
+"featured": false
+},
+{
+"slug": "confluent",
+"name": "Confluent",
+"featured": false
+},
+{
+"slug": "couchbase",
+"name": "Couchbase",
+"featured": false
+},
+{
+"slug": "coupa",
+"name": "Coupa",
+"featured": false
+},
+{
+"slug": "coupang",
+"name": "Coupang",
+"featured": false
+},
+{
+"slug": "coursera",
+"name": "Coursera",
+"featured": false
+},
+{
+"slug": "coveo",
+"name": "Coveo",
+"featured": false
+},
+{
+"slug": "cred",
+"name": "CRED",
+"featured": true
+},
+{
+"slug": "criteo",
+"name": "Criteo",
+"featured": false
+},
+{
+"slug": "crowdstrike",
+"name": "Crowdstrike",
+"featured": false
+},
+{
+"slug": "cruise-automation",
+"name": "Cruise Automation",
+"featured": false
+},
+{
+"slug": "ctc",
+"name": "Ctc",
+"featured": false
+},
+{
+"slug": "curefit",
+"name": "Curefit",
+"featured": false
+},
+{
+"slug": "cvent",
+"name": "Cvent",
+"featured": false
+},
+{
+"slug": "cyntexa",
+"name": "Cyntexa",
+"featured": false
+},
+{
+"slug": "cyware",
+"name": "Cyware",
+"featured": false
+},
+{
+"slug": "dailyhunt",
+"name": "Dailyhunt",
+"featured": false
+},
+{
+"slug": "darwinbox",
+"name": "Darwinbox",
+"featured": false
+},
+{
+"slug": "dassault-sysetmes",
+"name": "Dassault Sysetmes",
+"featured": false
+},
+{
+"slug": "dataart",
+"name": "Dataart",
+"featured": false
+},
+{
+"slug": "databricks",
+"name": "Databricks",
+"featured": true
+},
+{
+"slug": "datadog",
+"name": "Datadog",
+"featured": false
+},
+{
+"slug": "dataminr",
+"name": "Dataminr",
+"featured": false
+},
+{
+"slug": "de-shaw",
+"name": "D. E. Shaw",
+"featured": true
+},
+{
+"slug": "deepmind",
+"name": "Deepmind",
+"featured": false
+},
+{
+"slug": "delhivery",
+"name": "Delhivery",
+"featured": false
+},
+{
+"slug": "deliveroo",
+"name": "Deliveroo",
+"featured": false
+},
+{
+"slug": "dell",
+"name": "Dell",
+"featured": false
+},
+{
+"slug": "deloitte",
+"name": "Deloitte",
+"featured": false
+},
+{
+"slug": "deltax",
+"name": "Deltax",
+"featured": false
+},
+{
+"slug": "deutsche-bank",
+"name": "Deutsche Bank",
+"featured": true
+},
+{
+"slug": "devrev",
+"name": "Devrev",
+"featured": false
+},
+{
+"slug": "dialpad",
+"name": "Dialpad",
+"featured": false
+},
+{
+"slug": "directi",
+"name": "Directi",
+"featured": false
+},
+{
+"slug": "discord",
+"name": "Discord",
+"featured": false
+},
+{
+"slug": "discovery",
+"name": "Discovery",
+"featured": false
+},
+{
+"slug": "disney",
+"name": "Disney",
+"featured": false
+},
+{
+"slug": "dji",
+"name": "Dji",
+"featured": false
+},
+{
+"slug": "docusign",
+"name": "Docusign",
+"featured": false
+},
+{
+"slug": "doordash",
+"name": "DoorDash",
+"featured": true
+},
+{
+"slug": "dp-world",
+"name": "Dp World",
+"featured": false
+},
+{
+"slug": "drawbridge",
+"name": "Drawbridge",
+"featured": false
+},
+{
+"slug": "dream11",
+"name": "Dream11",
+"featured": true
+},
+{
+"slug": "dropbox",
+"name": "Dropbox",
+"featured": true
+},
+{
+"slug": "druva",
+"name": "Druva",
+"featured": false
+},
+{
+"slug": "drw",
+"name": "DRW",
+"featured": true
+},
+{
+"slug": "dtcc",
+"name": "Dtcc",
+"featured": false
+},
+{
+"slug": "dunzo",
+"name": "Dunzo",
+"featured": false
+},
+{
+"slug": "duolingo",
+"name": "Duolingo",
+"featured": false
+},
+{
+"slug": "earnin",
+"name": "Earnin",
+"featured": false
+},
+{
+"slug": "ebay",
+"name": "eBay",
+"featured": false
+},
+{
+"slug": "edelweiss",
+"name": "Edelweiss",
+"featured": false
+},
+{
+"slug": "electronic-arts",
+"name": "Electronic Arts",
+"featured": false
+},
+{
+"slug": "elitmus",
+"name": "Elitmus",
+"featured": false
+},
+{
+"slug": "envoy",
+"name": "Envoy",
+"featured": false
+},
+{
+"slug": "epam-systems",
+"name": "Epam Systems",
+"featured": false
+},
+{
+"slug": "epic-games",
+"name": "Epic Games",
+"featured": false
+},
+{
+"slug": "epic-systems",
+"name": "Epic Systems",
+"featured": false
+},
+{
+"slug": "epifi",
+"name": "Epifi",
+"featured": false
+},
+{
+"slug": "equinix",
+"name": "Equinix",
+"featured": false
+},
+{
+"slug": "ericsson",
+"name": "Ericsson",
+"featured": false
+},
+{
+"slug": "etsy",
+"name": "Etsy",
+"featured": false
+},
+{
+"slug": "exl",
+"name": "Exl",
+"featured": false
+},
+{
+"slug": "expedia",
+"name": "Expedia",
+"featured": true
+},
+{
+"slug": "ey",
+"name": "EY",
+"featured": false
+},
+{
+"slug": "f5-networks",
+"name": "F5 Networks",
+"featured": false
+},
+{
+"slug": "factset",
+"name": "Factset",
+"featured": false
+},
+{
+"slug": "faire",
+"name": "Faire",
+"featured": false
+},
+{
+"slug": "fallible",
+"name": "Fallible",
+"featured": false
+},
+{
+"slug": "fanatics",
+"name": "Fanatics",
+"featured": false
+},
+{
+"slug": "fast",
+"name": "Fast",
+"featured": false
+},
+{
+"slug": "fastenal",
+"name": "Fastenal",
+"featured": false
+},
+{
+"slug": "fico",
+"name": "Fico",
+"featured": false
+},
+{
+"slug": "fidelity",
+"name": "Fidelity",
+"featured": false
+},
+{
+"slug": "fidessa",
+"name": "Fidessa",
+"featured": false
+},
+{
+"slug": "figma",
+"name": "Figma",
+"featured": false
+},
+{
+"slug": "fiverr",
+"name": "Fiverr",
+"featured": false
+},
+{
+"slug": "fivetran",
+"name": "Fivetran",
+"featured": false
+},
+{
+"slug": "flatiron-health",
+"name": "Flatiron Health",
+"featured": false
+},
+{
+"slug": "fleetx",
+"name": "Fleetx",
+"featured": false
+},
+{
+"slug": "flexera",
+"name": "Flexera",
+"featured": false
+},
+{
+"slug": "flexport",
+"name": "Flexport",
+"featured": false
+},
+{
+"slug": "flipkart",
+"name": "Flipkart",
+"featured": true
+},
+{
+"slug": "fortinet",
+"name": "Fortinet",
+"featured": false
+},
+{
+"slug": "forusall",
+"name": "Forusall",
+"featured": false
+},
+{
+"slug": "fourkites",
+"name": "Fourkites",
+"featured": false
+},
+{
+"slug": "fpt",
+"name": "Fpt",
+"featured": false
+},
+{
+"slug": "fractal-analytics",
+"name": "Fractal Analytics",
+"featured": false
+},
+{
+"slug": "freecharge",
+"name": "Freecharge",
+"featured": false
+},
+{
+"slug": "freshworks",
+"name": "Freshworks",
+"featured": true
+},
+{
+"slug": "fynd",
+"name": "Fynd",
+"featured": false
+},
+{
+"slug": "gainsight",
+"name": "Gainsight",
+"featured": false
+},
+{
+"slug": "gameskraft",
+"name": "Gameskraft",
+"featured": false
+},
+{
+"slug": "garena",
+"name": "Garena",
+"featured": false
+},
+{
+"slug": "garmin",
+"name": "Garmin",
+"featured": false
+},
+{
+"slug": "gartner",
+"name": "Gartner",
+"featured": false
+},
+{
+"slug": "ge-digital",
+"name": "Ge Digital",
+"featured": false
+},
+{
+"slug": "ge-healthcare",
+"name": "Ge Healthcare",
+"featured": false
+},
+{
+"slug": "geico",
+"name": "Geico",
+"featured": false
+},
+{
+"slug": "general-electric",
+"name": "General Electric",
+"featured": false
+},
+{
+"slug": "general-motors",
+"name": "General Motors",
+"featured": false
+},
+{
+"slug": "gilt-groupe",
+"name": "Gilt Groupe",
+"featured": false
+},
+{
+"slug": "github",
+"name": "Github",
+"featured": false
+},
+{
+"slug": "glassdoor",
+"name": "Glassdoor",
+"featured": false
+},
+{
+"slug": "globallogic",
+"name": "Globallogic",
+"featured": false
+},
+{
+"slug": "glovo",
+"name": "Glovo",
+"featured": false
+},
+{
+"slug": "godaddy",
+"name": "Godaddy",
+"featured": false
+},
+{
+"slug": "gojek",
+"name": "Gojek",
+"featured": false
+},
+{
+"slug": "goldman-sachs",
+"name": "Goldman Sachs",
+"featured": true
+},
+{
+"slug": "google",
+"name": "Google",
+"featured": true
+},
+{
+"slug": "gopuff",
+"name": "Gopuff",
+"featured": false
+},
+{
+"slug": "goto",
+"name": "Goto",
+"featured": false
+},
+{
+"slug": "grab",
+"name": "Grab",
+"featured": false
+},
+{
+"slug": "grammarly",
+"name": "Grammarly",
+"featured": false
+},
+{
+"slug": "graviton",
+"name": "Graviton",
+"featured": false
+},
+{
+"slug": "groupon",
+"name": "Groupon",
+"featured": false
+},
+{
+"slug": "groww",
+"name": "Groww",
+"featured": true
+},
+{
+"slug": "grubhub",
+"name": "Grubhub",
+"featured": false
+},
+{
+"slug": "gsa-capital",
+"name": "Gsa Capital",
+"featured": false
+},
+{
+"slug": "gsn-games",
+"name": "Gsn Games",
+"featured": false
+},
+{
+"slug": "guidewire",
+"name": "Guidewire",
+"featured": false
+},
+{
+"slug": "gusto",
+"name": "Gusto",
+"featured": false
+},
+{
+"slug": "harness",
+"name": "Harness",
+"featured": false
+},
+{
+"slug": "hashedin",
+"name": "Hashedin",
+"featured": false
+},
+{
+"slug": "hbo",
+"name": "Hbo",
+"featured": false
+},
+{
+"slug": "hcl",
+"name": "Hcl",
+"featured": false
+},
+{
+"slug": "helix",
+"name": "Helix",
+"featured": false
+},
+{
+"slug": "highspot",
+"name": "Highspot",
+"featured": false
+},
+{
+"slug": "hilabs",
+"name": "Hilabs",
+"featured": false
+},
+{
+"slug": "hive",
+"name": "Hive",
+"featured": false
+},
+{
+"slug": "honey",
+"name": "Honey",
+"featured": false
+},
+{
+"slug": "honeywell",
+"name": "Honeywell",
+"featured": false
+},
+{
+"slug": "hopper",
+"name": "Hopper",
+"featured": false
+},
+{
+"slug": "hotstar",
+"name": "Hotstar",
+"featured": false
+},
+{
+"slug": "houzz",
+"name": "Houzz",
+"featured": false
+},
+{
+"slug": "hp",
+"name": "HP",
+"featured": false
+},
+{
+"slug": "hpe",
+"name": "HPE",
+"featured": false
+},
+{
+"slug": "hrt",
+"name": "Hrt",
+"featured": false
+},
+{
+"slug": "hsbc",
+"name": "Hsbc",
+"featured": false
+},
+{
+"slug": "htc",
+"name": "Htc",
+"featured": false
+},
+{
+"slug": "huawei",
+"name": "Huawei",
+"featured": false
+},
+{
+"slug": "hubspot",
+"name": "Hubspot",
+"featured": false
+},
+{
+"slug": "hulu",
+"name": "Hulu",
+"featured": false
+},
+{
+"slug": "ibm",
+"name": "IBM",
+"featured": true
+},
+{
+"slug": "iit-bombay",
+"name": "Iit Bombay",
+"featured": false
+},
+{
+"slug": "imc",
+"name": "Imc",
+"featured": false
+},
+{
+"slug": "impact-analytics",
+"name": "Impact Analytics",
+"featured": false
+},
+{
+"slug": "impetus",
+"name": "Impetus",
+"featured": false
+},
+{
+"slug": "increff",
+"name": "Increff",
+"featured": false
+},
+{
+"slug": "indeed",
+"name": "Indeed",
+"featured": false
+},
+{
+"slug": "info-edge",
+"name": "Info Edge",
+"featured": false
+},
+{
+"slug": "informatica",
+"name": "Informatica",
+"featured": false
+},
+{
+"slug": "infosys",
+"name": "Infosys",
+"featured": false
+},
+{
+"slug": "inmobi",
+"name": "Inmobi",
+"featured": false
+},
+{
+"slug": "innovaccer",
+"name": "Innovaccer",
+"featured": false
+},
+{
+"slug": "instabase",
+"name": "Instabase",
+"featured": false
+},
+{
+"slug": "instacart",
+"name": "Instacart",
+"featured": false
+},
+{
+"slug": "intel",
+"name": "Intel",
+"featured": false
+},
+{
+"slug": "interactive-brokers",
+"name": "Interactive Brokers",
+"featured": false
+},
+{
+"slug": "intercom",
+"name": "Intercom",
+"featured": false
+},
+{
+"slug": "intuit",
+"name": "Intuit",
+"featured": true
+},
+{
+"slug": "ivp",
+"name": "Ivp",
+"featured": false
+},
+{
+"slug": "ixigo",
+"name": "Ixigo",
+"featured": false
+},
+{
+"slug": "ixl",
+"name": "Ixl",
+"featured": false
+},
+{
+"slug": "jane-street",
+"name": "Jane Street",
+"featured": true
+},
+{
+"slug": "jd",
+"name": "Jd",
+"featured": false
+},
+{
+"slug": "jeavio",
+"name": "Jeavio",
+"featured": false
+},
+{
+"slug": "jingchi",
+"name": "Jingchi",
+"featured": false
+},
+{
+"slug": "jio",
+"name": "Jio",
+"featured": false
+},
+{
+"slug": "josh-technology",
+"name": "Josh Technology",
+"featured": false
+},
+{
+"slug": "jpmorgan",
+"name": "JPMorgan",
+"featured": true
+},
+{
+"slug": "jtg",
+"name": "Jtg",
+"featured": false
+},
+{
+"slug": "jump-trading",
+"name": "Jump Trading",
+"featured": false
+},
+{
+"slug": "juspay",
+"name": "Juspay",
+"featured": false
+},
+{
+"slug": "kakao",
+"name": "Kakao",
+"featured": false
+},
+{
+"slug": "karat",
+"name": "Karat",
+"featured": false
+},
+{
+"slug": "kickdrum",
+"name": "Kickdrum",
+"featured": false
+},
+{
+"slug": "kla",
+"name": "Kla",
+"featured": false
+},
+{
+"slug": "kla-tencor",
+"name": "Kla Tencor",
+"featured": false
+},
+{
+"slug": "kotak-mahindra-bank",
+"name": "Kotak Mahindra Bank",
+"featured": false
+},
+{
+"slug": "kpmg",
+"name": "KPMG",
+"featured": false
+},
+{
+"slug": "larsen-toubro",
+"name": "Larsen Toubro",
+"featured": false
+},
+{
+"slug": "leap-motion",
+"name": "Leap Motion",
+"featured": false
+},
+{
+"slug": "lendingkart",
+"name": "Lendingkart",
+"featured": false
+},
+{
+"slug": "lenskart",
+"name": "Lenskart",
+"featured": false
+},
+{
+"slug": "lg-electronics",
+"name": "Lg Electronics",
+"featured": false
+},
+{
+"slug": "liberty-mutual",
+"name": "Liberty Mutual",
+"featured": false
+},
+{
+"slug": "liftoff",
+"name": "Liftoff",
+"featured": false
+},
+{
+"slug": "lime",
+"name": "Lime",
+"featured": false
+},
+{
+"slug": "line",
+"name": "Line",
+"featured": false
+},
+{
+"slug": "linkedin",
+"name": "LinkedIn",
+"featured": true
+},
+{
+"slug": "liveramp",
+"name": "Liveramp",
+"featured": false
+},
+{
+"slug": "livspace",
+"name": "Livspace",
+"featured": false
+},
+{
+"slug": "lowe",
+"name": "Lowe",
+"featured": false
+},
+{
+"slug": "lti",
+"name": "Lti",
+"featured": false
+},
+{
+"slug": "lucid",
+"name": "Lucid",
+"featured": false
+},
+{
+"slug": "luxoft",
+"name": "Luxoft",
+"featured": false
+},
+{
+"slug": "lyft",
+"name": "Lyft",
+"featured": false
+},
+{
+"slug": "machine-zone",
+"name": "Machine Zone",
+"featured": false
+},
+{
+"slug": "machinezone",
+"name": "Machinezone",
+"featured": false
+},
+{
+"slug": "maersk",
+"name": "Maersk",
+"featured": false
+},
+{
+"slug": "makemytrip",
+"name": "Makemytrip",
+"featured": false
+},
+{
+"slug": "mapbox",
+"name": "Mapbox",
+"featured": false
+},
+{
+"slug": "maq-software",
+"name": "Maq Software",
+"featured": false
+},
+{
+"slug": "marqeta",
+"name": "Marqeta",
+"featured": false
+},
+{
+"slug": "mastercard",
+"name": "Mastercard",
+"featured": true
+},
+{
+"slug": "mathworks",
+"name": "Mathworks",
+"featured": false
+},
+{
+"slug": "mcafee",
+"name": "Mcafee",
+"featured": false
+},
+{
+"slug": "mcdonalds",
+"name": "Mcdonalds",
+"featured": false
+},
+{
+"slug": "mckinsey",
+"name": "Mckinsey",
+"featured": false
+},
+{
+"slug": "medianet",
+"name": "Medianet",
+"featured": false
+},
+{
+"slug": "meesho",
+"name": "Meesho",
+"featured": true
+},
+{
+"slug": "meituan",
+"name": "Meituan",
+"featured": false
+},
+{
+"slug": "mercari",
+"name": "Mercari",
+"featured": false
+},
+{
+"slug": "meta",
+"name": "Meta",
+"featured": true
+},
+{
+"slug": "micro1",
+"name": "Micro1",
+"featured": false
+},
+{
+"slug": "microsoft",
+"name": "Microsoft",
+"featured": true
+},
+{
+"slug": "microstrategy",
+"name": "Microstrategy",
+"featured": false
+},
+{
+"slug": "millennium",
+"name": "Millennium",
+"featured": false
+},
+{
+"slug": "mindtickle",
+"name": "Mindtickle",
+"featured": false
+},
+{
+"slug": "mindtree",
+"name": "Mindtree",
+"featured": false
+},
+{
+"slug": "mishipay",
+"name": "Mishipay",
+"featured": false
+},
+{
+"slug": "mitsogo",
+"name": "Mitsogo",
+"featured": false
+},
+{
+"slug": "mixpanel",
+"name": "Mixpanel",
+"featured": false
+},
+{
+"slug": "mobileye",
+"name": "Mobileye",
+"featured": false
+},
+{
+"slug": "mobisy",
+"name": "Mobisy",
+"featured": false
+},
+{
+"slug": "moengage",
+"name": "Moengage",
+"featured": false
+},
+{
+"slug": "moloco",
+"name": "Moloco",
+"featured": false
+},
+{
+"slug": "moneylion",
+"name": "Moneylion",
+"featured": false
+},
+{
+"slug": "mongodb",
+"name": "Mongodb",
+"featured": false
+},
+{
+"slug": "morgan-stanley",
+"name": "Morgan Stanley",
+"featured": true
+},
+{
+"slug": "motive",
+"name": "Motive",
+"featured": false
+},
+{
+"slug": "moveworks",
+"name": "Moveworks",
+"featured": false
+},
+{
+"slug": "mphasis",
+"name": "Mphasis",
+"featured": false
+},
+{
+"slug": "msci",
+"name": "Msci",
+"featured": false
+},
+{
+"slug": "murex",
+"name": "Murex",
+"featured": false
+},
+{
+"slug": "mykaarma",
+"name": "Mykaarma",
+"featured": false
+},
+{
+"slug": "myntra",
+"name": "Myntra",
+"featured": true
+},
+{
+"slug": "nagarro",
+"name": "Nagarro",
+"featured": false
+},
+{
+"slug": "nasdaq",
+"name": "Nasdaq",
+"featured": false
+},
+{
+"slug": "national-instruments",
+"name": "National Instruments",
+"featured": false
+},
+{
+"slug": "national-payments-coorperation-india",
+"name": "National Payments Coorperation India",
+"featured": false
+},
+{
+"slug": "natwest",
+"name": "Natwest",
+"featured": false
+},
+{
+"slug": "navan",
+"name": "Navan",
+"featured": false
+},
+{
+"slug": "naver",
+"name": "Naver",
+"featured": false
+},
+{
+"slug": "navi",
+"name": "Navi",
+"featured": false
+},
+{
+"slug": "ncr",
+"name": "Ncr",
+"featured": false
+},
+{
+"slug": "nerdwallet",
+"name": "Nerdwallet",
+"featured": false
+},
+{
+"slug": "netapp",
+"name": "Netapp",
+"featured": false
+},
+{
+"slug": "netcracker-technology",
+"name": "Netcracker Technology",
+"featured": false
+},
+{
+"slug": "netease",
+"name": "Netease",
+"featured": false
+},
+{
+"slug": "netflix",
+"name": "Netflix",
+"featured": true
+},
+{
+"slug": "netskope",
+"name": "Netskope",
+"featured": false
+},
+{
+"slug": "netsuite",
+"name": "Netsuite",
+"featured": false
+},
+{
+"slug": "newsbreak",
+"name": "Newsbreak",
+"featured": false
+},
+{
+"slug": "nextdoor",
+"name": "Nextdoor",
+"featured": false
+},
+{
+"slug": "nextjump",
+"name": "Nextjump",
+"featured": false
+},
+{
+"slug": "niantic",
+"name": "Niantic",
+"featured": false
+},
+{
+"slug": "nielsen",
+"name": "Nielsen",
+"featured": false
+},
+{
+"slug": "nike",
+"name": "Nike",
+"featured": false
+},
+{
+"slug": "nokia",
+"name": "Nokia",
+"featured": false
+},
+{
+"slug": "noon",
+"name": "Noon",
+"featured": false
+},
+{
+"slug": "nordstrom",
+"name": "Nordstrom",
+"featured": false
+},
+{
+"slug": "notion",
+"name": "Notion",
+"featured": false
+},
+{
+"slug": "npci",
+"name": "Npci",
+"featured": false
+},
+{
+"slug": "nuro",
+"name": "Nuro",
+"featured": false
+},
+{
+"slug": "nutanix",
+"name": "Nutanix",
+"featured": true
+},
+{
+"slug": "nvidia",
+"name": "NVIDIA",
+"featured": true
+},
+{
+"slug": "nykaa",
+"name": "Nykaa",
+"featured": false
+},
+{
+"slug": "observeai",
+"name": "Observeai",
+"featured": false
+},
+{
+"slug": "odoo",
+"name": "Odoo",
+"featured": false
+},
+{
+"slug": "okta",
+"name": "Okta",
+"featured": false
+},
+{
+"slug": "okx",
+"name": "Okx",
+"featured": false
+},
+{
+"slug": "ola",
+"name": "Ola",
+"featured": true
+},
+{
+"slug": "olx",
+"name": "Olx",
+"featured": false
+},
+{
+"slug": "openai",
+"name": "OpenAI",
+"featured": false
+},
+{
+"slug": "opentext",
+"name": "Opentext",
+"featured": false
+},
+{
+"slug": "oppo",
+"name": "Oppo",
+"featured": false
+},
+{
+"slug": "optiver",
+"name": "Optiver",
+"featured": true
+},
+{
+"slug": "optum",
+"name": "Optum",
+"featured": false
+},
+{
+"slug": "oracle",
+"name": "Oracle",
+"featured": true
+},
+{
+"slug": "oscar-health",
+"name": "Oscar Health",
+"featured": false
+},
+{
+"slug": "otterai",
+"name": "Otterai",
+"featured": false
+},
+{
+"slug": "oyo",
+"name": "Oyo",
+"featured": false
+},
+{
+"slug": "ozon",
+"name": "Ozon",
+"featured": false
+},
+{
+"slug": "palantir",
+"name": "Palantir",
+"featured": true
+},
+{
+"slug": "palo-alto-networks",
+"name": "Palo Alto Networks",
+"featured": false
+},
+{
+"slug": "park",
+"name": "Park",
+"featured": false
+},
+{
+"slug": "patreon",
+"name": "Patreon",
+"featured": false
+},
+{
+"slug": "paycom",
+"name": "Paycom",
+"featured": false
+},
+{
+"slug": "paypal",
+"name": "PayPal",
+"featured": true
+},
+{
+"slug": "paypay",
+"name": "Paypay",
+"featured": false
+},
+{
+"slug": "paytm",
+"name": "Paytm",
+"featured": true
+},
+{
+"slug": "payu",
+"name": "Payu",
+"featured": false
+},
+{
+"slug": "peak6",
+"name": "Peak6",
+"featured": false
+},
+{
+"slug": "pega",
+"name": "Pega",
+"featured": false
+},
+{
+"slug": "peloton",
+"name": "Peloton",
+"featured": false
+},
+{
+"slug": "persistent-systems",
+"name": "Persistent Systems",
+"featured": false
+},
+{
+"slug": "philips",
+"name": "Philips",
+"featured": false
+},
+{
+"slug": "phonepe",
+"name": "PhonePe",
+"featured": true
+},
+{
+"slug": "pickrr",
+"name": "Pickrr",
+"featured": false
+},
+{
+"slug": "pinterest",
+"name": "Pinterest",
+"featured": true
+},
+{
+"slug": "plaid",
+"name": "Plaid",
+"featured": false
+},
+{
+"slug": "playsimple",
+"name": "Playsimple",
+"featured": false
+},
+{
+"slug": "pocket-gems",
+"name": "Pocket Gems",
+"featured": false
+},
+{
+"slug": "point72",
+"name": "Point72",
+"featured": false
+},
+{
+"slug": "polar",
+"name": "Polar",
+"featured": false
+},
+{
+"slug": "ponyai",
+"name": "Ponyai",
+"featured": false
+},
+{
+"slug": "pornhub",
+"name": "Pornhub",
+"featured": false
+},
+{
+"slug": "porter",
+"name": "Porter",
+"featured": false
+},
+{
+"slug": "poshmark",
+"name": "Poshmark",
+"featured": false
+},
+{
+"slug": "postman",
+"name": "Postman",
+"featured": false
+},
+{
+"slug": "postmates",
+"name": "Postmates",
+"featured": false
+},
+{
+"slug": "poynt",
+"name": "Poynt",
+"featured": false
+},
+{
+"slug": "practo",
+"name": "Practo",
+"featured": false
+},
+{
+"slug": "publicis-sapient",
+"name": "Publicis Sapient",
+"featured": false
+},
+{
+"slug": "pubmatic",
+"name": "Pubmatic",
+"featured": false
+},
+{
+"slug": "pure",
+"name": "Pure",
+"featured": false
+},
+{
+"slug": "pure-storage",
+"name": "Pure Storage",
+"featured": false
+},
+{
+"slug": "purplle",
+"name": "Purplle",
+"featured": false
+},
+{
+"slug": "pwc",
+"name": "PWC",
+"featured": false
+},
+{
+"slug": "qualcomm",
+"name": "Qualcomm",
+"featured": true
+},
+{
+"slug": "qualtrics",
+"name": "Qualtrics",
+"featured": false
+},
+{
+"slug": "qualys",
+"name": "Qualys",
+"featured": false
+},
+{
+"slug": "quantcast",
+"name": "Quantcast",
+"featured": false
+},
+{
+"slug": "quantiphi",
+"name": "Quantiphi",
+"featured": false
+},
+{
+"slug": "quince",
+"name": "Quince",
+"featured": false
+},
+{
+"slug": "quora",
+"name": "Quora",
+"featured": false
+},
+{
+"slug": "rackspace",
+"name": "Rackspace",
+"featured": false
+},
+{
+"slug": "radius",
+"name": "Radius",
+"featured": false
+},
+{
+"slug": "rakuten",
+"name": "Rakuten",
+"featured": false
+},
+{
+"slug": "rally-health",
+"name": "Rally Health",
+"featured": false
+},
+{
+"slug": "ramp-2",
+"name": "Ramp 2",
+"featured": false
+},
+{
+"slug": "razorpay",
+"name": "Razorpay",
+"featured": true
+},
+{
+"slug": "rbc",
+"name": "RBC",
+"featured": false
+},
+{
+"slug": "redbus",
+"name": "Redbus",
+"featured": false
+},
+{
+"slug": "reddit",
+"name": "Reddit",
+"featured": false
+},
+{
+"slug": "redfin",
+"name": "Redfin",
+"featured": false
+},
+{
+"slug": "reliance-retails",
+"name": "Reliance Retails",
+"featured": false
+},
+{
+"slug": "remitly",
+"name": "Remitly",
+"featured": false
+},
+{
+"slug": "retailmenot",
+"name": "Retailmenot",
+"featured": false
+},
+{
+"slug": "revolut",
+"name": "Revolut",
+"featured": false
+},
+{
+"slug": "riot-games",
+"name": "Riot Games",
+"featured": false
+},
+{
+"slug": "ripple",
+"name": "Ripple",
+"featured": false
+},
+{
+"slug": "rippling",
+"name": "Rippling",
+"featured": false
+},
+{
+"slug": "rivian",
+"name": "Rivian",
+"featured": false
+},
+{
+"slug": "robinhood",
+"name": "Robinhood",
+"featured": false
+},
+{
+"slug": "roblox",
+"name": "Roblox",
+"featured": false
+},
+{
+"slug": "rokt",
+"name": "Rokt",
+"featured": false
+},
+{
+"slug": "roku",
+"name": "Roku",
+"featured": false
+},
+{
+"slug": "rubrik",
+"name": "Rubrik",
+"featured": true
+},
+{
+"slug": "salesforce",
+"name": "Salesforce",
+"featured": true
+},
+{
+"slug": "sambanova",
+"name": "Sambanova",
+"featured": false
+},
+{
+"slug": "samsara",
+"name": "Samsara",
+"featured": false
+},
+{
+"slug": "samsung",
+"name": "Samsung",
+"featured": true
+},
+{
+"slug": "sap",
+"name": "SAP",
+"featured": true
+},
+{
+"slug": "scale-ai",
+"name": "Scale AI",
+"featured": false
+},
+{
+"slug": "scaler",
+"name": "Scaler",
+"featured": false
+},
+{
+"slug": "schlumberger",
+"name": "Schlumberger",
+"featured": false
+},
+{
+"slug": "schneider-electric",
+"name": "Schneider Electric",
+"featured": false
+},
+{
+"slug": "schrodinger",
+"name": "Schrodinger",
+"featured": false
+},
+{
+"slug": "sentry",
+"name": "Sentry",
+"featured": false
+},
+{
+"slug": "servicenow",
+"name": "ServiceNow",
+"featured": true
+},
+{
+"slug": "sharechat",
+"name": "Sharechat",
+"featured": false
+},
+{
+"slug": "shift-technology",
+"name": "Shift Technology",
+"featured": false
+},
+{
+"slug": "shipsy",
+"name": "Shipsy",
+"featured": false
+},
+{
+"slug": "shopback",
+"name": "Shopback",
+"featured": false
+},
+{
+"slug": "shopee",
+"name": "Shopee",
+"featured": false
+},
+{
+"slug": "shopify",
+"name": "Shopify",
+"featured": false
+},
+{
+"slug": "shopup",
+"name": "Shopup",
+"featured": false
+},
+{
+"slug": "siemens",
+"name": "Siemens",
+"featured": false
+},
+{
+"slug": "sig",
+"name": "Sig",
+"featured": false
+},
+{
+"slug": "sigmoid",
+"name": "Sigmoid",
+"featured": false
+},
+{
+"slug": "singlestore",
+"name": "Singlestore",
+"featured": false
+},
+{
+"slug": "sixt",
+"name": "Sixt",
+"featured": false
+},
+{
+"slug": "slice",
+"name": "Slice",
+"featured": false
+},
+{
+"slug": "smartnews",
+"name": "Smartnews",
+"featured": false
+},
+{
+"slug": "smartsheet",
+"name": "Smartsheet",
+"featured": false
+},
+{
+"slug": "snapchat",
+"name": "Snapchat",
+"featured": false
+},
+{
+"slug": "snapdeal",
+"name": "Snapdeal",
+"featured": false
+},
+{
+"slug": "snowflake",
+"name": "Snowflake",
+"featured": true
+},
+{
+"slug": "societe-generale",
+"name": "Societe Generale",
+"featured": false
+},
+{
+"slug": "sofi",
+"name": "Sofi",
+"featured": false
+},
+{
+"slug": "softwire",
+"name": "Softwire",
+"featured": false
+},
+{
+"slug": "sonatus",
+"name": "Sonatus",
+"featured": false
+},
+{
+"slug": "sony",
+"name": "Sony",
+"featured": false
+},
+{
+"slug": "soti",
+"name": "Soti",
+"featured": false
+},
+{
+"slug": "soundhound",
+"name": "Soundhound",
+"featured": false
+},
+{
+"slug": "spacex",
+"name": "Spacex",
+"featured": false
+},
+{
+"slug": "spinny",
+"name": "Spinny",
+"featured": false
+},
+{
+"slug": "splunk",
+"name": "Splunk",
+"featured": false
+},
+{
+"slug": "spotify",
+"name": "Spotify",
+"featured": false
+},
+{
+"slug": "sprinklr",
+"name": "Sprinklr",
+"featured": true
+},
+{
+"slug": "square",
+"name": "Square",
+"featured": false
+},
+{
+"slug": "squarepoint-capital",
+"name": "Squarepoint Capital",
+"featured": false
+},
+{
+"slug": "squarespace",
+"name": "Squarespace",
+"featured": false
+},
+{
+"slug": "src",
+"name": "Src",
+"featured": false
+},
+{
+"slug": "stackadapt",
+"name": "Stackadapt",
+"featured": false
+},
+{
+"slug": "stackline",
+"name": "Stackline",
+"featured": false
+},
+{
+"slug": "starbucks",
+"name": "Starbucks",
+"featured": false
+},
+{
+"slug": "state-farm",
+"name": "State Farm",
+"featured": false
+},
+{
+"slug": "strava",
+"name": "Strava",
+"featured": false
+},
+{
+"slug": "stripe",
+"name": "Stripe",
+"featured": true
+},
+{
+"slug": "sumologic",
+"name": "Sumologic",
+"featured": false
+},
+{
+"slug": "swiggy",
+"name": "Swiggy",
+"featured": true
+},
+{
+"slug": "syfe",
+"name": "Syfe",
+"featured": false
+},
+{
+"slug": "symantec",
+"name": "Symantec",
+"featured": false
+},
+{
+"slug": "synopsys",
+"name": "Synopsys",
+"featured": false
+},
+{
+"slug": "ta-digital",
+"name": "Ta Digital",
+"featured": false
+},
+{
+"slug": "tableau",
+"name": "Tableau",
+"featured": false
+},
+{
+"slug": "tanium",
+"name": "Tanium",
+"featured": false
+},
+{
+"slug": "target",
+"name": "Target",
+"featured": false
+},
+{
+"slug": "tcs",
+"name": "TCS",
+"featured": false
+},
+{
+"slug": "tech-mahindra",
+"name": "Tech Mahindra",
+"featured": false
+},
+{
+"slug": "tekion",
+"name": "Tekion",
+"featured": false
+},
+{
+"slug": "tencent",
+"name": "Tencent",
+"featured": false
+},
+{
+"slug": "teradata",
+"name": "Teradata",
+"featured": false
+},
+{
+"slug": "tesco",
+"name": "Tesco",
+"featured": false
+},
+{
+"slug": "tesla",
+"name": "Tesla",
+"featured": false
+},
+{
+"slug": "texas-instruments",
+"name": "Texas Instruments",
+"featured": false
+},
+{
+"slug": "the-trade-desk",
+"name": "The Trade Desk",
+"featured": false
+},
+{
+"slug": "thomson-reuters",
+"name": "Thomson Reuters",
+"featured": false
+},
+{
+"slug": "thoughtspot",
+"name": "Thoughtspot",
+"featured": false
+},
+{
+"slug": "thoughtworks",
+"name": "Thoughtworks",
+"featured": false
+},
+{
+"slug": "thousandeyes",
+"name": "Thousandeyes",
+"featured": false
+},
+{
+"slug": "thumbtack",
+"name": "Thumbtack",
+"featured": false
+},
+{
+"slug": "tiaa",
+"name": "Tiaa",
+"featured": false
+},
+{
+"slug": "tiger-analytics",
+"name": "Tiger Analytics",
+"featured": false
+},
+{
+"slug": "tiktok",
+"name": "TikTok",
+"featured": true
+},
+{
+"slug": "tinder",
+"name": "Tinder",
+"featured": false
+},
+{
+"slug": "tinkoff",
+"name": "Tinkoff",
+"featured": false
+},
+{
+"slug": "toast",
+"name": "Toast",
+"featured": false
+},
+{
+"slug": "tokopedia",
+"name": "Tokopedia",
+"featured": false
+},
+{
+"slug": "tomtom",
+"name": "Tomtom",
+"featured": false
+},
+{
+"slug": "toptal",
+"name": "Toptal",
+"featured": false
+},
+{
+"slug": "tower-research",
+"name": "Tower Research",
+"featured": true
+},
+{
+"slug": "tracxn",
+"name": "Tracxn",
+"featured": false
+},
+{
+"slug": "traveloka",
+"name": "Traveloka",
+"featured": false
+},
+{
+"slug": "trend-micro",
+"name": "Trend Micro",
+"featured": false
+},
+{
+"slug": "trexquant",
+"name": "Trexquant",
+"featured": false
+},
+{
+"slug": "trilogy",
+"name": "Trilogy",
+"featured": false
+},
+{
+"slug": "tripactions",
+"name": "Tripactions",
+"featured": false
+},
+{
+"slug": "tripadvisor",
+"name": "Tripadvisor",
+"featured": false
+},
+{
+"slug": "triplebyte",
+"name": "Triplebyte",
+"featured": false
+},
+{
+"slug": "turing",
+"name": "Turing",
+"featured": false
+},
+{
+"slug": "turvo",
+"name": "Turvo",
+"featured": false
+},
+{
+"slug": "tusimple",
+"name": "Tusimple",
+"featured": false
+},
+{
+"slug": "twilio",
+"name": "Twilio",
+"featured": false
+},
+{
+"slug": "twitch",
+"name": "Twitch",
+"featured": false
+},
+{
+"slug": "twitter",
+"name": "Twitter",
+"featured": false
+},
+{
+"slug": "two-sigma",
+"name": "Two Sigma",
+"featured": false
+},
+{
+"slug": "uber",
+"name": "Uber",
+"featured": true
+},
+{
+"slug": "ubisoft",
+"name": "Ubisoft",
+"featured": false
+},
+{
+"slug": "ubs",
+"name": "Ubs",
+"featured": false
+},
+{
+"slug": "udemy",
+"name": "Udemy",
+"featured": false
+},
+{
+"slug": "uipath",
+"name": "Uipath",
+"featured": false
+},
+{
+"slug": "ukg",
+"name": "Ukg",
+"featured": false
+},
+{
+"slug": "unbxd",
+"name": "Unbxd",
+"featured": false
+},
+{
+"slug": "unity",
+"name": "Unity",
+"featured": false
+},
+{
+"slug": "unstop",
+"name": "Unstop",
+"featured": false
+},
+{
+"slug": "upstart",
+"name": "Upstart",
+"featured": false
+},
+{
+"slug": "urban-company",
+"name": "Urban Company",
+"featured": false
+},
+{
+"slug": "ust",
+"name": "Ust",
+"featured": false
+},
+{
+"slug": "valve",
+"name": "Valve",
+"featured": false
+},
+{
+"slug": "veeva",
+"name": "Veeva",
+"featured": false
+},
+{
+"slug": "verily",
+"name": "Verily",
+"featured": false
+},
+{
+"slug": "veritas",
+"name": "Veritas",
+"featured": false
+},
+{
+"slug": "verizon",
+"name": "Verizon",
+"featured": false
+},
+{
+"slug": "verkada",
+"name": "Verkada",
+"featured": false
+},
+{
+"slug": "viasat",
+"name": "Viasat",
+"featured": false
+},
+{
+"slug": "vimeo",
+"name": "Vimeo",
+"featured": false
+},
+{
+"slug": "virtu",
+"name": "Virtu",
+"featured": false
+},
+{
+"slug": "virtusa",
+"name": "Virtusa",
+"featured": false
+},
+{
+"slug": "visa",
+"name": "Visa",
+"featured": true
+},
+{
+"slug": "vk",
+"name": "Vk",
+"featured": false
+},
+{
+"slug": "vmware",
+"name": "VMware",
+"featured": true
+},
+{
+"slug": "walmart-labs",
+"name": "Walmart Labs",
+"featured": true
+},
+{
+"slug": "warnermedia",
+"name": "Warnermedia",
+"featured": false
+},
+{
+"slug": "wayfair",
+"name": "Wayfair",
+"featured": false
+},
+{
+"slug": "waymo",
+"name": "Waymo",
+"featured": false
+},
+{
+"slug": "wayve",
+"name": "Wayve",
+"featured": false
+},
+{
+"slug": "wealthfront",
+"name": "Wealthfront",
+"featured": false
+},
+{
+"slug": "wells-fargo",
+"name": "Wells Fargo",
+"featured": true
+},
+{
+"slug": "weride",
+"name": "Weride",
+"featured": false
+},
+{
+"slug": "western-digital",
+"name": "Western Digital",
+"featured": false
+},
+{
+"slug": "whatfix",
+"name": "Whatfix",
+"featured": false
+},
+{
+"slug": "whatnot",
+"name": "Whatnot",
+"featured": false
+},
+{
+"slug": "winzo",
+"name": "Winzo",
+"featured": false
+},
+{
+"slug": "wipro",
+"name": "Wipro",
+"featured": false
+},
+{
+"slug": "wise",
+"name": "Wise",
+"featured": false
+},
+{
+"slug": "wish",
+"name": "Wish",
+"featured": false
+},
+{
+"slug": "wissen",
+"name": "Wissen",
+"featured": false
+},
+{
+"slug": "wix",
+"name": "Wix",
+"featured": false
+},
+{
+"slug": "workday",
+"name": "Workday",
+"featured": false
+},
+{
+"slug": "works-applications",
+"name": "Works Applications",
+"featured": false
+},
+{
+"slug": "worldquant",
+"name": "WorldQuant",
+"featured": true
+},
+{
+"slug": "woven-by-toyota",
+"name": "Woven By Toyota",
+"featured": false
+},
+{
+"slug": "xing",
+"name": "Xing",
+"featured": false
+},
+{
+"slug": "yahoo",
+"name": "Yahoo",
+"featured": false
+},
+{
+"slug": "yandex",
+"name": "Yandex",
+"featured": false
+},
+{
+"slug": "yatra",
+"name": "Yatra",
+"featured": false
+},
+{
+"slug": "yelp",
+"name": "Yelp",
+"featured": false
+},
+{
+"slug": "yugabyte",
+"name": "Yugabyte",
+"featured": false
+},
+{
+"slug": "zalando",
+"name": "Zalando",
+"featured": false
+},
+{
+"slug": "zappos",
+"name": "Zappos",
+"featured": false
+},
+{
+"slug": "zemoso",
+"name": "Zemoso",
+"featured": false
+},
+{
+"slug": "zendesk",
+"name": "Zendesk",
+"featured": false
+},
+{
+"slug": "zenefits",
+"name": "Zenefits",
+"featured": false
+},
+{
+"slug": "zepto",
+"name": "Zepto",
+"featured": false
+},
+{
+"slug": "zeta",
+"name": "Zeta",
+"featured": false
+},
+{
+"slug": "zeta-suite",
+"name": "Zeta Suite",
+"featured": false
+},
+{
+"slug": "zillow",
+"name": "Zillow",
+"featured": false
+},
+{
+"slug": "zip",
+"name": "Zip",
+"featured": false
+},
+{
+"slug": "ziprecruiter",
+"name": "Ziprecruiter",
+"featured": false
+},
+{
+"slug": "zluri",
+"name": "Zluri",
+"featured": false
+},
+{
+"slug": "zocdoc",
+"name": "Zocdoc",
+"featured": false
+},
+{
+"slug": "zoho",
+"name": "Zoho",
+"featured": true
+},
+{
+"slug": "zomato",
+"name": "Zomato",
+"featured": true
+},
+{
+"slug": "zoom",
+"name": "Zoom",
+"featured": false
+},
+{
+"slug": "zoox",
+"name": "Zoox",
+"featured": false
+},
+{
+"slug": "zopsmart",
+"name": "Zopsmart",
+"featured": false
+},
+{
+"slug": "zs-associates",
+"name": "Zs Associates",
+"featured": false
+},
+{
+"slug": "zscaler",
+"name": "Zscaler",
+"featured": false
+},
+{
+"slug": "zulily",
+"name": "Zulily",
+"featured": false
+},
+{
+"slug": "zynga",
+"name": "Zynga",
+"featured": false
+}
+]
+}

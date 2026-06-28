@@ -10,14 +10,15 @@ import base64
 import datetime as dt
 import json
 import os
+import re
 import subprocess
 import sys
 import threading
 
 import webview
 
-from . import (backfill, coach, constants, gamify, github_auth, ollama_setup,
-               patterns, posts, problems, roadmap, runner, site, srs)
+from . import (backfill, coach, companies, constants, gamify, github_auth,
+               ollama_setup, patterns, posts, problems, roadmap, runner, site, srs)
 from .appsupport import STATE_DIR, load_config, save_config
 from .cards import render_png
 from .contests import cf_rating, upcoming as cf_upcoming
@@ -63,6 +64,22 @@ def _items():
         return Store(STATE_DIR).all()
     except Exception:  # noqa: BLE001
         return []
+
+
+def _solved_leetcode_slugs() -> set:
+    """Slugs of LeetCode problems the user has actually solved (from synced history),
+    used to mark progress against company question lists."""
+    out = set()
+    for it in _items():
+        if it.get("platform") != "leetcode":
+            continue
+        slug = companies.slug_from_url(it.get("url") or "")
+        if not slug:  # fall back to the stored dir, e.g. "leetcode/0001-two-sum"
+            base = (it.get("dir") or "").split("/")[-1]
+            slug = re.sub(r"^\d+-", "", base)
+        if slug:
+            out.add(slug)
+    return out
 
 
 def _connected():
@@ -496,6 +513,36 @@ class Api:
             + f"## Transcript so far\n{self._iv_convo(history)}\n\n"
             + "Respond as the interviewer for your next turn only.")
         return _ask_stream(prompt, stream_id) or _ai_hint()
+
+    # ---- company-wise interview questions ----
+    def list_companies(self):
+        return companies.list_companies()
+
+    def company_questions(self, company, period="all"):
+        res = companies.fetch(company, period, STATE_DIR)
+        if not res.get("ok"):
+            return res
+        solved = _solved_leetcode_slugs()
+        qs = res["questions"]
+        nsolved = 0
+        diff = {"Easy": 0, "Medium": 0, "Hard": 0}
+        for q in qs:
+            q["solved"] = q["slug"] in solved
+            q["in_app"] = q["slug"] in problems.CATALOG  # solvable in the built-in IDE
+            if q["solved"]:
+                nsolved += 1
+            diff[q["difficulty"]] = diff.get(q["difficulty"], 0) + 1
+        cat = next((c for c in companies.list_companies()["companies"] if c["slug"] == company), None)
+        return {
+            "ok": True,
+            "company": company,
+            "name": (cat or {}).get("name", company),
+            "period": res["period"],
+            "questions": qs,
+            "total": len(qs),
+            "solved": nsolved,
+            "difficulty": diff,
+        }
 
     def interview_score(self, history, pid, code="", elapsed_sec=0):
         prob = problems.get(pid) or {}

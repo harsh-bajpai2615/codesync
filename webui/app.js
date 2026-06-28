@@ -58,6 +58,7 @@ function switchTab(tab, item) {
   if (tab === "practice") renderPractice();
   if (tab === "learn") renderLearn();
   if (tab === "interview") renderInterview();
+  if (tab === "companies") renderCompanies();
 }
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab, b)));
 
@@ -780,6 +781,118 @@ async function ivScore() {
 function ivQuit() {
   clearInterval(IV.timer); IV.running = false; IV.pid = null; IV.chat = [];
   $("#ivLive").classList.add("hidden"); $("#ivSetup").classList.remove("hidden");
+}
+
+/* ---------- company prep ---------- */
+let CO = { init: false, slug: null, period: "all", name: "", companies: [], last: null };
+async function renderCompanies() {
+  if (CO.init) return;
+  CO.init = true;
+  if (!api()) { $("#coFeatured").innerHTML = '<span class="muted">Open GitKosh to load company question lists.</span>'; return; }
+  const data = await act("list_companies");
+  if (!data) { CO.init = false; return; }
+  CO.companies = data.companies || [];
+  const byslug = Object.fromEntries(CO.companies.map((c) => [c.slug, c]));
+  $("#coFeatured").innerHTML = (data.featured || []).map((s) =>
+    `<button class="co-chip" data-slug="${esc(s)}">${esc((byslug[s] || {}).name || s)}</button>`).join("");
+  $$("#coFeatured .co-chip").forEach((b) => b.addEventListener("click", () => selectCompany(b.dataset.slug)));
+  buildCompanyOptions("");
+  $("#coSelect").addEventListener("change", () => selectCompany($("#coSelect").value));
+  $("#coSearch").addEventListener("input", () => buildCompanyOptions($("#coSearch").value));
+  $("#coPeriod").innerHTML = (data.periods || []).map((p) =>
+    `<button data-k="${esc(p.key)}" class="${p.key === "all" ? "on" : ""}">${esc(p.label)}</button>`).join("");
+  $$("#coPeriod button").forEach((b) => b.addEventListener("click", () => {
+    CO.period = b.dataset.k; $$("#coPeriod button").forEach((x) => x.classList.toggle("on", x === b));
+    if (CO.slug) loadCompany();
+  }));
+  $("#coPracticeNext").addEventListener("click", coPracticeNext);
+  $("#coInterview").addEventListener("click", coInterview);
+}
+function buildCompanyOptions(filter) {
+  const q = (filter || "").toLowerCase().trim();
+  const sel = $("#coSelect");
+  const list = q ? CO.companies.filter((c) => c.name.toLowerCase().includes(q) || c.slug.includes(q)) : CO.companies;
+  sel.innerHTML = `<option value="">Select a company… (${CO.companies.length})</option>` +
+    list.slice(0, 400).map((c) => `<option value="${esc(c.slug)}">${esc(c.name)}${c.featured ? " ★" : ""}</option>`).join("");
+  if (CO.slug && [...sel.options].some((o) => o.value === CO.slug)) sel.value = CO.slug;
+  else if (q && list.length === 1) selectCompany(list[0].slug);
+}
+function selectCompany(slug) {
+  if (!slug) return;
+  CO.slug = slug;
+  $("#coSelect").value = slug;
+  $$("#coFeatured .co-chip").forEach((b) => b.classList.toggle("on", b.dataset.slug === slug));
+  loadCompany();
+}
+async function loadCompany() {
+  $("#coResult").classList.remove("hidden");
+  $("#coTableWrap").innerHTML = `<div class="muted">Loading questions…</div>`;
+  $("#coSummary").innerHTML = ""; $("#coProgress").textContent = "";
+  const r = await act("company_questions", CO.slug, CO.period);
+  if (!r || !r.ok) { $("#coTableWrap").innerHTML = `<div class="muted">${esc((r && r.error) || "Couldn't load.")}</div>`; return; }
+  CO.name = r.name; CO.last = r;
+  renderCompanyResult(r);
+}
+function renderCompanyResult(r) {
+  $("#coTitle").textContent = `${r.name} — top questions`;
+  const pct = r.total ? Math.round((100 * r.solved) / r.total) : 0;
+  $("#coProgress").textContent = `${r.solved}/${r.total} solved (${pct}%)`;
+  const inAppCount = r.questions.filter((q) => q.in_app).length;
+  $("#coSummary").innerHTML =
+    `<span>Window: <b>${esc(r.period)}</b></span>` +
+    `<span><b>${r.difficulty.Easy || 0}</b> Easy · <b>${r.difficulty.Medium || 0}</b> Med · <b>${r.difficulty.Hard || 0}</b> Hard</span>` +
+    `<span><b>${inAppCount}</b> solvable in-app</span>`;
+  const next = r.questions.find((q) => q.in_app && !q.solved);
+  $("#coPracticeNext").classList.toggle("hidden", !next);
+  if (next) $("#coPracticeNext").dataset.pid = next.slug;
+  $("#coInterview").classList.toggle("hidden", !r.questions.some((q) => q.in_app));
+  const maxFreq = r.questions.length ? (r.questions[0].frequency || 1) : 1;
+  const rows = r.questions.map((q, i) => {
+    const dc = q.difficulty === "Easy" ? "easy" : q.difficulty === "Hard" ? "hard" : "med";
+    const bar = Math.max(3, Math.round((46 * (q.frequency || 0)) / (maxFreq || 1)));
+    const status = q.solved ? `<span class="solved">✓ Solved</span>`
+      : q.in_app ? `<a href="#" class="co-open" data-pid="${esc(q.slug)}">Solve in app</a>`
+      : `<a href="${esc(q.url)}" target="_blank" rel="noopener">LeetCode ↗</a>`;
+    return `<tr class="${q.solved ? "done" : ""}">
+      <td>${i + 1}</td>
+      <td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.title)}</a>${q.in_app ? ' <span class="co-dchip" style="background:rgba(124,92,252,.16);color:#b9a7ff">in-app</span>' : ""}</td>
+      <td><span class="co-dchip ${dc}">${esc(q.difficulty || "")}</span></td>
+      <td class="freq">${(q.frequency || 0).toFixed(0)}%<span class="co-freqbar" style="width:${bar}px"></span></td>
+      <td class="acc">${esc(q.acceptance || "")}</td>
+      <td class="co-status">${status}</td></tr>`;
+  }).join("");
+  $("#coTableWrap").innerHTML = `<div class="co-tablewrap"><table class="co-table">
+    <thead><tr><th>#</th><th>Problem</th><th>Diff</th><th>Freq</th><th>Acc</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody></table></div>`;
+  $$("#coTableWrap .co-open").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openInApp(a.dataset.pid); }));
+}
+// Switch to the Learn tab and load a problem by slug (polls until options are ready).
+function openInApp(slug) {
+  const navBtn = $$(".nav-item").find((b) => b.dataset.tab === "learn");
+  if (navBtn) switchTab("learn", navBtn);
+  let tries = 0;
+  const t = setInterval(() => {
+    const sel = $("#probSelect");
+    if (sel && [...sel.options].some((o) => o.value === slug)) { sel.value = slug; loadProblem(); clearInterval(t); }
+    else if (++tries > 30) clearInterval(t);
+  }, 100);
+}
+function coPracticeNext() { const pid = $("#coPracticeNext").dataset.pid; if (pid) openInApp(pid); }
+function coInterview() {
+  const inApp = ((CO.last && CO.last.questions) || []).filter((q) => q.in_app);
+  if (!inApp.length) return;
+  const pick = (inApp.find((q) => !q.solved) || inApp[0]).slug;
+  const navBtn = $$(".nav-item").find((b) => b.dataset.tab === "interview");
+  if (navBtn) switchTab("interview", navBtn);
+  let tries = 0;
+  const t = setInterval(() => {
+    if (IV.init) {
+      clearInterval(t);
+      const sel = $("#ivProblem");
+      if (sel && [...sel.options].some((o) => o.value === pick)) sel.value = pick;
+      startInterview(pick);
+    } else if (++tries > 30) clearInterval(t);
+  }, 100);
 }
 
 function renderPatterns(pats) {

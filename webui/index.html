@@ -24,6 +24,7 @@
         <button class="nav-item active" data-tab="setup"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg></span> Setup &amp; Sync</button>
         <button class="nav-item" data-tab="practice"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/></svg></span> Practice</button>
         <button class="nav-item" data-tab="learn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg></span> Learn</button>
+        <button class="nav-item" data-tab="companies"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="9" y1="13" x2="9" y2="13.01"/><line x1="9" y1="17" x2="9" y2="17.01"/></svg></span> Companies</button>
         <button class="nav-item" data-tab="interview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg></span> Interview</button>
         <button class="nav-item" data-tab="showcase"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></span> Showcase</button>
         <button class="nav-item" data-tab="insights"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="21" x2="5" y2="11"/><line x1="12" y1="21" x2="12" y2="4"/><line x1="19" y1="21" x2="19" y2="14"/></svg></span> Insights</button>
@@ -270,6 +271,36 @@
             <button class="btn ghost sm" id="ivQuit">Quit</button>
           </div>
           <div id="ivScorecard" class="reviewout md hidden"></div>
+        </div>
+      </section>
+
+      <!-- COMPANIES -->
+      <section class="page" id="page-companies">
+        <header class="hero"><h1>Company prep</h1><p>The most-asked LeetCode questions at top companies — ranked by frequency, matched against what you've already solved.</p></header>
+        <div class="card">
+          <div class="card-head"><h2>Pick a company</h2></div>
+          <div class="muted" style="margin-bottom:6px">Featured (FAANG &amp; placement favourites):</div>
+          <div id="coFeatured" class="co-featured"></div>
+          <div class="row" style="margin-top:10px">
+            <input id="coSearch" class="probsearch" placeholder="…or search all 650+ companies" spellcheck="false">
+            <select id="coSelect" class="sel wide"></select>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div class="seg" id="coPeriod"></div>
+          </div>
+        </div>
+
+        <div class="card hidden" id="coResult">
+          <div class="card-head">
+            <h2 id="coTitle">Questions</h2>
+            <span class="badge ok" id="coProgress"></span>
+          </div>
+          <div id="coSummary" class="co-summary"></div>
+          <div class="row" style="margin:8px 0">
+            <button class="btn btn-accent sm hidden" id="coPracticeNext">▶ Practice next (in-app)</button>
+            <button class="btn btn-ai sm hidden" id="coInterview">🎤 Mock interview from this list</button>
+          </div>
+          <div id="coTableWrap"></div>
         </div>
       </section>
 

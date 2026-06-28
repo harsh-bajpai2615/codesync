@@ -11,9 +11,13 @@ from app.constants import VERSION
 
 APP = ["app_main.py"]
 
-DATA_FILES = [("webui", [
-    "webui/index.html", "webui/app.js", "webui/style.css", "webui/sample-card.png",
-])]
+DATA_FILES = [
+    ("webui", [
+        "webui/index.html", "webui/app.js", "webui/style.css", "webui/sample-card.png",
+    ]),
+    # Bundled company-question catalog (resolved at runtime from Resources/data/).
+    ("data", ["app/data/companies.json"]),
+]
 
 OPTIONS = {
     "argv_emulation": False,
