@@ -23,28 +23,42 @@
 
 ## What is GitKosh?
 
-GitKosh is a macOS app with two halves that feed each other:
+GitKosh is a macOS app with three halves that feed each other:
 
-1. **Learn & practice** — a built-in code editor for the full **NeetCode 150 + Blind 75** (144 curated problems) with syntax highlighting, one-click **Run / Run tests**, and a progressive **AI review** that coaches you from a gentle hint all the way to a worked solution. Plus an offline AI DSA tutor, a pattern library, an algorithm visualizer, and a spaced-repetition **Quiz Me**.
-2. **Sync & showcase** — turn your scattered competitive-programming solves into a clean, organized, **documented** GitHub repository, automatically. Log into your accounts once; GitKosh pulls every accepted submission, writes a per-problem README (problem summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it all to GitHub. Put it on a daily schedule and it keeps running — even keeping your contribution graph green.
+1. **Learn & practice** — a built-in code editor for the full **NeetCode 150 + Blind 75** (144 curated problems) with syntax highlighting, one-click **Run / Run tests** in **Python, C++, Java & JavaScript**, and a progressive **AI review** (now **streaming**) that coaches you from a gentle hint to a worked solution. Plus a **mock-interview mode** (timed problem + AI interviewer + scorecard), an offline AI DSA tutor, a pattern library with **practice-this-pattern** drilldowns, an algorithm visualizer, and spaced-repetition **Quiz Me**.
+2. **Interview prep by company** — the most-asked LeetCode questions for **657 companies** (FAANG + placement favourites featured), matched against what you've already solved. Filter by difficulty / topic / unsolved, bookmark across companies, build a **multi-company target sheet**, and generate an **auto study plan** — a dated schedule that emphasizes your weak patterns and reminds you daily.
+3. **Sync & showcase** — turn your scattered competitive-programming solves into a clean, **documented** GitHub repository, automatically. GitKosh pulls every accepted submission, writes a per-problem README (summary → a numbered algorithm of *your* solution → complexity → key insight), and pushes it on a daily schedule — even keeping your contribution graph green. It can also **import your real past local work** onto the graph with honest dates.
 
 > It's a **mediator**, not an editor. Keep solving on the platforms you love; GitKosh archives and documents the work for you. Your passwords are never stored — it logs in through the system's WebKit cookie store.
 
 ## ✨ Features
 
-- **Solve in-app — 144 problems.** A built-in Python editor with **syntax highlighting** for the full **NeetCode 150 + Blind 75**: pick a problem, write your solution, **Run** it or **Run tests** against built-in cases — no browser, no setup. Your work is auto-saved per problem.
-- **Progressive AI review that won't just hand you the answer.** Stuck? It escalates one step at a time — *small hint → bigger hint → algorithm in bullets → pseudocode → worked solution*. Got it right? It reviews **time/space complexity, code quality, and concrete optimizations**. (Uses your AI provider; Ollama runs free & offline.)
-- **AI DSA tutor + pattern library + visualizer.** A chat tutor that explains concepts and gives nudges, a browsable library of the core patterns, and an animated sorting-algorithm visualizer — all in the **Learn** tab.
+### 🎯 Company interview prep
+- **Most-asked questions for 657 companies.** Pick a company (FAANG + Indian-placement "dream/super-dream" tier featured) and a recency window; see its top LeetCode questions ranked by frequency, each marked ✓ if you've already solved it and *“in-app”* if it's solvable in the built-in editor.
+- **Filter, sort & search everything.** Difficulty, **unsolved-only**, in-app-only, saved-only, **topic/pattern**, title search and multiple sorts — with per-difficulty progress bars.
+- **Personal saved list & bookmarks** across companies, plus a **Markdown checklist export**.
+- **Multi-company target sheet.** Shortlist up to 8 dream companies → one merged, de-duplicated sheet ranked by overlap (*asked at: Amazon, Google, Meta*) — the highest-leverage problems first.
+- **Auto study plan.** Turn any company/target view into a dated **N-week schedule** with balanced daily difficulty and an optional **weak-topic emphasis**; a Plan tab tracks progress and a daily reminder nudges you.
+
+### 🎓 Learn & practice
+- **Solve in-app in 4 languages — 144 problems.** A built-in editor with **syntax highlighting** for the full **NeetCode 150 + Blind 75**: **Run / Run tests** in **Python, C++, Java or JavaScript** (uses your local toolchains, with a clear install hint if one's missing). Your work is auto-saved per problem.
+- **Progressive, streaming AI review.** Stuck? It escalates one step at a time — *small hint → bigger hint → algorithm → pseudocode → worked solution* — **streamed token-by-token**. Got it right? It reviews **complexity, code quality, and optimizations**. (Ollama runs free & offline.)
+- **Mock interview mode.** A timed problem with an AI interviewer that probes your reasoning and edge cases, then a structured **scorecard** (overall hire signal, problem-solving, communication, complexity, code quality).
+- **AI DSA tutor + pattern library + visualizer.** A streaming chat tutor, a browsable pattern library with **🧩 practice-this-pattern** drilldowns into matching in-app problems, and an animated sorting visualizer.
+- **Launch review nudge.** A startup banner when spaced-repetition reviews are due, one click to start them.
+
+### 🔄 Sync, archive & showcase
 - **5 logins — that's the whole sync UI.** LeetCode, Codeforces, CodeChef, NeetCode, AtCoder, GeeksforGeeks + GitHub. A guided 3-step flow makes the order obvious.
 - **AI write-ups for every problem.** Problem summary → **numbered algorithm of your actual code** → time/space complexity → key insight, in clean Markdown.
-- **Auto-generated dashboard.** Your repo's front page becomes a living portfolio: totals, solving streak, difficulty/language/topic breakdowns, and an index of every problem.
+- **Import your real past work.** Point GitKosh at a local project folder and it archives it to your repo dated to when you *actually wrote it* — using real git author dates (or file timestamps) — so genuine work you never pushed shows on your contribution graph. Honest backdating, never fabricated.
+- **Auto-generated dashboard + polished portfolio site.** Your repo's front page and a one-click **GitHub Pages** site become a living portfolio: totals, streak, difficulty/language/platform/topic breakdowns, and a searchable index of every problem.
 - **Real-date commits.** Each solution is committed on the day you *actually solved it*, so your GitHub contribution graph reflects your true history — not one giant dump dated today.
 - **Interview-prep exports.** A *Browse by topic* (patterns) view in the dashboard, plus a `study/` folder: **Anki** cards, a **Notion** CSV, and a spaced-repetition **“revise these”** list — auto-generated from your solves.
 - **Shareable stats card.** An auto-updating image — solved count, streak, difficulty split, top topics — to embed in your GitHub **profile** README (one-click *Copy embed code*).
 - **One-click portfolio site.** Publish a searchable, themed **GitHub Pages** site of your solves straight from the app.
 - **Progress posts.** Generate dev.to / LinkedIn / X drafts from your recent solves — a built-in personal-brand engine.
 - **AI solution coach.** Every write-up honestly assesses whether *your* solution is optimal — and suggests a better approach (with complexity) when it isn't.
-- **Insights dashboard.** In-app analytics: topic strengths, difficulty mastery, pace & streak, “% optimal”, a *revisit* list, and copy-able **résumé bullets** (also saved as `insights.md`).
+- **Insights dashboard.** In-app analytics: a **per-topic strength** breakdown (difficulty-weighted, with coverage and an *underexplored patterns* callout), difficulty mastery, pace & streak, “% optimal”, a *revisit* list, and copy-able **résumé bullets** (also saved as `insights.md`).
 - **Quiz me.** Spaced-repetition recall — GitKosh shows a past problem and you recall the approach before revealing it.
 - **Contest tracker.** Upcoming rounds across Codeforces & LeetCode, plus your Codeforces rating curve — right in the app.
 - **Browser extension (beta).** A companion that captures accepted LeetCode submissions **in real time** and pushes to GitHub — so it works on **Windows & Linux** too.
@@ -60,7 +74,7 @@ GitKosh is a macOS app with two halves that feed each other:
 
 <div align="center"><img src="docs/webui-learn.png" width="620" alt="GitKosh Learn & Solve tab — in-app editor with the NeetCode 150 + Blind 75" /></div>
 
-Practice the full **NeetCode 150 + Blind 75** without leaving the app: a syntax-highlighted Python editor, **Run / Run tests**, an offline AI tutor, a pattern library, and an algorithm visualizer — all on one page.
+Practice the full **NeetCode 150 + Blind 75** without leaving the app: a syntax-highlighted editor that **runs Python, C++, Java & JavaScript**, **Run / Run tests**, a streaming AI tutor, a pattern library with practice drilldowns, and an algorithm visualizer — all on one page.
 
 <div align="center"><img src="docs/ide.png" width="620" alt="GitKosh in-app code editor with progressive AI review" /></div>
 
@@ -196,18 +210,28 @@ cd gitkosh
 Cut a release that installed copies will auto-update to:
 
 ```bash
-# bump VERSION in app/constants.py, then:
+# 1) bump VERSION (semver) in app/constants.py
+# 2) add a section for it to CHANGELOG.md  (release.sh pulls it into the notes)
+# 3) publish:
 ./release.sh
 ```
+
+`release.sh` enforces the bump — it validates semver and **refuses to re-ship an
+already-published version** (so installed copies always see a strictly higher
+version), warns on an uncommitted tree, and uses your CHANGELOG entry as the
+release notes. (Set `RELEASE_FORCE=1` only to re-upload assets for the same tag.)
 
 ## 📂 Project structure
 
 ```
-app/            macOS app — GUI, WebKit login, sync core, scheduler, updater, Ollama setup
-gitkosh/        platform extractors, README generator, GitHub helpers
+app/            macOS app — UI bridge, WebKit login, sync core, scheduler, updater,
+                runner (multi-language), companies/studyplan/backfill, insights, site
+app/data/       bundled company catalog (companies.json) + LeetCode topic map
+gitkosh/        platform extractors, README generator (+ streaming), GitHub helpers
 extension/      cross-platform browser extension (real-time LeetCode → GitHub)
+webui/          pywebview front-end (index.html / app.js / style.css)
 setup.py        py2app bundle config           build_app.sh   build .app + .dmg
-release.sh      build + publish a release       tools/         app-icon generator
+release.sh      build + publish a release       CHANGELOG.md   release notes source
 ```
 
 ## ⚠️ Notes & limitations
