@@ -5,9 +5,11 @@ All notable changes to GitKosh. This project follows [semantic versioning](https
 
 ## 1.1.1
 
-- **Voice-first mock interview** — the AI interviewer speaks its questions aloud and you answer by voice: tap-to-talk recording, on-device transcription (free & private, biased toward DSA vocabulary) with a Groq Whisper fallback, auto-listen after each question, barge-in, and a 🔊 voice toggle. Typed input remains as a fallback.
-- **Companies page polish** — featured companies show a tidy top-12 with a "+N more" expander instead of a wall of chips; window labels read "30 days" not "thirty-days".
-- Interview hardening: stop audio when leaving the tab/scoring, generation-guarded TTS callbacks, clearer transcription errors.
+- **Voice-first mock interview** — the AI interviewer **speaks** its questions aloud and you **answer by voice**: tap-to-talk recording, transcription (Apple Speech, biased toward DSA vocabulary; Groq Whisper when a key is set), auto-listen after each question, barge-in, and a 🔊 voice toggle. Typed input remains as a fallback.
+- **Sharper interviewer, optional & isolated** — turn on **Groq just for the interview & voice** from the Interview tab (with an in-app key field + step-by-step guide). It runs Llama 3.3 70B without changing your main AI engine, so Ollama keeps powering write-ups/tutor for free.
+- **Companies page polish** — featured companies show a tidy top-12 with a "+N more" expander instead of a wall of chips; recency labels read "30 days", not "thirty-days".
+- **Reliability fix** — a corrupted `config.yaml` (from non-atomic concurrent writes) could break the whole app; config and review data are now written atomically and a bad config self-heals (backed up + reset) instead of bricking the app.
+- Interview hardening: stop audio when leaving the tab / scoring, generation-guarded speech callbacks, and clear, actionable transcription errors.
 
 ## 1.1.0
 
