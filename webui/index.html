@@ -24,6 +24,7 @@
         <button class="nav-item active" data-tab="setup"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg></span> Setup &amp; Sync</button>
         <button class="nav-item" data-tab="practice"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/></svg></span> Practice</button>
         <button class="nav-item" data-tab="learn"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/></svg></span> Learn</button>
+        <button class="nav-item" data-tab="interview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8A8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg></span> Interview</button>
         <button class="nav-item" data-tab="showcase"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></span> Showcase</button>
         <button class="nav-item" data-tab="insights"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="5" y1="21" x2="5" y2="11"/><line x1="12" y1="21" x2="12" y2="4"/><line x1="19" y1="21" x2="19" y2="14"/></svg></span> Insights</button>
         <button class="nav-item" data-tab="contests"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v4a6 6 0 0 1-12 0V4z"/><path d="M6 6H3.5v1A3 3 0 0 0 6.5 10"/><path d="M18 6h2.5v1a3 3 0 0 1-3 3"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="9.5" y1="21" x2="11.3" y2="17"/><line x1="14.5" y1="21" x2="12.7" y2="17"/></svg></span> Contests</button>
@@ -227,6 +228,48 @@
           </div>
           <canvas id="vizCanvas" class="viz"></canvas>
           <div class="row" style="margin-top:10px"><button class="btn btn-accent" id="vizPlay">▶ Play</button><button class="btn" id="vizStop" disabled>■ Stop</button><button class="btn" id="vizShuffle">Shuffle</button></div>
+        </div>
+      </section>
+
+      <!-- INTERVIEW -->
+      <section class="page" id="page-interview">
+        <header class="hero"><h1>Mock interview</h1><p>A timed problem with an AI interviewer who probes your reasoning, then scores you.</p></header>
+        <div class="card" id="ivSetup">
+          <div class="card-head"><h2>Start a session</h2></div>
+          <div class="row">
+            <select id="ivProblem" class="sel wide"></select>
+            <button class="btn" id="ivRandom" title="Pick a random problem">🎲 Random</button>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn btn-accent" id="ivStart">▶ Start interview</button>
+          </div>
+        </div>
+
+        <div class="card hidden" id="ivLive">
+          <div class="card-head">
+            <h2 id="ivTitle">Interview</h2>
+            <span class="iv-timer" id="ivTimer">00:00</span>
+          </div>
+          <div id="ivStatement" class="statement"></div>
+          <div class="iv-grid">
+            <div class="iv-col">
+              <div class="codewrap" id="ivCodewrap">
+                <textarea id="ivCode" class="editor code" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off" placeholder="Sketch your code here as you talk it through…"></textarea>
+              </div>
+            </div>
+            <div class="iv-col">
+              <div id="ivChat" class="iv-chat"></div>
+              <div class="iv-input">
+                <input id="ivInput" class="chat-input" placeholder="Type your thoughts, then Enter…">
+                <button class="btn btn-accent sm" id="ivSend">Send</button>
+              </div>
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn btn-ai" id="ivScore">End &amp; get scorecard</button>
+            <button class="btn ghost sm" id="ivQuit">Quit</button>
+          </div>
+          <div id="ivScorecard" class="reviewout md hidden"></div>
         </div>
       </section>
 

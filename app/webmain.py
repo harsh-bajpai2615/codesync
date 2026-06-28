@@ -452,6 +452,72 @@ class Api:
         out = _ask_stream(self._tutor_prompt(history), stream_id)
         return out or _ai_hint()
 
+    # ---- mock interview ----
+    _IV_SYSTEM = (
+        "You are a senior software engineer conducting a real coding interview at a top tech company. "
+        "Be professional, warm but rigorous, and CONCISE — one short turn at a time. Drive the interview: "
+        "ask the candidate to clarify assumptions, justify their approach, analyze time/space complexity, "
+        "handle edge cases, and improve a brute-force answer. Probe with pointed follow-up questions. "
+        "Give only a small nudge if they're truly stuck — NEVER write the solution for them. "
+        "Ask ONE focused question per turn. Reply in short GitHub-flavored Markdown.")
+
+    @staticmethod
+    def _iv_convo(history):
+        return "\n".join(
+            f"{'Candidate' if m.get('role') == 'user' else 'Interviewer'}: {m.get('content', '')}"
+            for m in (history or [])[-16:])
+
+    def interview_problems(self):
+        return problems.listing()
+
+    def interview_start(self, pid=""):
+        pool = problems.listing()
+        if not pool:
+            return {"ok": False, "error": "No problems available."}
+        if not pid:
+            import random
+            pid = random.choice(pool)["id"]
+        prob = problems.get(pid)
+        if not prob:
+            return {"ok": False, "error": "Unknown problem."}
+        opener = (
+            f"Hi! I'll be your interviewer today. Let's work on **{prob['title']}** "
+            f"({prob['difficulty']} · {prob['topic']}).\n\n"
+            "Take a moment to read it, then walk me through your initial thoughts — what's your first "
+            "approach, and what's its time and space complexity? Ask me anything you'd like to clarify.")
+        return {"ok": True, "pid": pid, "problem": prob, "opener": opener}
+
+    def interview_reply(self, history, pid, code="", stream_id=""):
+        prob = problems.get(pid) or {}
+        prompt = (
+            self._IV_SYSTEM
+            + f"\n\n## Problem\n{prob.get('title', '')} ({prob.get('difficulty', '')})\n{prob.get('statement', '')}\n\n"
+            + f"## Candidate's current code (may be incomplete)\n```python\n{code or '(nothing yet)'}\n```\n\n"
+            + f"## Transcript so far\n{self._iv_convo(history)}\n\n"
+            + "Respond as the interviewer for your next turn only.")
+        return _ask_stream(prompt, stream_id) or _ai_hint()
+
+    def interview_score(self, history, pid, code="", elapsed_sec=0):
+        prob = problems.get(pid) or {}
+        test_section = ""
+        if code and code.strip() and pid in problems.TESTED:
+            tr = problems.run_tests(code, pid)
+            v = "ALL TESTS PASSED" if tr.get("ok") else f"{tr.get('passed', 0)}/{tr.get('total', 0)} passed"
+            test_section = f"## Automated test results\n{v}\n\n"
+        mins = max(0, int(elapsed_sec)) // 60
+        prompt = (
+            "You are a senior interviewer writing the post-interview scorecard. Be fair, specific and "
+            "constructive — cite concrete moments from the transcript. Reply in GitHub-flavored Markdown "
+            "with EXACTLY these sections:\n"
+            "### 🎯 Overall — X/10\nOne-line verdict and a hire signal (Strong No / No / Lean No / Lean Yes / Yes / Strong Yes).\n"
+            "### 🧠 Problem solving\n### 🗣 Communication\n### ⏱ Complexity analysis\n### 🧹 Code quality\n"
+            "### ✅ Strengths\n### 📈 To improve\nKeep each section to 1–3 tight bullets.\n\n"
+            f"## Problem\n{prob.get('title', '')} ({prob.get('difficulty', '')})\n{prob.get('statement', '')}\n\n"
+            f"Time taken: ~{mins} min.\n\n{test_section}"
+            f"## Candidate's final code\n```python\n{code or '(none)'}\n```\n\n"
+            f"## Transcript\n{self._iv_convo(history)}")
+        return _ask(prompt) or _ai_hint()
+
     def get_onboarded(self):
         return bool(load_config().get("onboarded"))
 

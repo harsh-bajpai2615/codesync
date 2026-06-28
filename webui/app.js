@@ -57,6 +57,7 @@ function switchTab(tab, item) {
   if (tab === "showcase") renderCard();
   if (tab === "practice") renderPractice();
   if (tab === "learn") renderLearn();
+  if (tab === "interview") renderInterview();
 }
 $$(".nav-item").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab, b)));
 
@@ -706,6 +707,79 @@ async function aiReview() {
     (t) => { box.innerHTML = mdLite(t); });
   box.innerHTML = mdLite(r || "Couldn't review — check your AI engine in Setup.");
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+/* ---------- mock interview ---------- */
+let IV = { init: false, pid: null, chat: [], t0: 0, timer: null, running: false };
+async function renderInterview() {
+  if (!IV.init) {
+    IV.init = true;
+    const sel = $("#ivProblem");
+    const list = api() ? (await act("interview_problems") || []) : SAMPLE_PROBLEMS;
+    sel.innerHTML = list.map((p) => `<option value="${p.id}">${esc(p.title)} · ${esc(p.difficulty)}</option>`).join("");
+    $("#ivRandom").addEventListener("click", () => {
+      const opts = sel.options; if (opts.length) sel.selectedIndex = Math.floor(Math.random() * opts.length);
+    });
+    $("#ivStart").addEventListener("click", () => startInterview(sel.value));
+    $("#ivSend").addEventListener("click", ivSend);
+    $("#ivInput").addEventListener("keydown", (e) => { if (e.key === "Enter") ivSend(); });
+    $("#ivScore").addEventListener("click", ivScore);
+    $("#ivQuit").addEventListener("click", ivQuit);
+  }
+}
+function ivRenderChat() {
+  const c = $("#ivChat");
+  c.innerHTML = IV.chat.map((m) =>
+    `<div class="msg ${m.role === "user" ? "user" : "bot"}${m.content === "…" ? " typing" : ""}">${m.role === "user" ? esc(m.content) : mdLite(m.content)}</div>`).join("");
+  c.scrollTop = c.scrollHeight;
+}
+function ivTick() {
+  const s = Math.floor((Date.now() - IV.t0) / 1000);
+  const mm = String(Math.floor(s / 60)).padStart(2, "0"), ss = String(s % 60).padStart(2, "0");
+  $("#ivTimer").textContent = `${mm}:${ss}`;
+}
+async function startInterview(pid) {
+  if (!api()) { toast("Mock interview runs inside GitKosh with an AI engine on."); return; }
+  const r = await act("interview_start", pid);
+  if (!r || !r.ok) { toast((r && r.error) || "Couldn't start the interview."); return; }
+  IV.pid = r.pid; IV.chat = [{ role: "bot", content: r.opener }]; IV.running = true;
+  $("#ivSetup").classList.add("hidden"); $("#ivLive").classList.remove("hidden");
+  $("#ivScorecard").classList.add("hidden"); $("#ivScorecard").innerHTML = "";
+  $("#ivTitle").textContent = `${r.problem.title} · ${r.problem.difficulty}`;
+  $("#ivStatement").textContent = r.problem.statement || "";
+  $("#ivCode").value = r.problem.starter || "";
+  ivRenderChat();
+  IV.t0 = Date.now(); clearInterval(IV.timer); IV.timer = setInterval(ivTick, 1000); ivTick();
+  $("#ivInput").focus();
+}
+async function ivSend(text) {
+  if (!IV.running) return;
+  text = (text || $("#ivInput").value).trim(); if (!text) return;
+  $("#ivInput").value = "";
+  IV.chat.push({ role: "user", content: text });
+  const idx = IV.chat.push({ role: "bot", content: "…", pending: true }) - 1;
+  ivRenderChat();
+  $("#ivSend").disabled = true;
+  const hist = IV.chat.filter((m) => !m.pending);
+  const reply = await streamAsk("interview_reply", [hist, IV.pid, $("#ivCode").value],
+    (t) => { IV.chat[idx] = { role: "bot", content: t }; ivRenderChat(); });
+  IV.chat[idx] = { role: "bot", content: reply || "Let's continue — what's your next step?" };
+  ivRenderChat();
+  $("#ivSend").disabled = false; $("#ivInput").focus();
+}
+async function ivScore() {
+  if (!IV.pid) return;
+  const box = $("#ivScorecard"); box.classList.remove("hidden");
+  box.innerHTML = `<div class="md-loading">📋 Scoring your interview…</div>`;
+  const elapsed = Math.floor((Date.now() - IV.t0) / 1000);
+  clearInterval(IV.timer); IV.running = false;
+  const r = await act("interview_score", IV.chat.filter((m) => !m.pending), IV.pid, $("#ivCode").value, elapsed);
+  box.innerHTML = mdLite(r || "Couldn't produce a scorecard — check your AI engine in Setup.");
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function ivQuit() {
+  clearInterval(IV.timer); IV.running = false; IV.pid = null; IV.chat = [];
+  $("#ivLive").classList.add("hidden"); $("#ivSetup").classList.remove("hidden");
 }
 
 function renderPatterns(pats) {

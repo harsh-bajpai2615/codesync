@@ -337,3 +337,17 @@ a.lc:hover{text-decoration:underline}
 .bf-table th{color:var(--mut);font-weight:600}
 .bf-table td:last-child{text-align:right;color:var(--mut)}
 #bfPath{font-size:12px;word-break:break-all}
+
+/* ---- mock interview ---- */
+.iv-timer{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;color:var(--acc,#7c5cfc);background:rgba(124,92,252,.12);padding:3px 10px;border-radius:8px}
+.iv-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+@media (max-width:900px){.iv-grid{grid-template-columns:1fr}}
+.iv-col{min-width:0;display:flex;flex-direction:column}
+.iv-chat{flex:1;min-height:260px;max-height:46vh;overflow-y:auto;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.02)}
+.iv-chat .msg{margin:8px 0;padding:8px 12px;border-radius:10px;font-size:14px;line-height:1.5}
+.iv-chat .msg.user{background:rgba(124,92,252,.16);margin-left:24px}
+.iv-chat .msg.bot{background:rgba(255,255,255,.04);margin-right:24px}
+.iv-chat .msg.bot.typing{opacity:.7}
+.iv-input{display:flex;gap:8px;margin-top:10px}
+.iv-input .chat-input{flex:1}
+#ivCode{min-height:300px}
