@@ -74,6 +74,7 @@
             </div>
             <div class="muted hidden" id="keyHint" style="margin:10px 0 0">
               Free keys: aistudio.google.com/apikey · console.groq.com</div>
+            <div class="iv-engine-hint">🎤 Want a sharper <b>mock interviewer</b> without changing this engine? You can use <b>Groq just for interviews &amp; voice</b> — set it up in the <b>Interview</b> tab. Your main engine here stays free/local.</div>
           </div>
         </div>
 
@@ -254,6 +255,23 @@
           </div>
           <div class="row" style="margin-top:10px">
             <button class="btn btn-accent" id="ivStart">▶ Start interview</button>
+          </div>
+
+          <div class="iv-engine">
+            <label class="co-check"><input type="checkbox" id="ivUseGroq"> 🎤 Use <b>Groq</b> for a sharper interviewer &amp; accurate voice <span class="muted">(recommended — used only here)</span></label>
+            <div id="ivGroqBox" class="iv-groqbox hidden">
+              <p class="muted">Groq runs <b>Llama&nbsp;3.3&nbsp;70B</b> — far better than the small local model. It's used <b>only for the interview &amp; voice</b>; your main AI engine (in Setup) stays exactly as it is, so you don't spend Groq on anything else. The free tier is plenty.</p>
+              <ol class="iv-roadmap">
+                <li>Open <b>console.groq.com</b> → <b>Sign in</b> (Google/GitHub, free, no card).</li>
+                <li>Left sidebar → <b>API Keys</b> → <b>Create API Key</b> → copy the <code>gsk_…</code> value.</li>
+                <li>Paste it below and click <b>Save key</b>.</li>
+              </ol>
+              <div class="row">
+                <input id="ivGroqKey" class="chat-input" type="password" placeholder="gsk_…" spellcheck="false" autocomplete="off">
+                <button class="btn btn-accent sm" id="ivGroqSave">Save key</button>
+              </div>
+              <div class="muted" id="ivEngineStatus" style="margin-top:8px"></div>
+            </div>
           </div>
         </div>
 

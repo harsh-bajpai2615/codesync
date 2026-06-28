@@ -480,3 +480,18 @@ a.lc:hover{text-decoration:underline}
 .co-featured{gap:8px}
 .co-chip.co-more{background:transparent;border-style:dashed;border-color:rgba(124,92,252,.5);color:#b9a7ff;font-weight:600}
 .co-chip.co-more:hover{background:rgba(124,92,252,.12)}
+
+/* ---- interview: dedicated Groq engine setup ---- */
+.iv-engine{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+.iv-engine .co-check{font-size:13.5px}
+.iv-groqbox{margin-top:10px;padding:14px;border-radius:12px;background:rgba(124,92,252,.07);border:1px solid rgba(124,92,252,.25)}
+.iv-groqbox p{margin:0 0 8px;font-size:13px;line-height:1.55}
+.iv-roadmap{margin:0 0 12px;padding-left:20px;font-size:13px;line-height:1.7}
+.iv-roadmap code,.iv-groqbox code{background:rgba(255,255,255,.1);padding:1px 5px;border-radius:5px;font-size:12px}
+#ivGroqKey{flex:1}
+#ivEngineStatus.ok{color:#4ade80}
+
+/* ---- setup: interview-engine pointer ---- */
+.iv-engine-hint{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:12.5px;line-height:1.55;
+  background:rgba(124,92,252,.08);border:1px solid rgba(124,92,252,.22);color:var(--mut)}
+.iv-engine-hint b{color:var(--ink)}

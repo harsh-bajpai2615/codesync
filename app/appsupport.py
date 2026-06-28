@@ -27,6 +27,9 @@ DEFAULT_CONFIG = {
         "mode": "llm",
         "llm": {"provider": "gemini", "model": "gemini-2.5-flash", "api_key": ""},
     },
+    # A Groq key used ONLY for the mock interview + voice (so the main AI engine
+    # above can stay on free/local Ollama). Off unless the user sets a key here.
+    "interview": {"use_groq": False, "groq_key": ""},
     "watch": {"interval_minutes": 15},
     "paths": {"state_dir": str(STATE_DIR)},
 }

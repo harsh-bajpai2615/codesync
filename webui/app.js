@@ -782,7 +782,31 @@ async function renderInterview() {
     $("#ivQuit").addEventListener("click", ivQuit);
     $("#ivMic").addEventListener("click", voiceToggleRec);
     $("#ivVoiceToggle").addEventListener("click", toggleVoice);
+    $("#ivUseGroq").addEventListener("change", async (ev) => {
+      $("#ivGroqBox").classList.toggle("hidden", !ev.target.checked);
+      await act("set_interview_use_groq", ev.target.checked);
+      renderIvEngine();
+    });
+    $("#ivGroqSave").addEventListener("click", async () => {
+      const k = $("#ivGroqKey").value.trim();
+      if (!k) { toast("Paste your gsk_… key first."); return; }
+      if (!k.startsWith("gsk_")) { toast("That doesn't look like a Groq key (it starts with gsk_)."); return; }
+      const r = await act("set_interview_groq", k);
+      $("#ivGroqKey").value = "";
+      if (r) { toast("Saved — interviews now use Groq 🎤"); renderIvEngine(); }
+    });
   }
+  renderIvEngine();
+}
+async function renderIvEngine() {
+  const e = api() ? await act("interview_engine") : { use_groq: false, has_key: false, main_provider: "ollama" };
+  if (!e) return;
+  $("#ivUseGroq").checked = !!e.use_groq;
+  $("#ivGroqBox").classList.toggle("hidden", !e.use_groq);
+  const st = $("#ivEngineStatus");
+  if (e.use_groq && e.has_key) { st.className = "ok"; st.textContent = "✓ Using Groq (Llama 3.3 70B) for the interview & voice — your main engine is untouched."; }
+  else if (e.use_groq && !e.has_key) { st.className = ""; st.textContent = "Add your Groq key above to activate."; }
+  else { st.className = ""; st.textContent = `Currently using your main AI engine (${e.main_provider}). Turn on Groq above for a much sharper interviewer.`; }
 }
 function ivRenderChat() {
   const c = $("#ivChat");

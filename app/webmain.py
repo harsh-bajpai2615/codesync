@@ -147,10 +147,19 @@ def _wrap(prompt):
             "Write ONLY your response, in GitHub-flavored Markdown, after the marker line.\n" + _SENTINEL + "\n")
 
 
-def _ask(prompt):
+def _readme_cfg(override=None):
+    """The LLM config to use. `override` (e.g. the interview's dedicated Groq engine)
+    takes precedence over the main AI engine."""
+    if override:
+        return override
+    return load_config()["readme"]
+
+
+def _ask(prompt, readme_cfg=None):
     cfg = load_config()
-    _ensure_ollama_ready(cfg)
-    rg = ReadmeGenerator(cfg["readme"])
+    if not readme_cfg:
+        _ensure_ollama_ready(cfg)
+    rg = ReadmeGenerator(readme_cfg or cfg["readme"])
     out = rg.freeform(_wrap(prompt)) or ""
     if _SENTINEL in out:
         out = out.rsplit(_SENTINEL, 1)[-1]
@@ -163,13 +172,14 @@ def _emit_stream(stream_id, text):
     _js(f"window.gkStream && window.gkStream({json.dumps(stream_id)}, {json.dumps(text)})")
 
 
-def _ask_stream(prompt, stream_id):
+def _ask_stream(prompt, stream_id, readme_cfg=None):
     """Stream an answer to the UI (keyed by stream_id) and return the full text.
     The UI receives the cumulative post-marker text on each chunk and just
     re-renders it, so it never has to reassemble deltas."""
     cfg = load_config()
-    _ensure_ollama_ready(cfg)
-    rg = ReadmeGenerator(cfg["readme"])
+    if not readme_cfg:
+        _ensure_ollama_ready(cfg)
+    rg = ReadmeGenerator(readme_cfg or cfg["readme"])
     buf = []
 
     def on_chunk(piece):
@@ -488,6 +498,38 @@ class Api:
             f"{'Candidate' if m.get('role') == 'user' else 'Interviewer'}: {m.get('content', '')}"
             for m in (history or [])[-16:])
 
+    # A Groq engine dedicated to interviews + voice, independent of the main AI engine.
+    @staticmethod
+    def _interview_engine_cfg():
+        iv = load_config().get("interview") or {}
+        key = (iv.get("groq_key") or "").strip()
+        if iv.get("use_groq") and key:
+            return {"mode": "llm", "llm": {"provider": "groq",
+                    "model": DEFAULT_MODELS.get("groq", "llama-3.3-70b-versatile"), "api_key": key}}
+        return None  # fall back to the main AI engine
+
+    def interview_engine(self):
+        iv = load_config().get("interview") or {}
+        main = ((load_config().get("readme") or {}).get("llm") or {}).get("provider", "ollama")
+        return {"use_groq": bool(iv.get("use_groq")),
+                "has_key": bool((iv.get("groq_key") or "").strip()), "main_provider": main}
+
+    def set_interview_groq(self, key):
+        cfg = load_config()
+        iv = cfg.setdefault("interview", {})
+        key = (key or "").strip()
+        iv["groq_key"] = key
+        iv["use_groq"] = bool(key)  # setting a key turns it on
+        save_config(cfg)
+        return self.interview_engine()
+
+    def set_interview_use_groq(self, on):
+        cfg = load_config()
+        iv = cfg.setdefault("interview", {})
+        iv["use_groq"] = bool(on)
+        save_config(cfg)
+        return self.interview_engine()
+
     def interview_problems(self):
         return problems.listing()
 
@@ -516,7 +558,7 @@ class Api:
             + f"## Candidate's current code (may be incomplete)\n```python\n{code or '(nothing yet)'}\n```\n\n"
             + f"## Transcript so far\n{self._iv_convo(history)}\n\n"
             + "Respond as the interviewer for your next turn only.")
-        return _ask_stream(prompt, stream_id) or _ai_hint()
+        return _ask_stream(prompt, stream_id, self._interview_engine_cfg()) or _ai_hint()
 
     # ---- voice mock interview ----
     def voice_status(self):
@@ -537,10 +579,13 @@ class Api:
 
     def voice_stop(self, hints=None):
         try:
-            # Stored Groq key (any provider) is the preferred / fallback STT engine.
-            llm = (load_config().get("readme", {}) or {}).get("llm", {}) or {}
-            key = (llm.get("api_key") or "").strip()
-            groq_key = key if key.startswith("gsk_") else ""
+            cfg = load_config()
+            # Prefer the interview's dedicated Groq key; else any stored Groq key.
+            iv = cfg.get("interview") or {}
+            groq_key = (iv.get("groq_key") or "").strip() if iv.get("use_groq") else ""
+            if not groq_key:
+                key = ((cfg.get("readme") or {}).get("llm") or {}).get("api_key", "").strip()
+                groq_key = key if key.startswith("gsk_") else ""
             return voice.stop_and_transcribe(groq_key, hints or [])
         except Exception as e:  # noqa: BLE001
             import traceback; traceback.print_exc()
@@ -754,7 +799,7 @@ class Api:
             f"Time taken: ~{mins} min.\n\n{test_section}"
             f"## Candidate's final code\n```python\n{code or '(none)'}\n```\n\n"
             f"## Transcript\n{self._iv_convo(history)}")
-        return _ask(prompt) or _ai_hint()
+        return _ask(prompt, self._interview_engine_cfg()) or _ai_hint()
 
     def get_onboarded(self):
         return bool(load_config().get("onboarded"))
