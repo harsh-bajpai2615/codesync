@@ -211,6 +211,22 @@ async function act(method, ...args) {
   if (!a) { toast("Preview mode — run inside GitKosh to use this."); return null; }
   try { return await a[method](...args); } catch (e) { toast("Error: " + e); return null; }
 }
+
+/* ---------- streaming (token-by-token AI) ---------- */
+// Python emits window.gkStream(id, cumulativeText) per chunk; we route it to the
+// registered handler. streamAsk resolves with the final full text when done.
+let _streamSeq = 0;
+window._streams = window._streams || {};
+window.gkStream = (id, text) => { const h = window._streams[id]; if (h) h(text); };
+async function streamAsk(method, args, onChunk) {
+  const a = api();
+  if (!a) { toast("Preview mode — run inside GitKosh to use this."); return null; }
+  const id = "s" + (++_streamSeq);
+  window._streams[id] = onChunk;
+  try { return await a[method](...args, id); }
+  catch (e) { toast("Error: " + e); return null; }
+  finally { delete window._streams[id]; }
+}
 $("#btnGithub").addEventListener("click", connectGithub);
 async function connectGithub() {
   if (!api()) { toast("Open this inside GitKosh to connect GitHub."); return; }
@@ -478,8 +494,14 @@ async function sendChat(text) {
     }
   }, 9000);
   let reply;
-  if (api()) reply = await act("tutor_chat", chat.filter((m) => !m.pending));
-  else reply = "(Preview) Open GitKosh with an AI engine to chat. Tip: identify the pattern, find the invariant, then improve on brute force.";
+  if (api()) {
+    const hist = chat.filter((m) => !m.pending);
+    reply = await streamAsk("tutor_chat_stream", [hist], (t) => {
+      // Live-update the placeholder bubble as tokens arrive.
+      chat[idx] = { role: "bot", content: t };
+      renderChat();
+    });
+  } else reply = "(Preview) Open GitKosh with an AI engine to chat. Tip: identify the pattern, find the invariant, then improve on brute force.";
   clearTimeout(warm);
   chat[idx] = { role: "bot", content: reply || "No reply — check your AI engine in Setup (Ollama recommended)." };
   renderChat();
@@ -646,7 +668,8 @@ async function aiReview() {
   box.classList.remove("hidden");
   reviewAttempts[pid] = (reviewAttempts[pid] || 0) + 1;
   box.innerHTML = `<div class="md-loading">✨ Reviewing your solution… <span class="muted">(local model may take a few seconds)</span></div>`;
-  const r = await act("ai_review", $("#editor").value, pid, reviewAttempts[pid]);
+  const r = await streamAsk("ai_review_stream", [$("#editor").value, pid, reviewAttempts[pid]],
+    (t) => { box.innerHTML = mdLite(t); });
   box.innerHTML = mdLite(r || "Couldn't review — check your AI engine in Setup.");
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }

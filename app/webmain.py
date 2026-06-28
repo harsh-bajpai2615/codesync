@@ -135,16 +135,48 @@ def _ai_hint():
             "in **Setup → AI engine**. (Tip: **Ollama** runs locally with no key.)")
 
 
+def _wrap(prompt):
+    return (prompt.rstrip() + "\n\nIMPORTANT: Do not repeat this prompt, the problem, or the user's code. "
+            "Write ONLY your response, in GitHub-flavored Markdown, after the marker line.\n" + _SENTINEL + "\n")
+
+
 def _ask(prompt):
     cfg = load_config()
     _ensure_ollama_ready(cfg)
     rg = ReadmeGenerator(cfg["readme"])
-    full = (prompt.rstrip() + "\n\nIMPORTANT: Do not repeat this prompt, the problem, or the user's code. "
-            "Write ONLY your response, in GitHub-flavored Markdown, after the marker line.\n" + _SENTINEL + "\n")
-    out = rg.freeform(full) or ""
+    out = rg.freeform(_wrap(prompt)) or ""
     if _SENTINEL in out:
         out = out.rsplit(_SENTINEL, 1)[-1]
     return out.strip()
+
+
+def _emit_stream(stream_id, text):
+    if not stream_id:
+        return
+    _js(f"window.gkStream && window.gkStream({json.dumps(stream_id)}, {json.dumps(text)})")
+
+
+def _ask_stream(prompt, stream_id):
+    """Stream an answer to the UI (keyed by stream_id) and return the full text.
+    The UI receives the cumulative post-marker text on each chunk and just
+    re-renders it, so it never has to reassemble deltas."""
+    cfg = load_config()
+    _ensure_ollama_ready(cfg)
+    rg = ReadmeGenerator(cfg["readme"])
+    buf = []
+
+    def on_chunk(piece):
+        buf.append(piece)
+        text = "".join(buf)
+        if _SENTINEL in text:  # only reveal what the model writes after the marker
+            _emit_stream(stream_id, text.rsplit(_SENTINEL, 1)[-1].lstrip())
+
+    out = rg.freeform_stream(_wrap(prompt), on_chunk) or ""
+    if _SENTINEL in out:
+        out = out.rsplit(_SENTINEL, 1)[-1]
+    out = out.strip()
+    _emit_stream(stream_id, out)  # final, clean render
+    return out
 
 
 class Api:
@@ -354,14 +386,22 @@ class Api:
         return srs.stats(_items(), STATE_DIR)
 
     # ---- learn (AI tutor + in-app practice) ----
-    def tutor_chat(self, history):
+    _TUTOR_SYSTEM = (
+        "You are an expert, encouraging data-structures & algorithms tutor. Answer clearly and "
+        "concisely with well-structured GitHub-flavored Markdown — use short headings, bullet lists "
+        "and fenced code blocks where helpful. When asked for a hint, give a nudge; don't dump the "
+        "full solution unless explicitly asked.\n\nConversation so far:\n")
+
+    def _tutor_prompt(self, history):
         convo = "\n".join(f"{'Student' if m.get('role') == 'user' else 'Tutor'}: {m.get('content', '')}"
                           for m in (history or [])[-12:])
-        out = _ask(
-            "You are an expert, encouraging data-structures & algorithms tutor. Answer clearly and "
-            "concisely with well-structured GitHub-flavored Markdown — use short headings, bullet lists "
-            "and fenced code blocks where helpful. When asked for a hint, give a nudge; don't dump the "
-            "full solution unless explicitly asked.\n\nConversation so far:\n" + convo)
+        return self._TUTOR_SYSTEM + convo
+
+    def tutor_chat(self, history):
+        return _ask(self._tutor_prompt(history)) or _ai_hint()
+
+    def tutor_chat_stream(self, history, stream_id=""):
+        out = _ask_stream(self._tutor_prompt(history), stream_id)
         return out or _ai_hint()
 
     def get_onboarded(self):
@@ -419,10 +459,11 @@ class Api:
     def run_tests(self, code, pid):
         return problems.run_tests(code or "", pid)
 
-    def ai_review(self, code, pid, attempt=1):
+    def _review_body(self, code, pid, attempt):
+        """Build the AI-review prompt. Returns (body, None) or (None, message)."""
         prob = problems.get(pid)
         if not prob:
-            return "Unknown problem."
+            return None, "Unknown problem."
         code = (code or "").strip()
         try:
             attempt = max(1, int(attempt))
@@ -479,8 +520,20 @@ class Api:
             body = (header + "FIRST decide if the solution is correct and complete for all valid inputs "
                     "(treat an empty/stub body as incorrect).\n\nIf CORRECT:\n" + review_branch
                     + "\n\nIf NOT correct:\n" + ladder)
+        return body, None
 
-        out = _ask(body)
+    def ai_review(self, code, pid, attempt=1):
+        body, msg = self._review_body(code, pid, attempt)
+        if msg is not None:
+            return msg
+        return _ask(body) or _ai_hint()
+
+    def ai_review_stream(self, code, pid, attempt=1, stream_id=""):
+        body, msg = self._review_body(code, pid, attempt)
+        if msg is not None:
+            _emit_stream(stream_id, msg)
+            return msg
+        out = _ask_stream(body, stream_id)
         return out or _ai_hint()
 
     def grade_answer(self, key, answer):

@@ -6,6 +6,7 @@ LLM provider is pluggable — Gemini, Groq, or a local Ollama model via their HT
 """
 from __future__ import annotations
 
+import json
 import os
 import time
 from typing import TYPE_CHECKING
@@ -142,6 +143,69 @@ _PROVIDERS = {
     "ollama": _gen_openai_compatible,
 }
 
+
+# ---------- streaming providers ----------
+# Each yields incremental text via on_chunk(delta) and returns the full text, so
+# the UI can render an answer token-by-token instead of after a long wait.
+def _stream_openai_compatible(prompt, model, api_key, base_url, on_chunk):
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    payload = {"model": model, "messages": [{"role": "user", "content": prompt}], "stream": True}
+    full = []
+    with requests.post(f"{base_url.rstrip('/')}/chat/completions",
+                       headers=headers, json=payload, timeout=180, stream=True) as r:
+        r.raise_for_status()
+        for line in r.iter_lines(decode_unicode=True):
+            if not line:
+                continue
+            if line.startswith("data:"):
+                line = line[5:].strip()
+            if line == "[DONE]":
+                break
+            try:
+                obj = json.loads(line)
+            except ValueError:
+                continue
+            delta = (obj.get("choices") or [{}])[0].get("delta", {}).get("content")
+            if delta:
+                full.append(delta)
+                on_chunk(delta)
+    return "".join(full)
+
+
+def _stream_gemini(prompt, model, api_key, base_url, on_chunk):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent"
+    full = []
+    with requests.post(url, params={"key": api_key, "alt": "sse"},
+                       json={"contents": [{"parts": [{"text": prompt}]}]},
+                       timeout=180, stream=True) as r:
+        r.raise_for_status()
+        for line in r.iter_lines(decode_unicode=True):
+            if not line or not line.startswith("data:"):
+                continue
+            data = line[5:].strip()
+            if data == "[DONE]":
+                break
+            try:
+                obj = json.loads(data)
+            except ValueError:
+                continue
+            for cand in obj.get("candidates", []):
+                for part in cand.get("content", {}).get("parts", []):
+                    t = part.get("text")
+                    if t:
+                        full.append(t)
+                        on_chunk(t)
+    return "".join(full)
+
+
+_STREAM_PROVIDERS = {
+    "gemini": _stream_gemini,
+    "groq": _stream_openai_compatible,
+    "ollama": _stream_openai_compatible,
+}
+
 _DEFAULT_BASE = {
     "groq": "https://api.groq.com/openai/v1",
     "ollama": "http://localhost:11434/v1",
@@ -211,6 +275,23 @@ class ReadmeGenerator:
         except Exception as e:  # noqa: BLE001
             print(f"  ! freeform LLM failed ({self.provider}): {e}")
             return ""
+
+    def freeform_stream(self, prompt: str, on_chunk) -> str:
+        """Like freeform(), but streams the answer via on_chunk(delta) as it arrives.
+        Falls back to a single-shot call (emitting the whole result once) if the
+        provider can't stream or the stream errors. Returns the full text."""
+        if self.mode != "llm":
+            return ""
+        fn = _STREAM_PROVIDERS.get(self.provider)
+        if fn:
+            try:
+                return (fn(prompt, self.model, self.api_key, self.base_url, on_chunk) or "").strip()
+            except Exception as e:  # noqa: BLE001
+                print(f"  ! streaming failed ({self.provider}): {e}; falling back")
+        out = self.freeform(prompt)
+        if out:
+            on_chunk(out)
+        return out
 
     def generate(self, sub: "Submission") -> str:
         out = None
