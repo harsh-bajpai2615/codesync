@@ -284,6 +284,7 @@
           <div class="row" style="margin-top:10px">
             <input id="coSearch" class="probsearch" placeholder="…or search all 650+ companies" spellcheck="false">
             <select id="coSelect" class="sel wide"></select>
+            <button class="btn sm" id="coSavedList">★ My saved list</button>
           </div>
           <div class="row" style="margin-top:10px">
             <div class="seg" id="coPeriod"></div>
@@ -296,9 +297,32 @@
             <span class="badge ok" id="coProgress"></span>
           </div>
           <div id="coSummary" class="co-summary"></div>
-          <div class="row" style="margin:8px 0">
+          <div id="coBars" class="co-bars"></div>
+
+          <div class="co-toolbar">
+            <div class="seg" id="coDiff">
+              <button data-d="all" class="on">All</button>
+              <button data-d="Easy">Easy</button>
+              <button data-d="Medium">Medium</button>
+              <button data-d="Hard">Hard</button>
+            </div>
+            <label class="co-check"><input type="checkbox" id="coUnsolved"> Unsolved only</label>
+            <label class="co-check"><input type="checkbox" id="coInApp"> In-app only</label>
+            <label class="co-check"><input type="checkbox" id="coSavedOnly"> Saved only</label>
+            <input id="coQ" class="probsearch sm" placeholder="Filter by title…" spellcheck="false">
+            <select id="coSort" class="sel sm">
+              <option value="freq">Sort: Frequency</option>
+              <option value="diff">Sort: Difficulty</option>
+              <option value="acc">Sort: Acceptance</option>
+              <option value="title">Sort: Title (A–Z)</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin:8px 0;flex-wrap:wrap">
             <button class="btn btn-accent sm hidden" id="coPracticeNext">▶ Practice next (in-app)</button>
             <button class="btn btn-ai sm hidden" id="coInterview">🎤 Mock interview from this list</button>
+            <button class="btn sm" id="coCopy">⧉ Copy checklist</button>
+            <span class="muted" id="coCount"></span>
           </div>
           <div id="coTableWrap"></div>
         </div>

@@ -784,7 +784,8 @@ function ivQuit() {
 }
 
 /* ---------- company prep ---------- */
-let CO = { init: false, slug: null, period: "all", name: "", companies: [], last: null };
+let CO = { init: false, slug: null, period: "all", name: "", companies: [], last: null,
+  filter: { diff: "all", unsolved: false, inapp: false, saved: false, q: "", sort: "freq" } };
 async function renderCompanies() {
   if (CO.init) return;
   CO.init = true;
@@ -799,14 +800,25 @@ async function renderCompanies() {
   buildCompanyOptions("");
   $("#coSelect").addEventListener("change", () => selectCompany($("#coSelect").value));
   $("#coSearch").addEventListener("input", () => buildCompanyOptions($("#coSearch").value));
+  $("#coSavedList").addEventListener("click", loadSaved);
   $("#coPeriod").innerHTML = (data.periods || []).map((p) =>
     `<button data-k="${esc(p.key)}" class="${p.key === "all" ? "on" : ""}">${esc(p.label)}</button>`).join("");
   $$("#coPeriod button").forEach((b) => b.addEventListener("click", () => {
     CO.period = b.dataset.k; $$("#coPeriod button").forEach((x) => x.classList.toggle("on", x === b));
-    if (CO.slug) loadCompany();
+    if (CO.slug && CO.slug !== "__saved") loadCompany();
   }));
+  // ---- result toolbar (client-side filter/sort, no refetch) ----
+  $$("#coDiff button").forEach((b) => b.addEventListener("click", () => {
+    CO.filter.diff = b.dataset.d; $$("#coDiff button").forEach((x) => x.classList.toggle("on", x === b)); renderTable();
+  }));
+  $("#coUnsolved").addEventListener("change", (e) => { CO.filter.unsolved = e.target.checked; renderTable(); });
+  $("#coInApp").addEventListener("change", (e) => { CO.filter.inapp = e.target.checked; renderTable(); });
+  $("#coSavedOnly").addEventListener("change", (e) => { CO.filter.saved = e.target.checked; renderTable(); });
+  $("#coQ").addEventListener("input", (e) => { CO.filter.q = e.target.value; renderTable(); });
+  $("#coSort").addEventListener("change", (e) => { CO.filter.sort = e.target.value; renderTable(); });
   $("#coPracticeNext").addEventListener("click", coPracticeNext);
   $("#coInterview").addEventListener("click", coInterview);
+  $("#coCopy").addEventListener("click", coCopy);
 }
 function buildCompanyOptions(filter) {
   const q = (filter || "").toLowerCase().trim();
@@ -827,34 +839,93 @@ function selectCompany(slug) {
 async function loadCompany() {
   $("#coResult").classList.remove("hidden");
   $("#coTableWrap").innerHTML = `<div class="muted">Loading questions…</div>`;
-  $("#coSummary").innerHTML = ""; $("#coProgress").textContent = "";
+  $("#coSummary").innerHTML = ""; $("#coBars").innerHTML = ""; $("#coProgress").textContent = "";
   const r = await act("company_questions", CO.slug, CO.period);
   if (!r || !r.ok) { $("#coTableWrap").innerHTML = `<div class="muted">${esc((r && r.error) || "Couldn't load.")}</div>`; return; }
   CO.name = r.name; CO.last = r;
   renderCompanyResult(r);
 }
+async function loadSaved() {
+  CO.slug = "__saved";
+  $("#coSelect").value = ""; $$("#coFeatured .co-chip").forEach((b) => b.classList.remove("on"));
+  $("#coResult").classList.remove("hidden");
+  $("#coTableWrap").innerHTML = `<div class="muted">Loading your saved list…</div>`;
+  $("#coSummary").innerHTML = ""; $("#coBars").innerHTML = ""; $("#coProgress").textContent = "";
+  const r = await act("saved_questions");
+  if (!r || !r.ok) { $("#coTableWrap").innerHTML = `<div class="muted">Couldn't load saved list.</div>`; return; }
+  CO.name = r.name; CO.last = r;
+  if (!r.total) { $("#coTableWrap").innerHTML = `<div class="co-empty">No saved questions yet. Tap the ☆ star on any question to build your personal interview-prep list across companies.</div>`;
+    $("#coTitle").textContent = "My saved list"; $("#coProgress").textContent = "0 saved";
+    $("#coPracticeNext").classList.add("hidden"); $("#coInterview").classList.add("hidden"); return; }
+  renderCompanyResult(r);
+}
+function _bar(lbl, cls, done, total) {
+  const pct = total ? Math.round((100 * done) / total) : 0;
+  return `<div class="co-bar ${cls}"><div class="co-bar-top"><span class="lbl">${lbl}</span><span>${done}/${total}</span></div>
+    <div class="co-bar-bg"><div class="co-bar-fill" style="width:0%"></div></div></div>`;
+}
 function renderCompanyResult(r) {
-  $("#coTitle").textContent = `${r.name} — top questions`;
+  const saved = r.company === "__saved";
+  $("#coTitle").textContent = saved ? "★ My saved list" : `${r.name} — top questions`;
   const pct = r.total ? Math.round((100 * r.solved) / r.total) : 0;
   $("#coProgress").textContent = `${r.solved}/${r.total} solved (${pct}%)`;
   const inAppCount = r.questions.filter((q) => q.in_app).length;
   $("#coSummary").innerHTML =
     `<span>Window: <b>${esc(r.period)}</b></span>` +
-    `<span><b>${r.difficulty.Easy || 0}</b> Easy · <b>${r.difficulty.Medium || 0}</b> Med · <b>${r.difficulty.Hard || 0}</b> Hard</span>` +
-    `<span><b>${inAppCount}</b> solvable in-app</span>`;
+    `<span><b>${inAppCount}</b> solvable in-app</span>` +
+    `<span><b>${r.questions.filter((q) => q.bookmarked).length}</b> saved</span>`;
+  const sd = r.solved_by_diff || { Easy: 0, Medium: 0, Hard: 0 };
+  $("#coBars").innerHTML =
+    _bar("Overall", "tot", r.solved, r.total) +
+    _bar("Easy", "easy", sd.Easy || 0, r.difficulty.Easy || 0) +
+    _bar("Medium", "med", sd.Medium || 0, r.difficulty.Medium || 0) +
+    _bar("Hard", "hard", sd.Hard || 0, r.difficulty.Hard || 0);
+  // animate bar fills
+  requestAnimationFrame(() => $$("#coBars .co-bar").forEach((bar) => {
+    const top = bar.querySelector(".co-bar-top span:last-child").textContent.split("/");
+    const tot = +top[1] || 0, done = +top[0] || 0;
+    bar.querySelector(".co-bar-fill").style.width = (tot ? (100 * done / tot) : 0) + "%";
+  }));
+  renderTable();
+}
+function applyFilters() {
+  const f = CO.filter, q = (f.q || "").toLowerCase().trim();
+  let list = (CO.last.questions || []).slice();
+  if (f.diff !== "all") list = list.filter((x) => x.difficulty === f.diff);
+  if (f.unsolved) list = list.filter((x) => !x.solved);
+  if (f.inapp) list = list.filter((x) => x.in_app);
+  if (f.saved) list = list.filter((x) => x.bookmarked);
+  if (q) list = list.filter((x) => (x.title || "").toLowerCase().includes(q));
+  const DORD = { Easy: 0, Medium: 1, Hard: 2 };
+  if (f.sort === "diff") list.sort((a, b) => (DORD[a.difficulty] ?? 9) - (DORD[b.difficulty] ?? 9) || (b.frequency || 0) - (a.frequency || 0));
+  else if (f.sort === "acc") list.sort((a, b) => parseFloat(a.acceptance || 0) - parseFloat(b.acceptance || 0));
+  else if (f.sort === "title") list.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  else list.sort((a, b) => (b.frequency || 0) - (a.frequency || 0));
+  return list;
+}
+function renderTable() {
+  if (!CO.last) return;
+  const r = CO.last, list = applyFilters();
+  $("#coCount").textContent = `Showing ${list.length} of ${r.total}`;
   const next = r.questions.find((q) => q.in_app && !q.solved);
   $("#coPracticeNext").classList.toggle("hidden", !next);
   if (next) $("#coPracticeNext").dataset.pid = next.slug;
   $("#coInterview").classList.toggle("hidden", !r.questions.some((q) => q.in_app));
-  const maxFreq = r.questions.length ? (r.questions[0].frequency || 1) : 1;
-  const rows = r.questions.map((q, i) => {
+  if (!list.length) {
+    $("#coTableWrap").innerHTML = `<div class="co-empty">No questions match these filters.<br><button class="btn sm" id="coClear" style="margin-top:10px">Clear filters</button></div>`;
+    $("#coClear").addEventListener("click", coClearFilters);
+    return;
+  }
+  const maxFreq = Math.max(1, ...list.map((q) => q.frequency || 0));
+  const rows = list.map((q, i) => {
     const dc = q.difficulty === "Easy" ? "easy" : q.difficulty === "Hard" ? "hard" : "med";
-    const bar = Math.max(3, Math.round((46 * (q.frequency || 0)) / (maxFreq || 1)));
+    const bar = Math.max(3, Math.round((46 * (q.frequency || 0)) / maxFreq));
     const status = q.solved ? `<span class="solved">✓ Solved</span>`
       : q.in_app ? `<a href="#" class="co-open" data-pid="${esc(q.slug)}">Solve in app</a>`
       : `<a href="${esc(q.url)}" target="_blank" rel="noopener">LeetCode ↗</a>`;
     return `<tr class="${q.solved ? "done" : ""}">
       <td>${i + 1}</td>
+      <td><button class="co-star ${q.bookmarked ? "on" : ""}" data-slug="${esc(q.slug)}" title="Save to my list">${q.bookmarked ? "★" : "☆"}</button></td>
       <td><a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.title)}</a>${q.in_app ? ' <span class="co-dchip" style="background:rgba(124,92,252,.16);color:#b9a7ff">in-app</span>' : ""}</td>
       <td><span class="co-dchip ${dc}">${esc(q.difficulty || "")}</span></td>
       <td class="freq">${(q.frequency || 0).toFixed(0)}%<span class="co-freqbar" style="width:${bar}px"></span></td>
@@ -862,9 +933,51 @@ function renderCompanyResult(r) {
       <td class="co-status">${status}</td></tr>`;
   }).join("");
   $("#coTableWrap").innerHTML = `<div class="co-tablewrap"><table class="co-table">
-    <thead><tr><th>#</th><th>Problem</th><th>Diff</th><th>Freq</th><th>Acc</th><th>Status</th></tr></thead>
+    <thead><tr><th>#</th><th></th><th>Problem</th><th>Diff</th><th>Freq</th><th>Acc</th><th>Status</th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
   $$("#coTableWrap .co-open").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); openInApp(a.dataset.pid); }));
+  $$("#coTableWrap .co-star").forEach((s) => s.addEventListener("click", () => coToggleStar(s.dataset.slug)));
+}
+async function coToggleStar(slug) {
+  const q = (CO.last.questions || []).find((x) => x.slug === slug);
+  if (!q) return;
+  const res = await act("toggle_bookmark", {
+    slug: q.slug, title: q.title, url: q.url, difficulty: q.difficulty,
+    frequency: q.frequency, acceptance: q.acceptance,
+    company: CO.slug === "__saved" ? (q.company || "") : CO.slug,
+    company_name: CO.slug === "__saved" ? (q.company_name || "") : CO.name,
+  });
+  if (!res) return;
+  q.bookmarked = !!res.bookmarked;
+  // If we're viewing the saved list and just un-saved one, drop it from the view.
+  if (CO.slug === "__saved" && !q.bookmarked) {
+    CO.last.questions = CO.last.questions.filter((x) => x.slug !== slug);
+    CO.last.total = CO.last.questions.length;
+  }
+  renderTable();
+  // refresh the "saved" count chip in the summary row
+  const savedCount = CO.last.questions.filter((x) => x.bookmarked).length;
+  const chip = $("#coSummary").querySelectorAll("span")[2];
+  if (chip) chip.innerHTML = `<b>${savedCount}</b> saved`;
+}
+function coClearFilters() {
+  CO.filter = { diff: "all", unsolved: false, inapp: false, saved: false, q: "", sort: "freq" };
+  $$("#coDiff button").forEach((b) => b.classList.toggle("on", b.dataset.d === "all"));
+  $("#coUnsolved").checked = false; $("#coInApp").checked = false; $("#coSavedOnly").checked = false;
+  $("#coQ").value = ""; $("#coSort").value = "freq";
+  renderTable();
+}
+function coCopy() {
+  const list = applyFilters();
+  if (!list.length) { toast("Nothing to copy with these filters."); return; }
+  const title = CO.slug === "__saved" ? "My saved list" : `${CO.name} — interview prep`;
+  const lines = [`# ${title}`, ""];
+  for (const q of list) {
+    const box = q.solved ? "[x]" : "[ ]";
+    lines.push(`- ${box} [${q.title}](${q.url}) — ${q.difficulty || "?"} · ${(q.frequency || 0).toFixed(0)}% freq`);
+  }
+  navigator.clipboard?.writeText(lines.join("\n"));
+  toast(`Copied ${list.length} questions as a checklist`);
 }
 // Switch to the Learn tab and load a problem by slug (polls until options are ready).
 function openInApp(slug) {

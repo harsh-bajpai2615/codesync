@@ -518,31 +518,67 @@ class Api:
     def list_companies(self):
         return companies.list_companies()
 
+    @staticmethod
+    def _decorate_questions(qs, company, name, period):
+        """Tag each question with solved / in-app / bookmarked, plus aggregate
+        totals and solved-by-difficulty — shared by company and saved-list views."""
+        solved = _solved_leetcode_slugs()
+        bm = set((load_config().get("bookmarks") or {}).keys())
+        nsolved = 0
+        diff = {"Easy": 0, "Medium": 0, "Hard": 0}
+        solved_by_diff = {"Easy": 0, "Medium": 0, "Hard": 0}
+        for q in qs:
+            q["solved"] = q["slug"] in solved
+            q["in_app"] = q["slug"] in problems.CATALOG  # solvable in the built-in IDE
+            q["bookmarked"] = q["slug"] in bm
+            d = q.get("difficulty", "")
+            diff[d] = diff.get(d, 0) + 1
+            if q["solved"]:
+                nsolved += 1
+                if d in solved_by_diff:
+                    solved_by_diff[d] += 1
+        return {
+            "ok": True, "company": company, "name": name, "period": period,
+            "questions": qs, "total": len(qs), "solved": nsolved,
+            "difficulty": diff, "solved_by_diff": solved_by_diff,
+        }
+
     def company_questions(self, company, period="all"):
         res = companies.fetch(company, period, STATE_DIR)
         if not res.get("ok"):
             return res
-        solved = _solved_leetcode_slugs()
-        qs = res["questions"]
-        nsolved = 0
-        diff = {"Easy": 0, "Medium": 0, "Hard": 0}
-        for q in qs:
-            q["solved"] = q["slug"] in solved
-            q["in_app"] = q["slug"] in problems.CATALOG  # solvable in the built-in IDE
-            if q["solved"]:
-                nsolved += 1
-            diff[q["difficulty"]] = diff.get(q["difficulty"], 0) + 1
         cat = next((c for c in companies.list_companies()["companies"] if c["slug"] == company), None)
-        return {
-            "ok": True,
-            "company": company,
-            "name": (cat or {}).get("name", company),
-            "period": res["period"],
-            "questions": qs,
-            "total": len(qs),
-            "solved": nsolved,
-            "difficulty": diff,
-        }
+        return self._decorate_questions(res["questions"], company, (cat or {}).get("name", company), res["period"])
+
+    # ---- personal saved/bookmark list (across companies) ----
+    def get_bookmarks(self):
+        return list((load_config().get("bookmarks") or {}).values())
+
+    def toggle_bookmark(self, rec):
+        rec = rec or {}
+        slug = (rec.get("slug") or "").strip()
+        if not slug:
+            return {"ok": False}
+        cfg = load_config()
+        bm = cfg.setdefault("bookmarks", {})
+        if slug in bm:
+            del bm[slug]
+            on = False
+        else:
+            bm[slug] = {
+                "slug": slug, "title": rec.get("title", ""), "url": rec.get("url", ""),
+                "difficulty": rec.get("difficulty", ""), "frequency": rec.get("frequency", 0) or 0,
+                "acceptance": rec.get("acceptance", ""),
+                "company": rec.get("company", ""), "company_name": rec.get("company_name", ""),
+            }
+            on = True
+        save_config(cfg)
+        return {"ok": True, "bookmarked": on}
+
+    def saved_questions(self):
+        qs = list((load_config().get("bookmarks") or {}).values())
+        qs.sort(key=lambda x: x.get("frequency", 0) or 0, reverse=True)
+        return self._decorate_questions(qs, "__saved", "My saved list", "saved")
 
     def interview_score(self, history, pid, code="", elapsed_sec=0):
         prob = problems.get(pid) or {}
