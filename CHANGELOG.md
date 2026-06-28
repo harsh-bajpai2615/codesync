@@ -3,6 +3,12 @@
 All notable changes to GitKosh. This project follows [semantic versioning](https://semver.org).
 `release.sh` reads the top-most version's section here for the GitHub Release notes.
 
+## 1.1.1
+
+- **Voice-first mock interview** — the AI interviewer speaks its questions aloud and you answer by voice: tap-to-talk recording, on-device transcription (free & private, biased toward DSA vocabulary) with a Groq Whisper fallback, auto-listen after each question, barge-in, and a 🔊 voice toggle. Typed input remains as a fallback.
+- **Companies page polish** — featured companies show a tidy top-12 with a "+N more" expander instead of a wall of chips; window labels read "30 days" not "thirty-days".
+- Interview hardening: stop audio when leaving the tab/scoring, generation-guarded TTS callbacks, clearer transcription errors.
+
 ## 1.1.0
 
 **Practice & learning**

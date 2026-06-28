@@ -11,5 +11,5 @@ GITHUB_CLIENT_ID = "Ov23li1zSZj6zdhurptk"  # gitkosh OAuth App (Device Flow), pu
 # Bump this (semver) for every release — release.sh refuses to re-ship a version
 # that's already published, so installed copies always see a higher version. Keep
 # CHANGELOG.md in sync; release.sh pulls this version's section into the notes.
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 RELEASES_REPO = "harsh-bajpai2615/gitkosh"

@@ -130,14 +130,30 @@ def stop_and_transcribe(groq_key: str = "", hints=None) -> dict:
             except Exception as e:  # noqa: BLE001
                 print(f"  ! groq STT failed: {e}")
         if not text:
-            return {"ok": False, "error": "Couldn't transcribe. Turn on Dictation in "
-                    "System Settings → Keyboard, or add a Groq API key for cloud transcription."}
+            return {"ok": False, "error": _why_no_stt(groq_key)}
         return {"ok": True, "text": text, "engine": engine}
     finally:
         try:
             os.unlink(path)
         except OSError:
             pass
+
+
+def _why_no_stt(groq_key: str) -> str:
+    """Explain *why* transcription produced nothing, so the message is actionable."""
+    try:
+        import Speech
+        st = Speech.SFSpeechRecognizer.authorizationStatus()  # 0=undet 1=denied 2=restricted 3=ok
+    except Exception:  # noqa: BLE001
+        st = None
+    if st in (1, 2):
+        return ("Speech Recognition is off for this app. Enable it in System Settings → "
+                "Privacy & Security → Speech Recognition" + ("" if groq_key else ", or add a Groq API key in Setup."))
+    if st == 0:
+        return ("Speech Recognition wasn't granted (the dev run can't request it — it works "
+                "in the built app). For now, add a Groq API key in Setup → AI engine to use voice.")
+    # authorized but still nothing — likely silence/too short
+    return "Didn't catch any speech — speak a bit longer and clearer, then tap to stop."
 
 
 # ---------- transcription engines ----------

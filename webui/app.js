@@ -924,13 +924,14 @@ async function voiceStopRec() {
     VOICE.fails = 0;
     $("#ivInput").value = r.text; ivSend();
   } else {
-    // Keep the hands-free flow alive: re-listen once, then fall back to manual.
+    const err = (r && r.error) || "Couldn't hear that — tap the mic to try again, or type.";
+    const transient = /didn'?t catch/i.test(err);  // silence/too-short → worth auto-retrying
     VOICE.fails = (VOICE.fails || 0) + 1;
-    if (VOICE.fails < 2 && IV.running && VOICE.on && isTab("interview")) {
+    if (transient && VOICE.fails < 2 && IV.running && VOICE.on && isTab("interview")) {
       toast("Didn't catch that — listening again…"); autoListen();
     } else {
       VOICE.fails = 0;
-      toast((r && r.error) || "Couldn't hear that — tap the mic to try again, or type.");
+      toast(err);  // show the real, actionable reason (permission/setup/etc.)
     }
   }
 }
