@@ -116,19 +116,23 @@ def stop_and_transcribe(groq_key: str = "", hints=None) -> dict:
         return {"ok": False, "error": "no audio captured — try again"}
     try:
         text, engine = None, ""
-        try:
-            text = _transcribe_ondevice(path, hints)
-            if text:
-                engine = "on-device"
-        except Exception as e:  # noqa: BLE001
-            print(f"  ! on-device STT failed: {e}")
-        if not text and groq_key:
+        # Prefer Groq Whisper when a key is set — it's more accurate than on-device
+        # dictation and needs no macOS Speech-Recognition permission. Fall back to
+        # on-device if Groq fails (e.g. offline).
+        if groq_key:
             try:
                 text = _transcribe_groq(path, groq_key)
                 if text:
                     engine = "groq"
             except Exception as e:  # noqa: BLE001
                 print(f"  ! groq STT failed: {e}")
+        if not text:
+            try:
+                text = _transcribe_ondevice(path, hints)
+                if text:
+                    engine = "on-device"
+            except Exception as e:  # noqa: BLE001
+                print(f"  ! on-device STT failed: {e}")
         if not text:
             return {"ok": False, "error": _why_no_stt(groq_key)}
         return {"ok": True, "text": text, "engine": engine}
