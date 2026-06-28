@@ -10,9 +10,51 @@ from __future__ import annotations
 from collections import Counter
 from datetime import datetime, timezone
 
+from . import companies
 from .dashboard import _d, _streaks, LABELS
 
 DIFFS = ("Easy", "Medium", "Hard")
+
+
+def topic_strength(items: list, top: int = 14) -> dict:
+    """Per-topic strength from solved problems: count, difficulty mix, a relative
+    strength score (difficulty-weighted, 0..100 vs your strongest topic), and
+    coverage vs all LeetCode problems in that topic. Plus 'underexplored' — common
+    topics you've barely touched."""
+    by = {}
+    for i in items:
+        d = i.get("difficulty")
+        for t in (i.get("tags") or []):
+            e = by.setdefault(t, {"solved": 0, "Easy": 0, "Medium": 0, "Hard": 0})
+            e["solved"] += 1
+            if d in DIFFS:
+                e[d] += 1
+    totals = companies.topic_totals()
+    rows, max_pts = [], 1
+    for t, e in by.items():
+        pts = e["Easy"] + 2 * e["Medium"] + 3 * e["Hard"]
+        max_pts = max(max_pts, pts)
+        rows.append({"topic": t, "solved": e["solved"], "easy": e["Easy"], "med": e["Medium"],
+                     "hard": e["Hard"], "total": totals.get(t, 0), "_pts": pts})
+    for r in rows:
+        r["strength"] = round(100 * r["_pts"] / max_pts)
+        r["coverage"] = round(100 * r["solved"] / r["total"]) if r["total"] else None
+        r.pop("_pts")
+    rows.sort(key=lambda r: (r["solved"], r["strength"]), reverse=True)
+
+    # Underexplored: common topics you've barely touched — but don't flag ones
+    # you're already strong in (a huge denominator can make a top topic look thin).
+    strong = {r["topic"] for r in rows if r["strength"] >= 50}
+    under = []
+    for t, tot in sorted(totals.items(), key=lambda x: x[1], reverse=True):
+        if tot < 40 or t in strong:  # only common, interview-relevant topics
+            continue
+        s = by.get(t, {}).get("solved", 0)
+        if s / tot < 0.05:  # under 5% of that topic touched
+            under.append({"topic": t, "total": tot, "solved": s})
+        if len(under) >= 6:
+            break
+    return {"topics": rows[:top], "underexplored": under, "count": len(rows)}
 
 
 def _recent(items, days):

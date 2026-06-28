@@ -14,6 +14,16 @@ const SAMPLE = {
     tiles: [["This week", 0], ["This month", 0], ["Streak", "0d"], ["Longest", "4d"], ["Optimal", "—"], ["Total", 38]],
     difficulty: { Easy: 8, Medium: 21, Hard: 9 },
     topics: ["Array", "Hash Table", "Math", "Greedy", "Prefix Sum", "String", "Sorting", "Two Pointers"],
+    topic_strength: {
+      count: 8,
+      topics: [
+        { topic: "Array", solved: 18, easy: 7, med: 9, hard: 2, total: 2188, coverage: 1, strength: 100 },
+        { topic: "Hash Table", solved: 9, easy: 4, med: 5, hard: 0, total: 822, coverage: 1, strength: 62 },
+        { topic: "Dynamic Programming", solved: 4, easy: 0, med: 2, hard: 2, total: 661, coverage: 1, strength: 48 },
+        { topic: "Two Pointers", solved: 5, easy: 2, med: 3, hard: 0, total: 253, coverage: 2, strength: 40 },
+      ],
+      underexplored: [{ topic: "Graph", total: 200, solved: 1 }, { topic: "Backtracking", total: 110, solved: 0 }],
+    },
     resume: [
       "Solved 38+ data-structures & algorithms problems across 6 platforms.",
       "9 hard and 21 medium problems; strongest in Array, Hash Table, Math.",
@@ -161,6 +171,7 @@ async function renderInsights() {
     setTimeout(() => { row.querySelector(".bar-fill").style.width = (100 * n / tot) + "%"; }, 60);
   });
   $("#topics").innerHTML = (d.topics || []).map((t) => `<span class="chip">${esc(t)}</span>`).join("");
+  renderTopicStrength(d.topic_strength);
   $("#resume").innerHTML = (d.resume || []).map((b) => `<li>${esc(b.replace(/^[-•]\s*/, ""))}</li>`).join("");
   const g = (api() ? await act("get_gamify") : GAMIFY_SAMPLE) || GAMIFY_SAMPLE;
   $("#lvlBadge").textContent = "Lv " + g.level;
@@ -170,6 +181,30 @@ async function renderInsights() {
   $("#badges").innerHTML = g.badges.map((b) =>
     `<div class="bdg ${b.earned ? "earned" : "locked"}"><div class="ico">${b.earned ? "✓" : "·"}</div>
      <div><div class="bn">${b.name}</div><div class="bd">${b.desc}</div></div></div>`).join("");
+}
+function renderTopicStrength(ts) {
+  const card = $("#topicStrengthCard");
+  if (!ts || !ts.topics || !ts.topics.length) { if (card) card.classList.add("hidden"); return; }
+  card.classList.remove("hidden");
+  $("#topicMeta").textContent = `${ts.count} topics practiced`;
+  const dcol = { easy: "var(--easy,#22c55e)", med: "var(--med,#f59e0b)", hard: "var(--hard,#ef4444)" };
+  $("#topicStrength").innerHTML = ts.topics.map((t) => {
+    const mix = [["easy", t.easy], ["med", t.med], ["hard", t.hard]]
+      .filter(([, n]) => n).map(([k, n]) => `<span class="ts-pill ${k}">${n}</span>`).join("");
+    const cov = t.coverage != null ? `<span class="ts-cov" title="${t.solved}/${t.total} of all LeetCode ${esc(t.topic)} problems">${t.coverage}%</span>` : "";
+    return `<div class="ts-row">
+      <span class="ts-name" title="${esc(t.topic)}">${esc(t.topic)}</span>
+      <span class="ts-barbg"><span class="ts-barfill" style="width:0%" data-w="${t.strength}"></span></span>
+      <span class="ts-n">${t.solved}</span>
+      <span class="ts-mix">${mix}</span>
+      ${cov}</div>`;
+  }).join("");
+  requestAnimationFrame(() => $$("#topicStrength .ts-barfill").forEach((b) => { b.style.width = (b.dataset.w || 0) + "%"; }));
+  const under = ts.underexplored || [];
+  $("#topicUnder").innerHTML = under.length
+    ? `<div class="ts-under"><span class="muted">Underexplored (common, &lt;5% done):</span> ${under.map((u) =>
+        `<span class="chip ts-underchip" title="${u.solved}/${u.total} solved">${esc(u.topic)}</span>`).join("")}</div>`
+    : "";
 }
 const GAMIFY_SAMPLE = { level: 2, xp: 515, into: 15, need: 500, pct: 3, earned: 4, total_badges: 10,
   badges: [{ name: "First Steps", desc: "Sync your first solution", earned: true },

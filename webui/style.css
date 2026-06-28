@@ -428,3 +428,20 @@ a.lc:hover{text-decoration:underline}
 .co-topic{display:inline-block;font-size:10.5px;padding:1px 7px;margin:0 4px 2px 0;border-radius:6px;background:rgba(255,255,255,.06);color:var(--mut);cursor:pointer;transition:all .12s}
 .co-topic:hover{background:rgba(124,92,252,.18);color:#cbb9ff}
 .co-topic.on{background:var(--acc,#7c5cfc);color:#fff}
+
+/* ---- insights: topic strength ---- */
+.topicstrength{display:flex;flex-direction:column;gap:7px}
+.ts-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.ts-name{width:150px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--txt,#e8e8f0)}
+.ts-barbg{flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;min-width:60px}
+.ts-barfill{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,#5b8cff,#7c5cfc);transition:width .6s ease}
+.ts-n{width:30px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.ts-mix{display:inline-flex;gap:3px;width:96px}
+.ts-pill{font-size:10.5px;padding:1px 6px;border-radius:5px;font-variant-numeric:tabular-nums}
+.ts-pill.easy{background:rgba(34,197,94,.16);color:#4ade80}
+.ts-pill.med{background:rgba(245,158,11,.16);color:#fbbf24}
+.ts-pill.hard{background:rgba(239,68,68,.16);color:#f87171}
+.ts-cov{width:42px;text-align:right;color:var(--mut);font-size:12px;font-variant-numeric:tabular-nums}
+.ts-under{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
+.ts-underchip{background:rgba(239,68,68,.12);color:#f8a9a9}
+@media (max-width:720px){.ts-mix,.ts-cov{display:none}.ts-name{width:110px}}

@@ -22,7 +22,7 @@ from .appsupport import STATE_DIR, load_config, save_config
 from .cards import render_png
 from .contests import cf_rating, upcoming as cf_upcoming
 from .github_api import GitHubAPI, slug_repo
-from .insights import analytics, resume_bullets
+from .insights import analytics, resume_bullets, topic_strength
 from .sync_core import CP, DOMAINS, LABELS, run_sync
 from gitkosh.readme_gen import DEFAULT_MODELS, ReadmeGenerator
 from gitkosh.store import Store
@@ -220,6 +220,7 @@ class Api:
                  "difficulty": i.get("difficulty", ""), "approach": i.get("approach", "")}
                 for i in (a["revisit"] or items)[:30]]
         return {"tiles": tiles, "difficulty": dict(a["difficulty"]), "topics": a["strengths"],
+                "topic_strength": topic_strength(items),
                 "resume": resume_bullets(items), "quiz": quiz}
 
     def get_contests(self):

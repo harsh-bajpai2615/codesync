@@ -46,6 +46,22 @@ def topics_for(slug: str) -> list:
             _topics = {}
     return _topics.get(slug, [])
 
+
+_topic_totals = None
+
+
+def topic_totals() -> dict:
+    """How many LeetCode problems carry each topic tag — denominator for coverage."""
+    global _topic_totals
+    if _topic_totals is None:
+        topics_for("")  # ensure the map is loaded
+        counts = {}
+        for tags in (_topics or {}).values():
+            for t in tags:
+                counts[t] = counts.get(t, 0) + 1
+        _topic_totals = counts
+    return _topic_totals
+
 # Recency windows the dataset ships (smaller companies only have the longer ones;
 # fetch() falls back to "all" when a requested window is missing for a company).
 PERIODS = [
